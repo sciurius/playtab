@@ -46,6 +46,15 @@ while ( <> ) {
 	}
 	next;
     }
+    if ( /^M\s+([-+])?(\d+)/ ) {
+	if ( defined $1 ) {
+	    $md += $1.$2;
+	}
+	else {
+	    $md = $2;
+	}
+	next;
+    }
     if ( /^=/ ) {
 	&advance (1, $');
 	next;
@@ -96,7 +105,8 @@ sub print_title {
     if ( $new ) {
 	print STDOUT ('showpage', "\n") if $ps_pages;
 	print STDOUT ('%%Page: ', ++$ps_pages. ' ', $ps_pages, "\n");
-	$x = $y = $xm = 0; $xd = $std_width; $yd = $std_height;
+	$x = $y = $xm = 0; 
+	$xd = $std_width; $yd = $std_height; $md = $std_margin;
     }
     else {
 	$y -= 1.3*$yd;
@@ -148,7 +158,7 @@ sub advance {
     $xm = 0;
     &ps_move;
     print STDOUT ('SF (', $margin, ') show', "\n");
-    $xm = $std_margin;
+    $xm = $md;
 }
 
 sub ps_move {
@@ -230,7 +240,6 @@ sub ps_preamble {
 %%EndProlog
 %%BeginSetup
 %%PaperSize: A4
-(/home/jv/lib/psfonts/Marl.pfa)run
 %%EndSetup
 EOD
     $did_ps_preamble = 1;
