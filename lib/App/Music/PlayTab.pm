@@ -16,11 +16,12 @@ $my_version .= '*' if length('$Locker$ ') > 12;
 ################ Main ################
 
 &ps_preamble;
+$linetype = 0;
 
 while ( <> ) {
     next if /^\s*#/;
     next unless /\S/;
-    chop;
+    chop ($line = $_);
 
     s/\^\s+//;
     if ( /^!\s*/ ) {
@@ -28,24 +29,20 @@ while ( <> ) {
 	next;
     }
 
-    # Spacing/margin notes.
-    if ( /^=/ ) {
-	&ps_advance if $linetype;
-	&advance (2, $');
-	$linetype = 0;
+    if ( /^\s*\[/ ) {
+	while ( /^\s*\[([^]]+)\]/ ) {
+	    &chord ($1);
+	    $_ = $';
+	}
+	$linetype = 2;
 	next;
     }
-    if ( /^-/ ) {
-	&ps_advance if $linetype;
-	&advance (1, $');
+    elsif ( $linetype == 2 ) {
+        &ps_advance;
+        &ps_advance;
+        &ps_advance;
+        &ps_advance;
 	$linetype = 0;
-	next;
-    }
-    if ( /^\+/ ) {
-	&ps_advance if $linetype;
-	&advance (0, $');
-	$linetype = 0;
-	next;
     }
 
     if ( /^\s*\|/ ) {
@@ -54,8 +51,30 @@ while ( <> ) {
 	$linetype = 1;
 	next;
     }
+    elsif ( $linetype == 1 && /^[-+=]/ ) {
+	&ps_advance;
+	$linetype = 0;
+    }
+	
+    # Spacing/margin notes.
+    if ( /^=/ ) {
+	&advance (2, $');
+	$linetype = 0;
+	next;
+    }
+    if ( /^-/ ) {
+	&advance (1, $');
+	$linetype = 0;
+	next;
+    }
+    if ( /^\+/ ) {
+	&advance (0, $');
+	$linetype = 0;
+	next;
+    }
 
     &text ($_);
+    $linetype = 0;
 }
 
 &ps_trailer;
@@ -67,8 +86,9 @@ sub print_title {
     local ($new, $title) = @_;
 
     if ( $new ) {
-	print STDOUT ('showpage', "\n") if $ps_pages;
-	print STDOUT ('%%Page: ', ++$ps_pages. ' ', $ps_pages, "\n");
+	print STDOUT ('end showpage', "\n") if $ps_pages;
+	print STDOUT ('%%Page: ', ++$ps_pages. ' ', $ps_pages, "\n",
+		      'tabdict begin', "\n");
 	$x = $y = $xm = 0; 
 	$xd = $std_width; $yd = $std_height; $md = $std_margin;
     }
@@ -126,7 +146,7 @@ sub advance {
 	$x = 0;
 	$y += $yd * $full;
     }
-    return unless defined $margin;
+    return unless $margin =~ /\S/;
     $margin =~ s/^\s+//;
     $margin =~ s/\s$//;
     $xm = 0;
@@ -252,6 +272,42 @@ sub control {
     &errout ("Unrecognized control");
 }
 
+sub chord {
+    local (@l) = split(' ',$_[0]);
+    local ($xpose) = 0;
+
+    &errout ("Illegal [chord] spec, need 7 or 8 values") 
+	unless @l == 8 || @l == 7;
+    local ($chordname, $key, @vec) = &parse_chord (shift(@l));
+
+    @Rom = ('', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 
+	    'X', 'XI', 'XII') unless defined @Rom;
+
+    local (@c) = ();
+    local ($c) = '()';
+    foreach ( @l ) {
+	$_ = -1 if "\L$_" eq "x";
+	if ( /^@(\d+)/ ) {
+	    $c = "($Rom[$1])" if $1 > 1;
+	    next;
+	}
+	&errout ("Illegal [chord] spec, need 6 numbers") 
+	    unless /^-?\d$/ || @c == 6;
+	push (@c, $_);
+    }
+
+    &on_top;
+    $chordname = &ps_chordname;
+    print STDOUT ('1000 1000 moveto', "\n",
+		  $chordname, "\n",
+		  'currentpoint pop 1000 sub 2 div', "\n");
+    &ps_move;
+    print STDOUT ('25 exch sub 8 add 0 rmoveto ', $chordname, "\n");
+    &ps_move;
+    print STDOUT ("8 -45 rmoveto @c $c dots\n");
+    $x += 50 + 40;
+}
+
 sub text {
     local ($line) = @_;
     local ($xm) = 0;
@@ -294,6 +350,8 @@ sub ps_preamble {
 %%DocumentFonts: Helvetica
 %%EndComments
 %%BeginProcSet: Symbols 0
+/tabdict 50 dict def 
+tabdict begin
 /m { moveto } bind def
 /dim {
     currentpoint
@@ -361,6 +419,87 @@ sub ps_preamble {
     /Helvetica findfont 16 scalefont setfont } def
 /SF {
     /Helvetica findfont 12 scalefont setfont } def
+end
+%%EndProcSet
+%%BeginProcSet: Grid 0 0
+% Routines for the drawing of chords.
+/griddict 10 dict def
+griddict begin
+  /gridscale 10 def
+  /gridwidth gridscale 5 mul def
+  /gridheight gridscale 4 mul def
+  /half-incr gridscale 2 div def
+  /dot-size gridscale 0.35 mul def
+  /displ-font /Times-Roman findfont gridscale 1.25 mul scalefont def
+
+  /grid {				% -- grid --
+    gsave currentpoint
+    6 
+    { 0 gridheight rlineto gridscale gridscale gridwidth sub rmoveto }
+    repeat
+    moveto
+    5 
+    { gridwidth 0 rlineto 0 gridwidth sub gridscale rmoveto }
+    repeat
+    stroke grestore
+  } def
+
+  /dot {				% string fret dot --
+    gsave
+    exch 6 exch sub gridscale mul	% str fret -> fret y
+    exch dup 5 exch abs sub gridscale mul half-incr sub	% fret y -> y fret x 
+    exch 3 1 roll rmoveto
+
+    % fret {...} --
+    -1 ne
+    { currentpoint dot-size 0 360 arc fill }
+    { gsave
+      gridwidth 20 div
+	    dup neg dup rmoveto
+	    dup dup rlineto 
+	    dup dup rlineto
+	    dup neg dup rmoveto
+	    dup dup neg exch rmoveto
+	    dup dup neg rlineto
+	        dup neg rlineto
+      gridwidth 50 div setlinewidth stroke
+      grestore
+    } ifelse
+    grestore
+  } def	
+end
+tabdict begin
+/dots {				% e a d g b e offset dots --
+    griddict begin
+    gsave
+    1 setlinewidth
+    0 setgray
+
+    grid
+
+    % Chord offset, if greater than 1.
+    % offset {...} --
+    dup () ne
+    { gsave
+      half-incr neg gridheight gridscale sub rmoveto
+      displ-font setfont 
+      dup stringwidth pop neg half-incr rmoveto show grestore 
+    }
+    { pop }
+    ifelse
+
+    1 1 6
+    {	% fret string {...} --
+	exch dup
+	0 ne 
+	{ dot }
+	{ pop pop }
+	ifelse
+    }
+    for
+    end
+} def
+end
 %%EndProcSet
 %%EndProlog
 %%BeginSetup
@@ -374,7 +513,7 @@ EOD
 
 sub ps_trailer {
     print STDOUT <<EOD;
-showpage
+end showpage
 %%Trailer
 %%Pages: $ps_pages
 %%EOF
