@@ -15,66 +15,122 @@ $my_version .= '*' if length('$Locker$ ') > 12;
 
 ################ Main ################
 
+&ps_preamble;
+
 while ( <> ) {
     next if /^\s*#/;
     next unless /\S/;
     chop;
+
     s/\^\s+//;
-    if ( /^T\s+/i ) {
-	&print_title (1, $');
+    if ( /^!\s*/ ) {
+	&control ($');
 	next;
     }
-    if ( /^S\s+/i ) {
-	&print_title (0, $');
-	next;
-    }
-    if ( /^W\s+([-+])?(\d+)/ ) {
-	if ( defined $1 ) {
-	    $xd += $1.$2;
-	}
-	else {
-	    $xd = $2;
-	}
-	next;
-    }
-    if ( /^H\s+([-+])?(\d+)/ ) {
-	if ( defined $1 ) {
-	    $yd -= $1.$2;
-	}
-	else {
-	    $yd = -$2;
-	}
-	next;
-    }
-    if ( /^M\s+([-+])?(\d+)/ ) {
-	if ( defined $1 ) {
-	    $md += $1.$2;
-	}
-	else {
-	    $md = $2;
-	}
-	next;
-    }
+
+    # Spacing/margin notes.
     if ( /^=/ ) {
-	&advance (1, $');
+	&ps_advance if $linetype;
+	&advance (2, $');
+	$linetype = 0;
 	next;
     }
     if ( /^-/ ) {
-	&advance (0.5, $');
+	&ps_advance if $linetype;
+	&advance (1, $');
+	$linetype = 0;
 	next;
     }
     if ( /^\+/ ) {
+	&ps_advance if $linetype;
 	&advance (0, $');
+	$linetype = 0;
 	next;
     }
-    
-    $line = $_;
-    s/\|/ | /g;
-    s/\./ . /g;
-    s/:/ : /g;
-    $line = $_;
-    @c = split (' ');
-    foreach $c ( @c ) {
+
+    if ( /^\s*\|/ ) {
+	&ps_advance if $linetype;
+	&bar ($_);
+	$linetype = 1;
+	next;
+    }
+
+    &text ($_);
+}
+
+&ps_trailer;
+exit 0;
+
+################ Subroutines ################
+
+sub print_title {
+    local ($new, $title) = @_;
+
+    if ( $new ) {
+	print STDOUT ('showpage', "\n") if $ps_pages;
+	print STDOUT ('%%Page: ', ++$ps_pages. ' ', $ps_pages, "\n");
+	$x = $y = $xm = 0; 
+	$xd = $std_width; $yd = $std_height; $md = $std_margin;
+    }
+    &ps_move;
+    print STDOUT ($new ? 'TF (' : 'SF (', $title, ') show', "\n");
+    &ps_advance;
+    $on_top = 1;
+}
+
+sub print_chord {
+    $prev_chord = &ps_chordname;
+    &ps_move;
+    print STDOUT ($prev_chord, "\n");
+    &ps_step;
+}
+
+sub print_again {
+    &ps_move;
+    print STDOUT ($prev_chord, "\n");
+    &ps_step;
+}
+
+sub print_bar {
+    &ps_move;
+    print STDOUT ("bar\n");
+    $x += 4;
+}
+
+sub print_newline {
+    &ps_advance;
+}
+
+sub print_space {
+    &ps_step;
+}
+
+sub advance {
+    local ($full, $margin) = @_;
+    unless ( &on_top ) {
+	$x = 0;
+	$y += $yd * $full;
+    }
+    return unless defined $margin;
+    $margin =~ s/^\s+//;
+    $margin =~ s/\s$//;
+    $xm = 0;
+    &ps_move;
+    print STDOUT ('SF (', $margin, ') show', "\n");
+    $xm = $md;
+}
+
+sub bar {
+    local ($line) = @_;
+    local ($chord, $key, @vec);
+
+    &on_top;
+
+    $line =~ s/\|/ | /g;
+    $line =~ s/\./ . /g;
+    $line =~ s/:/ : /g;
+
+    foreach $c ( split (' ', $line) ) {
 	if ( $c eq '|' ) {
 	    &print_bar;
 	    next;
@@ -93,72 +149,72 @@ while ( <> ) {
     &print_newline;
 }
 
-&ps_trailer if defined $did_ps_preamble;
-exit 0;
+sub control {
+    local ($_) = @_;
 
-################ Subroutines ################
-
-sub print_title {
-    local ($new, $title) = @_;
-    &ps_preamble unless $did_ps_preamble;
-
-    if ( $new ) {
-	print STDOUT ('showpage', "\n") if $ps_pages;
-	print STDOUT ('%%Page: ', ++$ps_pages. ' ', $ps_pages, "\n");
-	$x = $y = $xm = 0; 
-	$xd = $std_width; $yd = $std_height; $md = $std_margin;
+    # Title.
+    if ( /^t(itle)?\s+/i ) {
+	&print_title (1, $');
+	return;
     }
-    else {
-	$y -= 1.3*$yd;
+
+    # Subtitle(s).
+    if ( /^s(ub(title)?)?\s+/i ) {
+	&print_title (0, $');
+	return;
     }
+
+    # Width adjustment.
+    if ( /^w(idth)?\s+([-+])?(\d+)/i ) {
+	if ( defined $2 ) {
+	    $xd += $2.$3;
+	}
+	else {
+	    $xd = $3;
+	}
+	return;
+    }
+
+    # Height adjustment.
+    if ( /^h(eight)?\s+([-+])?(\d+)/i ) {
+	if ( defined $2 ) {
+	    $yd -= $2.$3;
+	}
+	else {
+	    $yd = -$3;
+	}
+	return;
+    }
+
+    # Margin width adjustment.
+    if ( /^m(argin)?\s+([-+])?(\d+)/i ) {
+	if ( defined $2 ) {
+	    $md += $2.$3;
+	}
+	else {
+	    $md = $3;
+	}
+	return;
+    }
+
+    &errout ("Unrecognized control");
+}
+
+sub text {
+    local ($line) = @_;
+    local ($xm) = 0;
+    &on_top;
     &ps_move;
-    print STDOUT ($new ? 'TF (' : 'SF (', $title, ') show', "\n");
+    print STDOUT ('SF (', $line, ') show', "\n");
     &ps_advance;
-    &ps_advance;
 }
 
-sub print_chord {
-    &ps_preamble unless $did_ps_preamble;
-    $prev_chord = &ps_chordname;
-    &ps_move;
-    print STDOUT ($prev_chord, "\n");
-    &ps_step;
-}
-
-sub print_again {
-    &ps_preamble unless $did_ps_preamble;
-    &ps_move;
-    print STDOUT ($prev_chord, "\n");
-    &ps_step;
-}
-
-sub print_bar {
-    &ps_preamble unless $did_ps_preamble;
-    &ps_move;
-    print STDOUT ("bar\n");
-    $x += 4;
-}
-
-sub print_newline {
-    &ps_preamble unless $did_ps_preamble;
-    &ps_advance;
-}
-
-sub print_space {
-    &ps_step;
-}
-
-sub advance {
-    local ($full, $margin) = @_;
+sub on_top {
+    return 0 unless $on_top;
     $x = 0;
-    $y += $yd * $full;
-    return unless defined $margin;
-    $margin =~ s/^\s+//;
-    $margin =~ s/\s$//;
-    $xm = 0;
-    &ps_move;
-    print STDOUT ('SF (', $margin, ') show', "\n");
-    $xm = $md;
+    $y = 4*$yd;
+    $on_top = 0;
+    return 1;
 }
 
 sub ps_move {
@@ -242,9 +298,8 @@ sub ps_preamble {
 %%PaperSize: A4
 %%EndSetup
 EOD
-    $did_ps_preamble = 1;
     $x0 = 50; $y0 = 800; $xd = $std_width; $yd = $std_height;
-    $x = $y = $xm = 0; $std_margin = 40;
+    $x = $y = $xm = 0;
     $ps_pages = 0;
 }
 
@@ -519,6 +574,7 @@ sub ps_chordname {
 	$res .= '(7) addn ';
     }
     elsif ( $v =~ s/^( \d| 10)* 11 / $1/ ) {
+	$res .= '-2 0 rmoveto ' if $res =~ /flat $/;
 	$res .= 'delta ';
     }
     if ( $v =~ s/ 5 7 / / ) {
@@ -554,8 +610,11 @@ sub init {
     @FNotes = 
 	# 0    1    2    3    4    5    6    7    8    9    10   11
 	('C ','Db','D ','Eb','E ','F ','Gb','G ','Ab','A ','Bb','B ');
-    $std_width = 30;
-    $std_height = -30;
+
+    # Print dimensions.
+    $std_width  = 30;
+    $std_height = -15;
+    $std_margin = 40;
 }
 
 ################ Options ################
