@@ -541,7 +541,6 @@ sub init {
     @SNotes = 
 	# 0    1    2    3    4    5    6    7    8    9    10   11
 	('C ','C#','D ','D#','E ','F ','F#','G ','G#','A ','A#','B ');
-    $notes = @SNotes;
     # All notes, using flats.
     @FNotes = 
 	# 0    1    2    3    4    5    6    7    8    9    10   11
@@ -555,27 +554,17 @@ sub init {
 sub options {
 
     # Defaults...
-    $opt_verbose = 0;
+    $opt_verbose = $opt_quiet = 0;
     $opt_debug = 0;
     $opt_trace = 0;
-    $opt_all = 0;
     $opt_help = 0;
-    $opt_quiet = 0;
-    $opt_scale = 'Major';
-    $opt_chord = 0;
-    $opt_fingerboard = 0;
-    $opt_ps = $opt_color = 0;
-    $opt_sharp = $opt_flat = $opt_auto = 0;
     $opt_syntax = 0;
-    $opt_analyze = 0;
 
     # Process options, if any...
     if ( $ARGV[0] =~ /^-/ ) {
 	require "newgetopt.pl";
 
-	if ( ! &NGetOpt ("all", "scale=s", "fingerboard", "chord",
-			 "sharp", "flat", "auto", "syntax", "ps",
-			 "color", "analyze",
+	if ( ! &NGetOpt ('syntax',
 			 "verbose", "help", "debug", "trace")
 	    || $opt_help ) {
 	    &usage;
@@ -590,17 +579,9 @@ sub usage {
     print STDERR <<EoU;
 This is Chords [$my_name $my_version]
 
-Usage: $0 [ options ] [ notes ]
+Usage: $0 [ options ] [ file ... ]
 
 Options:
-   -all		generate all scales
-   -scale XXX	print this scale
-   -chord 	process chords instead of scales
-   -flat|sharp	use flat (or sharp) scale
-   -fingerboard	show positions on guitar fingerboard
-   -analyze
-   -ps		output in PostScript
-   -color	use color PostScript
    -verbose	verbose output
    -help	this message
    -syntax	syntax for chords and notes
