@@ -4,8 +4,8 @@ my $RCS_Id = '$Id$ ';
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Feb 12 19:43:29 1999
-# Update Count    : 56
+# Last Modified On: Wed Oct 27 17:18:06 1999
+# Update Count    : 81
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -29,14 +29,26 @@ $my_version .= '*' if length('$Locker$ ') > 12;
 use Getopt::Long;
 sub app_options();
 
+my $output;
+my $preamble;
 my $verbose = 0;		# verbose processing
 
 # Development options (not shown with -help).
 my $debug = 0;			# debugging
 my $trace = 0;			# trace (show process)
-my $test = 0;			# test (no actual processing)
+my $test = 0;			# test
 
 app_options();
+print STDOUT ("ok 1\n") if $test;
+
+if ( defined $output ) {
+    open (OUTPUT, ">$output") or print STDOUT ("not ") if $test;
+    print STDOUT ("ok 2\n") if $test;
+}
+else {
+    die ("Test mode requires -output option to be set\n") if $test;
+    *OUTPUT = *STDOUT;
+}
 
 # Options post-processing.
 $trace |= ($debug || $test);
@@ -88,6 +100,7 @@ my $xpose = 0;
 use vars qw($chord @vec $key $chordname);
 
 ps_preamble();
+print STDOUT ("ok 3\n") if $test;
 
 while ( <> ) {
     next if /^\s*#/;
@@ -126,7 +139,7 @@ while ( <> ) {
 	ps_advance ();
 	$linetype = 0;
     }
-	
+
     # Spacing/margin notes.
     if ( /^=(.*)/ ) {
 	advance (2, $1);
@@ -147,9 +160,13 @@ while ( <> ) {
     text ($_);
     $linetype = 0;
 }
+print STDOUT ("ok 4\n") if $test;
 
 ps_trailer ();
-exit 0;
+print STDOUT ("ok 5\n") if $test;
+
+close OUTPUT if defined $output;
+exit 0 unless $test;
 
 ################ Subroutines ################
 
@@ -157,14 +174,14 @@ sub print_title {
     my ($new, $title) = @_;
 
     if ( $new ) {
-	print STDOUT ('end showpage', "\n") if $ps_pages;
-	print STDOUT ('%%Page: ', ++$ps_pages. ' ', $ps_pages, "\n",
+	print OUTPUT ('end showpage', "\n") if $ps_pages;
+	print OUTPUT ('%%Page: ', ++$ps_pages. ' ', $ps_pages, "\n",
 		      'tabdict begin', "\n");
 	$x = $y = $xm = 0; 
 	$xd = $std_width; $yd = $std_height; $md = $std_margin;
     }
     ps_move ();
-    print STDOUT ($new ? 'TF (' : 'SF (', $title, ') show', "\n");
+    print OUTPUT ($new ? 'TF (' : 'SF (', $title, ') show', "\n");
     ps_advance ();
     $on_top = 1;
     $xpose = 0;
@@ -174,18 +191,18 @@ my $prev_chord;
 
 sub print_chord {
     $prev_chord = ps_chordname ();
-    print STDOUT ($prev_chord, "\n");
+    print OUTPUT ($prev_chord, "\n");
 }
 
 sub print_again {
     ps_move ();
-    print STDOUT ($prev_chord, "\n");
+    print OUTPUT ($prev_chord, "\n");
     ps_step ();
 }
 
 sub print_bar {
     ps_move ();
-    print STDOUT ("bar\n");
+    print OUTPUT ("bar\n");
     $x += 4;
 }
 
@@ -199,7 +216,7 @@ sub print_space {
 
 sub print_rest {
     ps_move ();
-    print STDOUT ("rest\n");
+    print OUTPUT ("rest\n");
     ps_step ();
 }
 
@@ -208,7 +225,7 @@ sub print_same {
     { my $xsave = $x;
       $x += ($xs * $xd) / 2;
       ps_move ();
-      print STDOUT ("same$wh\n");
+      print OUTPUT ("same$wh\n");
       $x = $xsave;
     }
     $x += $xs * $xd;
@@ -216,7 +233,7 @@ sub print_same {
 
 sub print_turnaround {
     ps_move ();
-    print STDOUT ("ta\n");
+    print OUTPUT ("ta\n");
     ps_step ();
 }
 
@@ -231,7 +248,7 @@ sub advance {
     $margin =~ s/\s$//;
     $xm = 0;
     ps_move ();
-    print STDOUT ('SF (', $margin, ') show', "\n");
+    print OUTPUT ('SF (', $margin, ') show', "\n");
     $xm = $md;
 }
 
@@ -291,7 +308,7 @@ sub bar {
 	    my $c = shift (@ch);
 	    ($chord, $key, @vec) = parse_chord ($c);
 	    print_chord ($chord, $key, @vec);
-	    print STDOUT ("slash\n");
+	    print OUTPUT ("slash\n");
 	}
 	($chord, $key, @vec) = parse_chord ($ch[0]);
 	print_chord ($chord, $key, @vec);
@@ -380,14 +397,14 @@ sub chord {
 
     on_top ();
     $chordname = ps_chordname ();
-    print STDOUT ('1000 1000 moveto', "\n",
+    print OUTPUT ('1000 1000 moveto', "\n",
 		  $chordname, "\n",
 		  'currentpoint pop 1000 sub 2 div', "\n");
     ps_move ();
-    print STDOUT (2.5*$std_gridscale, ' exch sub 8 add 0 rmoveto ',
+    print OUTPUT (2.5*$std_gridscale, ' exch sub 8 add 0 rmoveto ',
 		  $chordname, "\n");
     ps_move ();
-    print STDOUT ('8 ', -5-(4*$std_gridscale), " rmoveto @c $c dots\n");
+    print OUTPUT ('8 ', -5-(4*$std_gridscale), " rmoveto @c $c dots\n");
     $x += 40 + 40;
 }
 
@@ -397,7 +414,7 @@ sub text {
     $xm = 0;
     on_top ();
     ps_move ();
-    print STDOUT ('SF (', $line, ') show', "\n");
+    print OUTPUT ('SF (', $line, ') show', "\n");
     ps_advance ();
     $xm = $xmsave;
 }
@@ -411,7 +428,7 @@ sub on_top {
 }
 
 sub ps_move {
-    print STDOUT ($x0+$x+$xm, ' ' , $y0+$y, ' m ');
+    print OUTPUT ($x0+$x+$xm, ' ' , $y0+$y, ' m ');
 }
 
 sub ps_step {
@@ -429,9 +446,12 @@ sub ps_kern {
 }
 
 sub ps_preamble {
+    if ( defined $preamble ) {
+	open (DATA, $preamble) or die ("$preamble: $!\n");
+    }
     while ( <DATA> ) {
 	s/\$std_gridscale/$std_gridscale/g;
-	print STDOUT ($_);
+	print OUTPUT ($_);
     }
     $x0 = 50; $y0 = 800; $xd = $std_width; $yd = $std_height;
     $x = $y = $xm = 0;
@@ -439,7 +459,7 @@ sub ps_preamble {
 }
 
 sub ps_trailer {
-    print STDOUT <<EOD;
+    print OUTPUT <<EOD;
 end showpage
 %%Trailer
 %%Pages: $ps_pages
@@ -559,8 +579,10 @@ sub parse_chord {
 	    $mod = $+;
 	    vec($chflags,3,1) = 1;
 	    vec($chflags,5,1) = 1;
+	    vec($chflags,7,1) = 1;
 	    $chmods[3] = -1;
 	    $chmods[5] = -1;
+	    $chmods[7] = -1;
 	    next;
 	}
 	if ( $mod =~ /^%(.*)/ ) {	# half-diminished 7
@@ -632,6 +654,9 @@ sub chordname {
 	$res .= $1 == 8 ? '+' : '';
 	$v = ' 6' . $v if $1 == 6;
     }
+    elsif ( $v =~ s/^0 3 6 9 / / ) {
+	$res .= 'o';
+    }
     elsif ( $v =~ s/^0 3 (6|7|8) / / ) {
 	if ( $1 == 6 ) {
 	    $res .= ( $v =~ s/^ 10 // ) ? '%' : 'o';
@@ -693,6 +718,9 @@ sub ps_chordname {
     if ( $v =~ s/^0 4 (6|7|8) / / ) {
 	$res .= $1 == 8 ? 'plus ' : '';
 	$v = ' 6' . $v if $1 == 6;
+    }
+    elsif ( $v =~ s/^0 3 6 9 / / ) {
+	$res .= 'dim ';
     }
     elsif ( $v =~ s/^0 3 (6|7|8) / / ) {
 	if ( $1 == 6 ) {
@@ -756,12 +784,14 @@ sub app_options() {
     # Process options, if any.
     # Make sure defaults are set before returning!
     return unless @ARGV > 0;
-    
-    if ( !GetOptions(
+
+    if ( !GetOptions('output=s'	=> \$output,
+		     'preamble=s' => \$preamble,
 		     'ident'	=> \$ident,
 		     'verbose'	=> \$verbose,
 		     'trace'	=> \$trace,
 		     'help'	=> \$help,
+		     'test'	=> \$test,
 		     'debug'	=> \$debug,
 		    ) )
     {
@@ -780,6 +810,7 @@ sub app_usage($) {
     app_ident;
     print STDERR <<EndOfUsage;
 Usage: $0 [options] [file ...]
+    -output XXX		output file name
     -help		this message
     -ident		show identification
     -verbose		verbose information
@@ -856,6 +887,9 @@ tabdict begin
 /flat {
     /MSyms findfont 16 scalefont setfont 
     2 -2 rmoveto (s) show -2 2 rmoveto } def
+/natural {
+    /MSyms findfont 13 scalefont setfont
+    2 0 rmoveto (d) show -1 0 rmoveto } def
 /addn {
     /Helvetica findfont 12 scalefont setfont 
     0 -3 rmoveto show 0 3 rmoveto } def
@@ -1059,6 +1093,8 @@ EB5F70677A7578EB766174536E4CEBFC83A5E95E5D4E5E4A68EB5F7167787478EB746374
 F5>def 
 /asciicircum<A0645E979281D9EE78ADE94E644E866486EB7A647A426442EBFC786ED9
 E94A644A3C643CEB7E647E8C648CEBFC887DD9E9401EEA6864EA88AAEAFCF5>def 
+/d<A0646B489376D9EE706FD9E96463D7EA7D6CEA643DEA6964EA6465D9EA4B5CEA648B
+EAFC759CE9786BEA6447EA505DEAFCF5>def 
 /f<B4645B3EA980D9EE7346E9648CD9EA6964EA643CD7EAFC8C50E9648CD9EA6964EA64
 3CD7EAFC6469E96473EAA078EA6455EAFC6496E96473EAA078EA6455EAFCF5>def 
 /s<A0645E698F7FD9EE797FE9726E7D7B6D94EB616A536A4F64EB605FEA6497EA5F64EA
