@@ -678,7 +678,7 @@ sub parse_chord {
 	    next;
 	}
 	&errout ("Unknown chord modification: \"$mod\"");
-	next;
+	last;
     }
 
     local (@vec) = (0);
