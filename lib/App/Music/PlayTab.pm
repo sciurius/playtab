@@ -140,6 +140,12 @@ sub print_same {
     $x += $xs * $xd;
 }
 
+sub print_turnaround {
+    &ps_move;
+    print STDOUT ("ta\n");
+    &ps_step;
+}
+
 sub advance {
     local ($full, $margin) = @_;
     unless ( &on_top ) {
@@ -161,8 +167,8 @@ sub bar {
 
     &on_top;
 
-    $line =~ s/([|.:`'])/ $1 /g;
-
+    $line =~ s/([|.:`'])/ $1 /g;	#'`])/;
+    
     local (@c) = split (' ', $line);
     while ( @c > 0 ) {
 	$c = shift (@c);
@@ -195,8 +201,12 @@ sub bar {
 	    &ps_kern (1);
 	    next;
 	}
-	elsif ( $c eq '`' ) {
+	elsif ( $c eq '\`' ) {
 	    &ps_kern (-1);
+	    next;
+	}
+	elsif ( $c eq 'ta' || $c eq 'TA' ) {
+	    &print_turnaround;
 	    next;
 	}
 
@@ -416,6 +426,9 @@ tabdict begin
 /resth {
     /Marl findfont 16 scalefont setfont
     (R) show } def
+/ta {
+    /Helvetica findfont 14 scalefont setfont
+    (T.A.) show	} def
 /TF {
     /Helvetica findfont 16 scalefont setfont } def
 /SF {
