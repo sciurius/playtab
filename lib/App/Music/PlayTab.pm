@@ -302,10 +302,11 @@ sub chord {
 		  $chordname, "\n",
 		  'currentpoint pop 1000 sub 2 div', "\n");
     &ps_move;
-    print STDOUT ('25 exch sub 8 add 0 rmoveto ', $chordname, "\n");
+    print STDOUT (2.5*$std_gridscale, ' exch sub 8 add 0 rmoveto ',
+		  $chordname, "\n");
     &ps_move;
-    print STDOUT ("8 -45 rmoveto @c $c dots\n");
-    $x += 50 + 40;
+    print STDOUT ('8 ', -5-(4*$std_gridscale), " rmoveto @c $c dots\n");
+    $x += 40 + 40;
 }
 
 sub text {
@@ -425,7 +426,7 @@ end
 % Routines for the drawing of chords.
 /griddict 10 dict def
 griddict begin
-  /gridscale 10 def
+  /gridscale $std_gridscale def
   /gridwidth gridscale 5 mul def
   /gridheight gridscale 4 mul def
   /half-incr gridscale 2 div def
@@ -450,6 +451,8 @@ griddict begin
     exch dup 5 exch abs sub gridscale mul half-incr sub	% fret y -> y fret x 
     exch 3 1 roll rmoveto
 
+    % It is tempting to use the more enhanced format (that places o
+    % and x above the grid) but there is a chord caption.
     % fret {...} --
     -1 ne
     { currentpoint dot-size 0 360 arc fill }
@@ -829,6 +832,7 @@ sub init {
     $std_width  = 30;
     $std_height = -15;
     $std_margin = 40;
+    $std_gridscale = 8;
 }
 
 ################ Options ################
