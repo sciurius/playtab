@@ -76,13 +76,12 @@ sub print_title {
     print STDOUT ($new ? 'TF (' : 'SF (', $title, ') show', "\n");
     &ps_advance;
     $on_top = 1;
+    $xpose = 0;
 }
 
 sub print_chord {
     $prev_chord = &ps_chordname;
-    &ps_move;
     print STDOUT ($prev_chord, "\n");
-    &ps_step;
 }
 
 sub print_again {
@@ -103,6 +102,22 @@ sub print_newline {
 
 sub print_space {
     &ps_step;
+}
+
+sub print_rest {
+    &ps_move;
+    print STDOUT ("rest\n");
+    &ps_step;
+}
+
+sub print_same {
+    local ($wh, $xs) = @_;
+    { local ($x) = $x;
+      $x += ($xs * $xd) / 2;
+      &ps_move;
+      print STDOUT ("same$wh\n");
+    }
+    $x += $xs * $xd;
 }
 
 sub advance {
@@ -130,7 +145,9 @@ sub bar {
     $line =~ s/\./ . /g;
     $line =~ s/:/ : /g;
 
-    foreach $c ( split (' ', $line) ) {
+    local (@c) = split (' ', $line);
+    while ( @c > 0 ) {
+	$c = shift (@c);
 	if ( $c eq '|' ) {
 	    &print_bar;
 	    next;
@@ -143,8 +160,31 @@ sub bar {
 	    &print_space;
 	    next;
 	}
-	($chord, $key, @vec) = &parse_chord ($c);
+	elsif ( $c eq '%' ) {
+	    local ($xs) = 1;
+	    while ( @c > 0 && $c[0] eq '.' ) {
+		shift (@c);
+		$xs++;
+	    }
+	    &print_same ('1', $xs);
+	    next;
+	}
+	elsif ( $c eq '-' ) {
+	    &print_rest;
+	    next;
+	}
+
+	&ps_move;
+	local (@ch) = split ('/',$c);
+	while ( @ch > 1 ) {
+	    $c = shift (@ch);
+	    ($chord, $key, @vec) = &parse_chord ($c);
+	    &print_chord ($chord, $key, @vec);
+	    print STDOUT ("slash\n");
+	}
+	($chord, $key, @vec) = &parse_chord ($ch[0]);
 	&print_chord ($chord, $key, @vec);
+	&ps_step;
     }
     &print_newline;
 }
@@ -194,6 +234,12 @@ sub control {
 	else {
 	    $md = $3;
 	}
+	return;
+    }
+
+    # Transpose.
+    if ( /^x(pose)?\s+([-+])(\d+)/i ) {
+	$xpose += $2.$3;
 	return;
     }
 
@@ -282,12 +328,24 @@ sub ps_preamble {
 /root {
     /Helvetica findfont 16 scalefont setfont
     show } def
+/slash {
+    /Helvetica findfont 16 scalefont setfont
+    (/) show } def
 /susp {
     /Helvetica findfont 12 scalefont setfont
     0 -3 rmoveto (sus) show show 0 3 rmoveto } def
 /bar {
     1 setlinewidth
     currentpoint 0 -3 rmoveto 0 16 rlineto stroke moveto } def
+/same1 {
+    /Marl findfont 10 scalefont setfont
+    (L) dup stringwidth pop 2 div neg 0 rmoveto show } def
+/rest {
+    /Helvetica findfont 16 scalefont setfont
+    (\261) show } def
+/resth {
+    /Marl findfont 16 scalefont setfont
+    (R) show } def
 /TF {
     /Helvetica findfont 16 scalefont setfont } def
 /SF {
@@ -505,12 +563,15 @@ sub chordname {
 	$v = ' 8' . $v if $1 == 8;
     }
     $v =~ s/^0 5 7 / 5 7 /;
-    $v =~ s/ 10 14 18 (21|22) / $1 /;
-    $v =~ s/ 10 14 (17|18) / $1 /;
-    $v =~ s/ 10 (14|15) / $1 /;
-    $v =~ s/ 11 14 18 (21|22) / $1 11 /;
-    $v =~ s/ 11 14 (17|18) / $1 11 /;
-    $v =~ s/ 11 (14|15) / $1 11 /;
+    $v =~ s/ 10 14 18 (21) / $1 /;		# 13
+    $v =~ s/ 10 14 (17) / $1 /;			# 11
+    $v =~ s/ 10 (14) / $1 /;			#  9
+    $v =~ s/ 10 14 18 (22) / 10 $1 /;		#  7#13
+    $v =~ s/ 10 14 (18) / 10 $1 /;		#  7#11
+    $v =~ s/ 10 (15) / 10 $1 /;			#  7#9
+    $v =~ s/ 11 14 18 (21|22) / $1 11 /;	# 13#5
+    $v =~ s/ 11 14 (17|18) / $1 11 /;		# 11#5
+    $v =~ s/ 11 (14|15) / $1 11 /;		#  9#5
     if ( $v =~ s/ 10 / / ) {
 	$res .= '7';
     }
@@ -522,7 +583,7 @@ sub chordname {
     $v =~ s/^ //;
     @v = split(' ', $v);
     foreach ( @v ) {
-	$res .= '('.('1','b2','2','b3','3','4','b5','5','#5','6','7','#7','8','b9','9','b10','b11','11','#11','12','b13','13')[$_].')';
+	$res .= '('.('1','b2','2','b3','3','4','b5','5','#5','6','7','#7','8','b9','9','#9','b11','11','#11','12','b13','13')[$_].')';
     }
     local ($res0) = $res;
     $res =~ s/^([^\(]*[^\d])?\((\d+)\)([^\d][^\(]*)?$/$1$2$3/;
@@ -533,7 +594,7 @@ sub chordname {
 }
 
 sub ps_chordname {
-    local ($res) = $Notes[$key eq '*' ? 0 : $key];
+    local ($res) = $Notes[$key eq '*' ? 0 : (($key+$xpose)%12)];
     $res =~ s/\s+$//;
     if ( $res =~ /(.)b/ ) {
 	$res = '('.$1.') root flat ';
@@ -564,12 +625,15 @@ sub ps_chordname {
 	$v = ' 8' . $v 	if $1 == 8;
     }
     $v =~ s/^0 5 7 / 5 7 /;
-    $v =~ s/ 10 14 18 (21|22) / $1 /;
-    $v =~ s/ 10 14 (17|18) / $1 /;
-    $v =~ s/ 10 (14|15) / $1 /;
-    $v =~ s/ 11 14 18 (21|22) / $1 11 /;
-    $v =~ s/ 11 14 (17|18) / $1 11 /;
-    $v =~ s/ 11 (14|15) / $1 11 /;
+    $v =~ s/ 10 14 18 (21) / $1 /;		# 13
+    $v =~ s/ 10 14 (17) / $1 /;			# 11
+    $v =~ s/ 10 (14) / $1 /;			#  9
+    $v =~ s/ 10 14 18 (22) / 10 $1 /;		#  7#13
+    $v =~ s/ 10 14 (18) / 10 $1 /;		#  7#11
+    $v =~ s/ 10 (15) / 10 $1 /;			#  7#9
+    $v =~ s/ 11 14 18 (21|22) / $1 11 /;	# 13#5
+    $v =~ s/ 11 14 (17|18) / $1 11 /;		# 11#5
+    $v =~ s/ 11 (14|15) / $1 11 /;		#  9#5
     if ( $v =~ s/ 10 / / ) {
 	$res .= '(7) addn ';
     }
@@ -588,7 +652,7 @@ sub ps_chordname {
 	$res .= ('(1) addn ','(2) addf ','(2) addn ','(3) addf ','(3) addn ',
 		 '(4) addn ','(5) addf ','(5) addn ','(5) adds ','(6) addn ',
 		 '(7) addn ','(7) adds ','(8) addn ','(9) addf ','(9) addn ',
-		 '(10) addf ','(11) addf ','(11) addn ','(11) adds ',
+		 '(9) adds ','(11) addf ','(11) addn ','(11) adds ',
 		 '(12) addn ','(13) addf ','(13) addn ')[$_];
     }
     print STDERR ("=cn=> $chord -> $res\n") if $opt_debug;
@@ -681,6 +745,15 @@ b               lower the pitch of the note to a flat [C11b9]
 no              substract a note from a chord [C9no11]
 --------------------------------------------------------------
 Whitespace and () may be used to avoid ambiguity, e.g. C(#9) <-> C#9 <-> C#(9)
+
+Other:          Meaning
+--------------------------------------------------------------
+.               Chord space
+-               Rest
+%               Repeat
+/               Powerchord constructor   [D/G D/E-]
+--------------------------------------------------------------
+
 EOD
     exit (1);
 }
