@@ -356,10 +356,12 @@ sub ps_kern {
 }
 
 sub ps_preamble {
+    my $MSyms = '$MSyms';
     print STDOUT <<EOD;
 %!PS-Adobe-2.0
 %%Pages: (atend)
-%%DocumentFonts: Helvetica
+%%DocumentFonts: Helvetica MSyms
+%%DocumentSuppliedFonts: MSyms
 %%EndComments
 %%BeginProcSet: Symbols 0
 /tabdict 50 dict def 
@@ -367,11 +369,11 @@ tabdict begin
 /m { moveto } bind def
 /dim {
     currentpoint
-    /Marl findfont 18 scalefont setfont
+    /MSyms findfont 18 scalefont setfont
     1 -2 rmoveto (@) show moveto } def
 /hdim {
     currentpoint
-    /Marl findfont 18 scalefont setfont 
+    /MSyms findfont 18 scalefont setfont 
     1 -2 rmoveto (^) show moveto } def
 /minus {
     currentpoint
@@ -385,21 +387,21 @@ tabdict begin
     /Symbol findfont 12 scalefont setfont 
     1 -3 rmoveto (D) show -1 3 rmoveto } def
 /sharp {
-    /Marl findfont 13 scalefont setfont
+    /MSyms findfont 13 scalefont setfont
     2 0 rmoveto (f) show -1 0 rmoveto } def
 /flat {
-    /Marl findfont 16 scalefont setfont 
+    /MSyms findfont 16 scalefont setfont 
     2 -2 rmoveto (s) show -2 2 rmoveto } def
 /addn {
     /Helvetica findfont 12 scalefont setfont 
     0 -3 rmoveto show 0 3 rmoveto } def
 /adds {
-    /Marl findfont 9 scalefont setfont
+    /MSyms findfont 9 scalefont setfont
     2 -2 rmoveto (f) show -1 2 rmoveto 
     /Helvetica findfont 12 scalefont setfont 
     0 -3 rmoveto show 0 3 rmoveto } def
 /addf {
-    /Marl findfont 12 scalefont setfont
+    /MSyms findfont 12 scalefont setfont
     2 -4 rmoveto (s) show -1 4 rmoveto 
     /Helvetica findfont 12 scalefont setfont 
     0 -3 rmoveto show 0 3 rmoveto } def
@@ -419,13 +421,13 @@ tabdict begin
     1 setlinewidth
     currentpoint 0 -3 rmoveto 0 16 rlineto stroke moveto } def
 /same1 {
-    /Marl findfont 10 scalefont setfont
+    /MSyms findfont 10 scalefont setfont
     (L) dup stringwidth pop 2 div neg 0 rmoveto show } def
 /rest {
     /Helvetica findfont 16 scalefont setfont
     (\261) show } def
 /resth {
-    /Marl findfont 16 scalefont setfont
+    /MSyms findfont 16 scalefont setfont
     (R) show } def
 /ta {
     /Helvetica findfont 14 scalefont setfont
@@ -519,6 +521,89 @@ tabdict begin
 end
 %%EndProcSet
 %%EndProlog
+%%BeginFont: MSyms
+systemdict/currentpacking known{/SavPak currentpacking def true setpacking}if
+userdict/AltRT6 known{{currentfile(   )readstring{(%%%)eq{exit}if}{pop}ifelse}loop}if
+userdict begin/AltRT6 39 dict def AltRT6 begin/NL 0 def/B{bind def}bind def
+/Cache{NL 0 eq{setcachedevice}{6{pop}repeat}ifelse 0 0 moveto}B
+/SetWid{NL 0 eq{0 setcharwidth setgray}{pop setgray}ifelse 0 0 moveto}B
+/ShowInt{/NL NL 1 add store BC2 grestore/NL NL 1 sub store}B
+/charStr(.)def/Strk 0 def/Sstrk{/Strk 1 store}B
+/Cfill{PaintType 0 eq{Strk 0 eq{exec}{gsave exec grestore
+currentgray 0 ne{0 setgray}if stroke}ifelse}{pop stroke}ifelse}B
+/Fill{{fill}Cfill}def/Eofill{{eofill}Cfill}def/Cp{closepath 0 0 moveto}def
+/ShowExt{EFN exch get findfont setfont matrix currentmatrix exch
+InvMtx concat 0 0 moveto charStr 0 3 -1 roll put PaintType 0 ne Strk 0 ne
+or currentgray 0 ne or{charStr false charpath setmatrix Fill}
+{charStr show pop}ifelse grestore}B/stringtype{{UCS}forall}B
+/arraytype/exec load def/packedarraytype/exec load def
+/BuildChar{AltRT6 begin exch begin BC2 end end}B
+/BC2{save exch StrokeWidth setlinewidth/Strk 0 store
+Encoding exch get dup CharDefs exch known not{pop/.notdef}if
+CharDefs exch get newpath dup type exec restore}B 
+/UVec[{rmoveto}{rlineto}{rcurveto}{ShowExt}{]concat}{Cache}{setlinewidth}
+{ShowInt}{setlinecap}{setlinejoin}{gsave}{[}{Fill}{Eofill}{stroke}{SetWid}
+{100 mul add}{100 mul}{100 div}{Cp}{Sstrk}{setgray}]def
+/UCS{dup 200 lt{100 sub}{dup 233 lt{216 sub 100 mul add}
+{233 sub UVec exch get exec}ifelse}ifelse}B
+/CD{/NF exch def{exch dup/FID ne{exch NF 3 1 roll put}  
+{pop pop}ifelse}forall NF}B
+/MN{1 index length/Len exch def dup length Len add string dup 
+Len 4 -1 roll putinterval dup 0 4 -1 roll putinterval}B
+/RC{(|______)anchorsearch {1 index MN cvn/NewN exch def cvn
+findfont dup maxlength dict CD dup/FontName NewN put dup
+/Encoding MacVec put NewN exch definefont pop}{pop}ifelse}B
+/RF{dup cvn FontDirectory exch known{pop}{RC}ifelse}B
+/MacVec 256 array def MacVec 0 /Helvetica findfont
+/Encoding get 0 128 getinterval putinterval MacVec 127 /DEL put
+MacVec 16#27 /quotesingle put  MacVec 16#60 /grave put/NUL/SOH/STX/ETX
+/EOT/ENQ/ACK/BEL/BS/HT/LF/VT/FF/CR/SO/SI/DLE/DC1/DC2/DC3/DC4/NAK/SYN
+/ETB/CAN/EM/SUB/ESC/FS/GS/RS/US MacVec 0 32 getinterval astore pop
+/Adieresis/Aring/Ccedilla/Eacute/Ntilde/Odieresis/Udieresis/aacute
+/agrave/acircumflex/adieresis/atilde/aring/ccedilla/eacute/egrave
+/ecircumflex/edieresis/iacute/igrave/icircumflex/idieresis/ntilde/oacute
+/ograve/ocircumflex/odieresis/otilde/uacute/ugrave/ucircumflex/udieresis
+/dagger/degree/cent/sterling/section/bullet/paragraph/germandbls
+/register/copyright/trademark/acute/dieresis/notequal/AE/Oslash
+/infinity/plusminus/lessequal/greaterequal/yen/mu/partialdiff/summation
+/product/pi/integral/ordfeminine/ordmasculine/Omega/ae/oslash 
+/questiondown/exclamdown/logicalnot/radical/florin/approxequal/Delta/guillemotleft
+/guillemotright/ellipsis/nbspace/Agrave/Atilde/Otilde/OE/oe
+/endash/emdash/quotedblleft/quotedblright/quoteleft/quoteright/divide/lozenge
+/ydieresis/Ydieresis/fraction/currency/guilsinglleft/guilsinglright/fi/fl
+/daggerdbl/periodcentered/quotesinglbase/quotedblbase
+/perthousand/Acircumflex/Ecircumflex/Aacute
+/Edieresis/Egrave/Iacute/Icircumflex/Idieresis/Igrave/Oacute/Ocircumflex
+/apple/Ograve/Uacute/Ucircumflex/Ugrave/dotlessi/circumflex/tilde
+/macron/breve/dotaccent/ring/cedilla/hungarumlaut/ogonek/caron
+MacVec 128 128 getinterval astore pop end end
+/$MSyms 19 dict def $MSyms begin/PaintType 0 def/FontType 3 def
+/StrokeWidth 0 def/FontBBox[-30 -60 296 185]def %/UniqueID 5449203 def
+/FontMatrix[0.008333 0 0 0.008333 0 0]def/InvMtx[120 0 0 120 0 0]def
+/CharDefs 7 dict def/FontName (MSyms) def
+/BuildChar{AltRT6/BuildChar get exec}def
+/FontInfo 3 dict def FontInfo begin
+/UnderlinePosition -20 def/UnderlineThickness 20 def end
+/Encoding AltRT6/MacVec get def CharDefs begin/.notdef{500 0 setcharwidth} def
+/at<A0645EA79171D9EE78ADE94E644E866486EB7A647A426442EBFC786ED9E94A644A3C
+643CEB7E647E8C648CEBFCF5>def 
+/L<96D964525E8BD96AD9EE6464E98064EAC164D9EA4864EAFC75D973E95E5D4D5E4968
+EB5F70677A7578EB766174536E4CEBFC83A5E95E5D4E5E4A68EB5F7167787478EB746374
+536E4CEBFCF5>def 
+/R<B4645C879F84D9EE758CE96A64EA7CA7EA686FEA666A6063585FEB6062545D5865EB
+676A61715971EB5B635762555AEB625C6A557155EB696468627365EB6A6571697167EBFC
+F5>def 
+/asciicircum<A0645E979281D9EE78ADE94E644E866486EB7A647A426442EBFC786ED9
+E94A644A3C643CEB7E647E8C648CEBFC887DD9E9401EEA6864EA88AAEAFCF5>def 
+/f<B4645B3EA980D9EE7346E9648CD9EA6964EA643CD7EAFC8C50E9648CD9EA6964EA64
+3CD7EAFC6469E96473EAA078EA6455EAFC6496E96473EAA078EA6455EAFCF5>def 
+/s<A0645E698F7FD9EE797FE9726E7D7B6D94EB616A536A4F64EB605FEA6497EA5F64EA
+645AD7EAFC69A4E96A67EA6D687060705BEB655162515C4AEB5A59EAFCF5>def 
+end/EFN[]def
+end systemdict/currentpacking known{SavPak setpacking}if
+/MSyms $MSyms definefont pop
+/MSyms findfont/EFN get AltRT6 begin{RF}forall end
+%%EndFont
 %%BeginSetup
 %%PaperSize: A4
 %%EndSetup
