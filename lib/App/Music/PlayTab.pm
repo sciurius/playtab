@@ -1,17 +1,16 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl
 my $RCS_Id = '$Id$ ';
 
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Feb 12 17:29:04 1999
-# Update Count    : 53
+# Last Modified On: Fri Feb 12 19:43:29 1999
+# Update Count    : 56
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
 
 use strict;
-# Comment: This program is not 'sawampersand' clean.
 
 # Package or program libraries, if appropriate.
 # $LIBDIR = $ENV{'LIBDIR'} || '/usr/local/lib/sample';
@@ -27,7 +26,7 @@ $my_version .= '*' if length('$Locker$ ') > 12;
 
 ################ Command line parameters ################
 
-use Getopt::Long 2.13;
+use Getopt::Long;
 sub app_options();
 
 my $verbose = 0;		# verbose processing
@@ -762,7 +761,7 @@ sub app_options() {
 		     'ident'	=> \$ident,
 		     'verbose'	=> \$verbose,
 		     'trace'	=> \$trace,
-		     'help|?'	=> \$help,
+		     'help'	=> \$help,
 		     'debug'	=> \$debug,
 		    ) )
     {
