@@ -168,7 +168,8 @@ sub bar {
     &on_top;
 
     $line =~ s/([|.:`'])/ $1 /g;	#'`])/;
-    
+    $line =~ s/  +/ /g;
+
     local (@c) = split (' ', $line);
     while ( @c > 0 ) {
 	$c = shift (@c);
@@ -201,7 +202,7 @@ sub bar {
 	    &ps_kern (1);
 	    next;
 	}
-	elsif ( $c eq '\`' ) {
+	elsif ( $c eq '`' ) {
 	    &ps_kern (-1);
 	    next;
 	}
