@@ -1,9 +1,9 @@
-# Makefile.PL -- Makefile for Music::PlayTab
+# Makefile.PL -- Makefile for PostScript::Fonts
 # Author          : Johan Vromans
 # Created On      : Mon Feb  8 11:46:56 1999
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Feb 12 19:45:31 1999
-# Update Count    : 66
+# Last Modified On: Fri Feb 12 19:44:46 1999
+# Update Count    : 65
 # Status          : Stable
 
 # Verify perl version.
