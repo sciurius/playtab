@@ -4,8 +4,8 @@ my $RCS_Id = '$Id$ ';
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Oct 27 17:18:06 1999
-# Update Count    : 81
+# Last Modified On: Wed Oct 27 17:30:11 1999
+# Update Count    : 88
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -853,6 +853,173 @@ Other:          Meaning
 
 EOD
 }
+
+################ Documentation ################
+
+=head1 NAME
+
+playtab - print chords of songs
+
+=head1 SYNOPSIS
+
+playtab [options] [file ...]
+
+ Options:
+   -output XXX		set outout file
+   -ident		show identification
+   -help		brief help message
+   -verbose		verbose information
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-output> I<file>
+
+Designates I<file> as the output file for the program.
+
+=item B<-help>
+
+Print a brief help message and exits.
+
+=item B<-ident>
+
+Prints program identification.
+
+=item B<-verbose>
+
+More verbose information.
+
+=item I<file>
+
+Input file(s).
+
+=back
+
+=head1 DESCRIPTION
+
+The input for playtab is plan ASCII. It contains the chords, the
+division in bars, with optional annotations.
+
+An example:
+
+    !t Blue Bossa
+
+    Bossanova
+    =
+    | c-9 ... | f-9 ... | d% . g7 . | c-9 ... |
+    | es-9 . as6 . | desmaj7 ... | d% . g7 . | c-9 . d% g7 |
+
+The first line, '!t' denotes the title of the song. Each song must
+start with a title line.
+
+The title line may be followed by '!s', a subtitle, for example to
+indicate the composer.
+
+The text "Bossanova" is printed below the title and subtitle.
+
+The "=" indicates some vertical space.
+
+The next lines show the bars of the song. In the first bar is the c-9
+chord (Cminor9), followed by three dots. The dots indicate that this
+chord is repeated for all 4 beats of this bar. In the 3rd bar each
+chord take two beats: d5% (d half dim), a dot, g7 and another dot.
+
+Run playtab with B<-h> or B<--help> for the syntax of chords.
+
+If you use "=" followed by some text, the printout is indented and the
+text sticks out to the left. With this you can tag groups of bars, for
+example the parts of a song that must be played in a certain order.
+For example:
+
+    !t Donna Lee
+    !s Charlie Parker
+
+    Order: A B A B
+
+    = A
+    | as . | f7 . | bes7 . | bes7 . |
+    | bes-7 . | es7 . | as . | es-7 D7 |
+    | des . | des-7 . | as . | f7 . |
+    | bes7 . | bes7 . | bes-7 . | es7 . |
+
+    = B
+    | as . | f7 . | bes7 . | bes7 . |
+    | c7 . | c7 . | f- . | c7#9 . |
+    | f- . | c7 . | f- . | aso . |
+    | as f7 | bes-7 es7 | as - | bes-7 es7 |
+
+You can modify the width of the bars with a '!w' control. Standard
+width of a beat is 30. '!w +5' increases the width to 35. '!w 25' sets
+it to 25. You get the idea. You can also change the height with '!h'
+(default is 15) and margin with '!m' (default width is 40).
+
+Look at the examples, that is (currently) the best way to get grip on
+what the program does.
+
+Oh, I almost forgot: it can print guitar chord diagrams as well. 
+See "bluebossa", "sophisticatedlady" and some others.
+
+Have fun, and let me know your ideas!
+
+=head1 INPUT SYNTAX
+
+  Notes: C, D, E, F, G, A, B.
+  Raised with '#' or suffix 'is', e.g. A#, Ais.
+  Lowered with 'b' or suffix 's' or 'es', e.g. Bes, As, Eb.
+
+  Chords: note + optional modifiers.
+  Chord modifiers Meaning                 [examples]
+  --------------------------------------------------------------
+  nothing         major triad             [C]
+  - or min or m   minor triad             [Cm Fmin Gb-]
+  + or aug        augmented triad         [Caug B+]
+  o or 0 or dim   diminished triad        [Co D0 Fdim]
+  --------------------------------------------------------------
+  maj7            major 7th chord         [Cmaj7]
+  %               half-diminished 7 chord [C%]
+  6,7,9,11,13     chord additions         [C69]
+  --------------------------------------------------------------
+  #               raise the pitch of the note to a sharp [C11#9]
+  b               lower the pitch of the note to a flat [C11b9]
+  --------------------------------------------------------------
+  no              substract a note from a chord [C9no11]
+  --------------------------------------------------------------
+  Whitespace and () may be used to avoid ambiguity, e.g. C(#9) <-> C#9 <-> C#(9)
+
+  Other:          Meaning
+  --------------------------------------------------------------
+  .               Chord space
+  -               Rest
+  %               Repeat
+  /               Powerchord constructor   [D/G D/E-]
+  --------------------------------------------------------------
+
+=head1 AUTHOR
+
+Johan Vromans, Squirrel Consultancy E<lt>jvromans@squirrel.nlE<gt>
+
+=head1 COPYRIGHT AND DISCLAIMER
+
+This program is Copyright 1990,1999 by Johan Vromans.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the Perl Artistic License or the
+GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any
+later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+If you do not have a copy of the GNU General Public License write to
+the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, 
+MA 02139, USA.
+
+
+=cut
+
 __END__
 %!PS-Adobe-2.0
 %%Pages: (atend)
