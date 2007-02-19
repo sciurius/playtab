@@ -1,0 +1,47 @@
+From msi.umn.edu!epeterse Wed Feb 17 20:25:49 1999
+X-VM-v5-Data: ([nil nil nil nil t nil nil nil nil]
+	[nil "Wednesday" "17" "February" "1999" "11:50:00" "-0600" "Eric Petersen [Aero]" "epeterse@msi.umn.edu" nil "17" "Re: chord bars" "^From:" nil nil "2" nil nil nil nil nil]
+	nil)
+Received: from localhost [127.0.0.1]  with esmtp 
+	by phoenix.squirrel.nl with esmtp 
+	(Smail-3.2.0.101 1997-Dec-17 #1 #1) id m10DCbM-0002j5C; Wed, 17 Feb 1999 20:25:40 +0100 (MET)
+Received: from pop.xs4all.nl
+	by localhost with POP3 (fetchmail-4.7.6)
+	for jv@localhost (single-drop); Wed, 17 Feb 1999 20:25:40 +0100 (MET)
+Received: from smtp3.xs4all.nl (smtp3.xs4all.nl [194.109.6.53])
+	by maildrop.xs4all.nl (8.8.8/8.8.8) with ESMTP id SAA26223
+	for <jvromans@maildrop.xs4all.nl>; Wed, 17 Feb 1999 18:50:07 +0100 (CET)
+Received: from mail.msi.umn.edu (mail.msi.umn.edu [128.101.31.10])
+	by smtp3.xs4all.nl (8.8.8/8.8.8) with ESMTP id SAA10766
+	for <jvromans@squirrel.nl>; Wed, 17 Feb 1999 18:50:06 +0100 (CET)
+Received: from ir7.msi.umn.edu (ir7.msi.umn.edu [128.101.31.207])
+	by mail.msi.umn.edu (8.9.1/8.9.1) with ESMTP id LAA26308
+	for <jvromans@squirrel.nl>; Wed, 17 Feb 1999 11:50:03 -0600 (CST)
+In-Reply-To: <19990216081401.D7690@xs3.xs4all.nl>
+Message-ID: <Pine.SGI.4.05.9902170958040.100783-100000@ir7.msi.umn.edu>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+X-UIDL: 919273808.maildrop.26228
+From: "Eric Petersen [Aero]" <epeterse@msi.umn.edu>
+To: Johan Vromans <jvromans@squirrel.nl>
+Subject: Re: chord bars
+Date: Wed, 17 Feb 1999 11:50:00 -0600
+
+Hello Johan,
+	I got PlayTab running both on my SGI and under MacPerl. It is quite
+nice.  I have some suggestions for you to consider, though.  Some
+(unbelievably primitive) parts of the world don't have easy access to A4
+paper, and the first line or two gets cut off. Perhaps a switch to toggle
+between A4 and 8.5"x11"? I don't know how much work that would be on your
+part, so just take it as a suggestion.
+	Eric
+
++------------------------------------------------------------------------+
+| Eric Petersen, University of Minnesota             (Home) 612-533-2654 |
+| Dept of Aerospace Engineering and Mechanics               612-624-3516 |
+| Minnesota Supercomputer Institute                         612-624-1524 |
+| epeterse@aem.umn.edu, epeterse@msi.umn.edu                             |
+| http://www.aem.umn.edu/people/students/epeterse/                       |
++------------------------------------------------------------------------+
+
+

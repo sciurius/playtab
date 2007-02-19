@@ -1,0 +1,23 @@
+INSTALLATION
+
+  - Edit Makefile.PL (if needed)
+  - Type 'perl Makefile.PL'
+  - Type 'make'
+
+    blib/script/playtab is the playtab program
+
+  - Type 'make install' to install the program and the documentation
+    on your system. This usually requires super user privileges.
+
+EXAMPLES
+
+  You will find several examples in directories 'hwbb' and 'misc'.
+  HWBB stands for 'Herbie White Big Band', a big band started by
+  Herman de Wit (knicknamed Herbie White). After his death the bigband
+  renamed itself to 'Herbie White Big Band' to his memorial.
+
+REQUIREMENTS
+
+  - Perl 5 standard installation. Perl 5.005 is preferred.
+  - If you cannot run Perl 5, but you do have Perl 4, let me know. I
+    have an old version lying around that may still run under Perl 4.

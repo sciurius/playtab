@@ -1,9 +1,9 @@
-# Makefile.PL -- Makefile for PostScript::Fonts
+# Makefile.PL -- Makefile for Music::PlayTab
 # Author          : Johan Vromans
 # Created On      : Mon Feb  8 11:46:56 1999
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Feb 12 19:44:46 1999
-# Update Count    : 65
+# Last Modified On: Mon Feb 19 23:22:42 2007
+# Update Count    : 69
 # Status          : Stable
 
 # Verify perl version.
@@ -18,8 +18,8 @@ WriteMakefile
    NAME         => 'Music::PlayTab',
    AUTHOR	=> 'Johan Vromans (jvromans@squirrel.nl)',
    ABSTRACT	=> 'Print play tabs of songs',
-   VERSION      => "0.01",
+   VERSION      => "0.03",
    PREREQ_PM	=> { 'Getopt::Long' => 2.00 },
-   EXE_FILES    => [ map { "scripts/$_" } @scripts ],
+   EXE_FILES    => [ map { "script/$_" } @scripts ],
    # *.pm files will be picked up automatically from ./lib
  );
