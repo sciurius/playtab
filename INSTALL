@@ -1,6 +1,5 @@
 INSTALLATION
 
-  - Edit Makefile.PL (if needed)
   - Type 'perl Makefile.PL'
   - Type 'make'
 
@@ -18,6 +17,4 @@ EXAMPLES
 
 REQUIREMENTS
 
-  - Perl 5 standard installation. Perl 5.005 is preferred.
-  - If you cannot run Perl 5, but you do have Perl 4, let me know. I
-    have an old version lying around that may still run under Perl 4.
+  - Perl 5 standard installation, version 5.005 or higher.
