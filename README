@@ -4,7 +4,7 @@ chords of songs.
 Important: This is a 'snapshot' release. I've been using it for
 several years now with much pleasure but your mileage may vary.
 
-The input for playtab is plan ASCII. It contains the chords, the
+The input for playtab is plain ASCII. It contains the chords, the
 division in bars, with optional annotations.
 
 An example:
@@ -70,7 +70,7 @@ Have fun, and let me know your ideas!
 
 ----------------------------------------------------------------------------
 Johan Vromans                                           jvromans@squirrel.nl
-Squirrel Consultancy                                Haarlem, the Netherlands
-http://www.squirrel.nl                http://www.squirrel.nl/people/jvromans
-PGP Key 2048/4783B14D     http://www.squirrel.nl/people/jvromans/pgpkey.html
+Squirrel Consultancy                                  Exloo, the Netherlands
+http://www.squirrel.nl                              http://johan.vromans.org
+PGP Key 1024D/1298C2B4                  http://johan.vromans.org/pgpkey.html
 ----------------------- "Arms are made for hugging" ------------------------
