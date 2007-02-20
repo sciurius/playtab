@@ -4,8 +4,8 @@ my $RCS_Id = '$Id$ ';
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Feb 20 12:39:30 2007
-# Update Count    : 110
+# Last Modified On: Tue Feb 20 13:32:25 2007
+# Update Count    : 112
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -873,7 +873,7 @@ EOD
 
 =head1 NAME
 
-playtab - print chords of songs
+playtab - print chords of songs in a tabular fashion
 
 =head1 SYNOPSIS
 
@@ -913,7 +913,7 @@ Input file(s).
 
 =head1 DESCRIPTION
 
-The input for playtab is plan ASCII. It contains the chords, the
+The input for playtab is plain ASCII. It contains the chords, the
 division in bars, with optional annotations.
 
 An example:
@@ -1016,7 +1016,7 @@ Johan Vromans, Squirrel Consultancy E<lt>jvromans@squirrel.nlE<gt>
 
 =head1 COPYRIGHT AND DISCLAIMER
 
-This program is Copyright 1990,1999 by Johan Vromans.
+This program is Copyright 1990,2007 by Johan Vromans.
 This program is free software; you can redistribute it and/or
 modify it under the terms of the Perl Artistic License or the
 GNU General Public License as published by the Free Software
