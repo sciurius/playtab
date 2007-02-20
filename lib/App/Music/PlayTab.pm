@@ -4,8 +4,8 @@ my $RCS_Id = '$Id$ ';
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Oct 27 17:30:11 1999
-# Update Count    : 88
+# Last Modified On: Tue Feb 20 12:39:30 2007
+# Update Count    : 110
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -31,6 +31,7 @@ sub app_options();
 
 my $output;
 my $preamble;
+my $gxpose = 0;			# global xpose value
 my $verbose = 0;		# verbose processing
 
 # Development options (not shown with -help).
@@ -63,7 +64,14 @@ my @SNotes =
 my @FNotes =
   # 0    1    2    3    4    5    6    7    8    9    10   11
   ('C ','Db','D ','Eb','E ','F ','Gb','G ','Ab','A ','Bb','B ');
+# The current mapping.
 my $Notes;
+
+# Reverse mapping (plain notes only).
+my %Notemap;
+for ( my $i = 0; $i < @SNotes; $i++ ) {
+    $Notemap{$1} = $i if $SNotes[$i] =~ /(.) /;
+}
 
 # Print dimensions.
 my $std_width  = 30;
@@ -72,8 +80,6 @@ my $std_margin = 40;
 my $std_gridscale = 8;
 
 my $ps_pages = 0;
-
-my $TMPDIR = $ENV{TMPDIR} || '/usr/tmp';
 
 my @Rom = ('', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX',
 	   'X', 'XI', 'XII');
@@ -94,7 +100,7 @@ my $xw = 0;
 my $yd_width = 0;
 my $md = 0;
 my $on_top = 0;
-my $xpose = 0;
+my $xpose = $gxpose;
 
 # Globals.
 use vars qw($chord @vec $key $chordname);
@@ -157,7 +163,7 @@ while ( <> ) {
 	next;
     }
 
-    text ($_);
+    text($_);
     $linetype = 0;
 }
 print STDOUT ("ok 4\n") if $test;
@@ -184,7 +190,9 @@ sub print_title {
     print OUTPUT ($new ? 'TF (' : 'SF (', $title, ') show', "\n");
     ps_advance ();
     $on_top = 1;
-    $xpose = 0;
+    $xpose = $gxpose;
+    # Use sharps when xposing up, flats when xposing down.
+    $Notes = $xpose > 0 ? \@SNotes : \@FNotes;
 }
 
 my $prev_chord;
@@ -368,6 +376,8 @@ sub control {
     # Transpose.
     if ( /^x(pose)?\s+([-+])(\d+)/i ) {
 	$xpose += $2.$3;
+	# Use sharps when xposing up, flats when xposing down.
+	$Notes = $xpose > 0 ? \@SNotes : \@FNotes;
 	return;
     }
 
@@ -376,7 +386,7 @@ sub control {
 
 sub chord {
     my (@l) = split(' ',$_[0]);
-    my $xpose = 0;
+    my $xpose = 0;		#### TODO: WHY?
 
     errout ("Illegal [chord] spec, need 7 or 8 values")
 	unless @l == 8 || @l == 7;
@@ -480,20 +490,22 @@ sub parse_note {
     return '*' if $note eq '*';
 
     my $res;
-    $Notes = \@SNotes;
 
     # Try sharp notes, e.g. Ais, C#.
     if ( $note =~ /^([a-g])(is|\#)$/i ) {
-	$res = (10,0,1,3,5,6,8)[ord("\U$1")-ord('A')];
+	$res = $Notemap{uc($1)} + 1;
+	$res = 0 if $res >= 12;
+	$Notes = \@SNotes unless $xpose;
     }
     # Try flat notes, e.g. Es, Bes, Db.
     elsif ( $note =~ /^([a-g])(e?s|b)$/i ) {
-	$res = (8,10,11,1,3,4,6)[ord("\U$1")-ord('A')];
-	$Notes = \@FNotes;
+	$res = $Notemap{uc($1)} - 1;
+	$res = 11 if $res < 0;
+	$Notes = \@FNotes unless $xpose;
     }
     # Try plain note, e.g. A, C.
     elsif ( $note =~ /^([a-g])$/i ) {
-	$res = (9,11,0,2,4,5,7)[ord("\U$1")-ord('A')];
+	$res = $Notemap{uc($1)};
     }
     # No more tries.
     else {
@@ -787,13 +799,15 @@ sub app_options() {
 
     if ( !GetOptions('output=s'	=> \$output,
 		     'preamble=s' => \$preamble,
+		     'transpose|x=i' => \$gxpose,
 		     'ident'	=> \$ident,
 		     'verbose'	=> \$verbose,
 		     'trace'	=> \$trace,
 		     'help'	=> \$help,
 		     'test'	=> \$test,
 		     'debug'	=> \$debug,
-		    ) )
+		    )
+	 or abs($gxpose) > 11 )
     {
 	app_usage(2);
     }
@@ -811,6 +825,7 @@ sub app_usage($) {
     print STDERR <<EndOfUsage;
 Usage: $0 [options] [file ...]
     -output XXX		output file name
+    -transpose +/-N     transpose all
     -help		this message
     -ident		show identification
     -verbose		verbose information
