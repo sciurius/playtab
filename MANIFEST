@@ -2,6 +2,7 @@ MANIFEST
 Makefile.PL
 README
 INSTALL
+CHANGES
 zzexamples/TOC
 zzexamples/allblues.dat
 zzexamples/anighttunisia.dat
