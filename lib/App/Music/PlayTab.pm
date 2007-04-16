@@ -4,8 +4,8 @@ my $RCS_Id = '$Id$ ';
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Feb 20 13:51:19 2007
-# Update Count    : 116
+# Last Modified On: Mon Apr 16 14:46:37 2007
+# Update Count    : 121
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -316,7 +316,7 @@ sub bar {
 	    my $c = shift (@ch);
 	    ($chord, $key, @vec) = parse_chord ($c);
 	    print_chord ($chord, $key, @vec);
-	    print OUTPUT ("slash\n");
+	    print OUTPUT ("slash ");
 	}
 	($chord, $key, @vec) = parse_chord ($ch[0]);
 	print_chord ($chord, $key, @vec);
@@ -1106,7 +1106,7 @@ tabdict begin
     show } def
 /slash {
     /Helvetica findfont 16 scalefont setfont
-    (/) show } def
+    0 -4 rmoveto (/) show } def
 /susp {
     /Helvetica findfont 12 scalefont setfont
     0 -3 rmoveto (sus) show show 0 3 rmoveto } def
