@@ -4,8 +4,8 @@ my $RCS_Id = '$Id$ ';
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Feb 20 13:32:25 2007
-# Update Count    : 112
+# Last Modified On: Tue Feb 20 13:51:19 2007
+# Update Count    : 116
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -880,6 +880,7 @@ playtab - print chords of songs in a tabular fashion
 playtab [options] [file ...]
 
  Options:
+   -transpose +/-N      transpose all songs
    -output XXX		set outout file
    -ident		show identification
    -help		brief help message
@@ -888,6 +889,15 @@ playtab [options] [file ...]
 =head1 OPTIONS
 
 =over 8
+
+=item B<-transpose> I<amount>
+
+Transposes all songs by I<amount>. This can be B<+> or B<-> 11 semitones.
+
+When transposing up, chords will de represented sharp if necessary;
+when transposing down, chords will de represented flat if necessary.
+For example, chord A transposed +1 will become A-sharp, but when
+transposed -11 it will become B-flat.
 
 =item B<-output> I<file>
 
@@ -928,8 +938,8 @@ An example:
 The first line, '!t' denotes the title of the song. Each song must
 start with a title line.
 
-The title line may be followed by '!s', a subtitle, for example to
-indicate the composer.
+The title line may be followed by one or more '!s', subtitles, for
+example to indicate the composer.
 
 The text "Bossanova" is printed below the title and subtitle.
 
@@ -969,10 +979,13 @@ width of a beat is 30. '!w +5' increases the width to 35. '!w 25' sets
 it to 25. You get the idea. You can also change the height with '!h'
 (default is 15) and margin with '!m' (default width is 40).
 
+You can transpose an individual song with '!x I<amount>', where
+I<amount> can range from -11 to +11, inclusive.
+
 Look at the examples, that is (currently) the best way to get grip on
 what the program does.
 
-Oh, I almost forgot: it can print guitar chord diagrams as well. 
+Oh, I almost forgot: it can print guitar chord diagrams as well.
 See "bluebossa", "sophisticatedlady" and some others.
 
 Have fun, and let me know your ideas!
