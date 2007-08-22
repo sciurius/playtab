@@ -4,8 +4,8 @@ my $RCS_Id = '$Id$ ';
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Apr 16 14:46:37 2007
-# Update Count    : 121
+# Last Modified On: Tue Aug 21 17:22:43 2007
+# Update Count    : 186
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -81,13 +81,12 @@ my $std_gridscale = 8;
 
 my $ps_pages = 0;
 
-my @Rom = ('', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX',
-	   'X', 'XI', 'XII');
+my @Rom = ('', qw(I II III IV V VI VII VIII IX X XI XII));
 
 ################ The Process ################
 
-my $linetype = 0;
-my $line;
+my $line;			# current line (for messages)
+my $linetype = 0;		# type of current line
 
 my $x0 = 0;
 my $y0 = 0;
@@ -195,10 +194,12 @@ sub print_title {
     $Notes = $xpose > 0 ? \@SNotes : \@FNotes;
 }
 
+# begin scope for $prev_chord
 my $prev_chord;
 
 sub print_chord {
-    $prev_chord = ps_chordname ();
+    my($key, $vec, $chord) = @_;
+    $prev_chord = ps_chordname($key, $vec, $chord);
     print OUTPUT ($prev_chord, "\n");
 }
 
@@ -207,6 +208,8 @@ sub print_again {
     print OUTPUT ($prev_chord, "\n");
     ps_step ();
 }
+
+# end scope for $prev_chord
 
 sub print_bar {
     ps_move ();
@@ -262,7 +265,6 @@ sub advance {
 
 sub bar {
     my ($line) = @_;
-    local ($chord, $key, @vec);
 
     on_top ();
 
@@ -312,14 +314,15 @@ sub bar {
 
 	ps_move ();
 	my (@ch) = split ('/',$c);
+	my ($chord, $key, @vec);
 	while ( @ch > 1 ) {
 	    my $c = shift (@ch);
 	    ($chord, $key, @vec) = parse_chord ($c);
-	    print_chord ($chord, $key, @vec);
+	    print_chord($key, \@vec, $chord);
 	    print OUTPUT ("slash ");
 	}
 	($chord, $key, @vec) = parse_chord ($ch[0]);
-	print_chord ($chord, $key, @vec);
+	print_chord($key, \@vec, $chord);
 	ps_step ();
     }
     print_newline ();
@@ -390,12 +393,14 @@ sub chord {
 
     errout ("Illegal [chord] spec, need 7 or 8 values")
 	unless @l == 8 || @l == 7;
-    local ($chordname, $key, @vec) = parse_chord (shift(@l));
+    my $ch = shift(@l);
+    my @ch = split('/', $ch);
+    my ($chordname, $key, @vec) = parse_chord($ch[0]);
 
     my @c = ();
     my $c = '()';
     foreach ( @l ) {
-	$_ = -1 if "\L$_" eq "x";
+	$_ = -1 if lc($_) eq "x";
 	if ( /^@(\d+)/ ) {
 	    $c = "($Rom[$1])" if $1 > 1;
 	    next;
@@ -406,7 +411,14 @@ sub chord {
     }
 
     on_top ();
-    $chordname = ps_chordname ();
+    $chordname = ps_chordname($key, \@vec, $chord);
+    shift(@ch);
+    while ( @ch ) {
+	my $c = shift (@ch);
+	($chord, $key, @vec) = parse_chord ($c);
+	$chordname .= " slash " . ps_notename($key);
+    }
+
     print OUTPUT ('1000 1000 moveto', "\n",
 		  $chordname, "\n",
 		  'currentpoint pop 1000 sub 2 div', "\n");
@@ -518,9 +530,9 @@ sub parse_note {
 }
 
 sub parse_chord {
-    local ($chord) = @_;
+    my ($chord) = @_;
 
-    $chord = "\L$chord";
+    $chord = lc($chord);
     my $mod;
 
     # Separate the chord key from the modifications.
@@ -528,7 +540,7 @@ sub parse_chord {
 	$key = $1;
 	$mod = $3;
 	$mod = chop($key) . $mod
-	    if $1 eq 's' && substr($3,0,2) eq 'us';
+	    if $2 eq 's' && substr($3,0,2) eq 'us';
     }
     else {
 	$key = $chord;
@@ -558,7 +570,7 @@ sub parse_chord {
 
     # Then other modifications.
     while ( $mod ne '' ) {
-	if ( $mod =~ /^[(). ](.*)/ ) {	# syntactic sugar
+	if ( $mod =~ /^[()._](.*)/ ) {	# syntactic sugar
 	    $mod = $+;
 	    next;
 	}
@@ -572,6 +584,12 @@ sub parse_chord {
 	    $mod = $+;
 	    vec($chflags,3,1) = 1;
 	    $chmods[3] = -1;
+	    next;
+	}
+	if ( $mod =~ /^sus2(.*)/ ) {	# Suspended second
+	    $mod = $+;
+	    vec($chflags,3,1) = 0;
+	    undef $chmods[3];
 	    next;
 	}
 	if ( $mod =~ /^sus4?(.*)/ ) {	# Suspended fourth
@@ -608,7 +626,7 @@ sub parse_chord {
 	    $chmods[7] = 0;
 	    next;
 	}
-	if ( $mod =~ /^([\#b])?(5|6|7|9|10|11|13)(.*)/ ) { # addition
+	if ( $mod =~ /^([\#b])?(2|5|6|7|9|10|11|13)(.*)/ ) { # addition
 	    $mod = $+;
 	    # 13th implies 11th implies 9th implies 7th...
 	    if ( $2 > 7 && !(vec($chflags,7,1)) ) {
@@ -646,7 +664,7 @@ sub parse_chord {
 	next unless defined $chmods[$_];
 	push (@vec, (0,0,2,4,5,7,9,10,12,14,16,17,19,21)[$_]+$chmods[$_]);
     }
-    $chord = chordname ();
+    $chord = chordname($key, \@vec, $chord);
     print STDERR ("=pc=> $chord -> $key\[@vec]\n") if $debug;
     ("\u$chord", $key, @vec);
 
@@ -654,29 +672,32 @@ sub parse_chord {
 }
 
 sub chordname {
+    my ($key, $vec, $chord) = @_;
     my $res = $Notes->[$key eq '*' ? 0 : $key];
     $res =~ s/\s+$//;
 
-    my @v = @vec;
+    my @v = @$vec;
     shift (@v);
 
-    my $v = "@vec ";
+    my $v = "@$vec ";
     print STDERR ("=cn=> $v\n") if $debug;
-    if ( $v =~ s/^0 4 (6|7|8) / / ) {
-	$res .= $1 == 8 ? '+' : '';
-	$v = ' 6' . $v if $1 == 6;
+    if ( $v =~ s/^0 (2 )?4 (6|7|8) / / ) {
+	$res .= $2 == 8 ? '+' : '';
+	$v = ' 6' . $v if $2 == 6;
+	$v = ' 2' . $v if defined $1;
     }
     elsif ( $v =~ s/^0 3 6 9 / / ) {
 	$res .= 'o';
     }
-    elsif ( $v =~ s/^0 3 (6|7|8) / / ) {
-	if ( $1 == 6 ) {
+    elsif ( $v =~ s/^0 (2 )?3 (6|7|8) / / ) {
+	if ( $2 == 6 ) {
 	    $res .= ( $v =~ s/^ 10 // ) ? '%' : 'o';
 	}
 	else {
 	    $res .= 'm';
 	}
-	$v = ' 8' . $v if $1 == 8;
+	$v = ' 8' . $v if $2 == 8;
+	$v = ' 2' . $v if defined $1;
     }
     $v =~ s/^0 5 7 / 5 7 /;
     $v =~ s/ 10 14 18 (21) / $1 /;		# 13
@@ -694,6 +715,15 @@ sub chordname {
     elsif ( $v =~ s/^( \d| 10)* 11 / $1/ ) {
 	$res .= 'maj7';
     }
+    if ( $v =~ s/ 5 7 / / ) {
+	$res .= 'sus4';
+    }
+    elsif ( $v =~ s/^0 7 / / ) {
+	$res .= 'sus2';
+    }
+    elsif ( $v =~ s/^0 4 / / ) {
+	$res .= 'no5';
+    }
     print STDERR ("=cn=> $v\n") if $debug;
     chop ($v);
     $v =~ s/^ //;
@@ -705,11 +735,13 @@ sub chordname {
     $res =~ s/^([^\(]*[^\d])?\((\d+)\)([^\d][^\(]*)?$/$1$2$3/;
     $res =~ s/7?(6|\(6\))(9|\(9\))/6.9/;
     $res =~ s/(4|\(4\))(5|\(5\))/sus4/;
+    $res =~ s/(1|\(1\))(5|\(5\))/sus2/;
     print STDERR ("=cn=> $chord -> $res0 -> $res\n") if $debug;
     $res;
 }
 
-sub ps_chordname {
+sub ps_notename {
+    my ($key) = @_;
     my $res = $Notes->[$key eq '*' ? 0 : (($key+$xpose)%12)];
     $res =~ s/\s+$//;
     if ( $res =~ /(.)b/ ) {
@@ -717,31 +749,49 @@ sub ps_chordname {
     }
     elsif ( $res =~ /(.)#/ ) {
 	$res = '('.$1.') root sharp ';
-    } 
+    }
+    else {
+	$res = '('.$res.') root ';
+    }
+}
+
+sub ps_chordname {
+    my ($key, $vec, $chord) = @_;
+
+    my $res = $Notes->[$key eq '*' ? 0 : (($key+$xpose)%12)];
+    $res =~ s/\s+$//;
+    if ( $res =~ /(.)b/ ) {
+	$res = '('.$1.') root flat ';
+    }
+    elsif ( $res =~ /(.)#/ ) {
+	$res = '('.$1.') root sharp ';
+    }
     else {
 	$res = '('.$res.') root ';
     }
 
-    my @v = @vec;
+    my @v = @$vec;
     shift (@v);
 
-    my $v = "@vec ";
+    my $v = "@$vec ";
     print STDERR ("=cn=> $v\n") if $debug;
-    if ( $v =~ s/^0 4 (6|7|8) / / ) {
-	$res .= $1 == 8 ? 'plus ' : '';
-	$v = ' 6' . $v if $1 == 6;
+    if ( $v =~ s/^0 (2 )?4 (6|7|8) / / ) {
+	$res .= $2 == 8 ? 'plus ' : '';
+	$v = ' 6' . $v if $2 == 6;
+	$v = ' 2' . $v if defined $1;
     }
     elsif ( $v =~ s/^0 3 6 9 / / ) {
 	$res .= 'dim ';
     }
-    elsif ( $v =~ s/^0 3 (6|7|8) / / ) {
-	if ( $1 == 6 ) {
+    elsif ( $v =~ s/^0 (2 )?3 (6|7|8) / / ) {
+	if ( $2 == 6 ) {
 	    $res .= ( $v =~ s/^ 10 // ) ? 'hdim' : 'dim';
 	}
 	else {
 	    $res .= 'minus ';
 	}
-	$v = ' 8' . $v 	if $1 == 8;
+	$v = ' 8' . $v 	if $2 == 8;
+	$v = ' 2' . $v  if defined $1;
     }
     $v =~ s/^0 5 7 / 5 7 /;
     $v =~ s/ 10 14 18 (21) / $1 /;		# 13
@@ -762,6 +812,12 @@ sub ps_chordname {
     }
     if ( $v =~ s/ 5 7 / / ) {
 	$res .= '(4) susp ';
+    }
+    elsif ( $v =~ s/^0 7 / / ) {
+	$res .= '(2) susp ';
+    }
+    elsif ( $v =~ s/^0 4 / / ) {
+	$res .= '(no5) addn ';
     }
     print STDERR ("=cn=> $v\n") if $debug;
     chop ($v);
@@ -850,19 +906,21 @@ o or 0 or dim   diminished triad        [Co D0 Fdim]
 maj7            major 7th chord         [Cmaj7]
 %               half-diminished 7 chord [C%]
 6,7,9,11,13     chord additions         [C69]
+sus sus4, sus2  suspended 4th, 2nd      [Csus]
 --------------------------------------------------------------
 #               raise the pitch of the note to a sharp [C11#9]
 b               lower the pitch of the note to a flat [C11b9]
 --------------------------------------------------------------
 no              substract a note from a chord [C9no11]
 --------------------------------------------------------------
-Whitespace and () may be used to avoid ambiguity, e.g. C(#9) <-> C#9 <-> C#(9)
+() and _ may be used to avoid ambiguity, e.g. C(#9) <-> C#9 <-> C#_9
 
 Other:          Meaning
 --------------------------------------------------------------
 .               Chord space
 -               Rest
-%               Repeat
+:               Repeats previous chord
+%               Repeat pattern
 /               Powerchord constructor   [D/G D/E-]
 --------------------------------------------------------------
 
@@ -980,7 +1038,8 @@ it to 25. You get the idea. You can also change the height with '!h'
 (default is 15) and margin with '!m' (default width is 40).
 
 You can transpose an individual song with '!x I<amount>', where
-I<amount> can range from -11 to +11, inclusive.
+I<amount> can range from -11 to +11, inclusive. A positive transpose
+value will make sharps, a negative value will make flats.
 
 Look at the examples, that is (currently) the best way to get grip on
 what the program does.
@@ -1007,18 +1066,20 @@ Have fun, and let me know your ideas!
   maj7            major 7th chord         [Cmaj7]
   %               half-diminished 7 chord [C%]
   6,7,9,11,13     chord additions         [C69]
+  sus sus4, sus2  suspended 4th, 2nd      [Csus]
   --------------------------------------------------------------
   #               raise the pitch of the note to a sharp [C11#9]
   b               lower the pitch of the note to a flat [C11b9]
   --------------------------------------------------------------
   no              substract a note from a chord [C9no11]
   --------------------------------------------------------------
-  Whitespace and () may be used to avoid ambiguity, e.g. C(#9) <-> C#9 <-> C#(9)
+  _ may be used to avoid ambiguity, e.g. C_#9 <-> C#9 <-> C#_9
 
   Other:          Meaning
   --------------------------------------------------------------
   .               Chord space
   -               Rest
+  :               Repeats previous chord
   %               Repeat
   /               Powerchord constructor   [D/G D/E-]
   --------------------------------------------------------------
