@@ -1,0 +1,317 @@
+#! perl
+
+package App::PlayTab::Chord;
+
+use strict;
+use warnings;
+use App::PlayTab::Note;
+use Carp;
+
+my $debug = 0;
+
+sub new {
+    my $pkg = shift;
+    bless {}, $pkg;
+}
+
+sub parse {
+    my ($self, $chord) = @_;
+
+    $self = $self->new unless ref($self);
+
+    $chord = lc($chord);
+    $self->{unparsed} = $chord;
+    my $key = $chord;
+    my $mod = '';
+
+    # Separate the chord key from the modifications.
+    if ( $chord =~ /(^[a-g*](\#|b|s(?!us)|es|is)?)(.*)/ ) {
+	$key = $1;
+	$mod = $3;
+    }
+
+    # Parse key.
+    $self->{key} = App::PlayTab::Note->parse($key);
+    croak("Unrecognized pitch in chord: $chord") unless defined $self->{key};
+
+    # Encodings: a bit is set in $chflags for every note in the chord.
+    # The corresponding element of $chmods is 0 (natural), -1
+    # (lowered), 1 (raised) or undef (suppressed).
+
+    my $chflags = '';
+    my @chmods = (0) x 14;
+
+    # Assume major triad.
+    vec($chflags,3,1) = 1;
+    vec($chflags,5,1) = 1;
+    $chmods[3] = 0;
+    $chmods[5] = 0;
+
+    $mod =~ s/^-/min/;		# Minor triad
+    $mod =~ s/^\+/aug/;		# Augmented triad
+    $mod =~ s/^0/dim/;		# Diminished
+
+    # Then other modifications.
+    while ( $mod ne '' ) {
+
+	if ( $mod =~ /^[() ._](.*)/ ) {	# syntactic sugar
+	    $mod = $+;
+	    next;
+	}
+	if ( $mod =~ /^maj7?(.*)/ ) {	# Maj7
+	    $mod = $+;
+	    vec($chflags,7,1) = 1;
+	    $chmods[7] = 1;
+	    next;
+	}
+	if ( $mod =~ /^(min|m)(.*)/ ) {	# Minor triad
+	    $mod = $+;
+	    vec($chflags,3,1) = 1;
+	    $chmods[3] = -1;
+	    next;
+	}
+	if ( $mod =~ /^sus2(.*)/ ) {	# Suspended second
+	    $mod = $+;
+	    vec($chflags,3,1) = 0;
+	    undef $chmods[3];
+	    next;
+	}
+	if ( $mod =~ /^sus4?(.*)/ ) {	# Suspended fourth
+	    $mod = $+;
+	    vec($chflags,4,1) = 1;	# does it?
+	    undef $chmods[3];
+	    $chmods[4] = 0;
+	    next;
+	}
+	if ( $mod =~ /^aug(.*)/ ) {		# Augmented
+	    $mod = $+;
+	    vec($chflags,5,1) = 1;
+	    $chmods[5] = 1;
+	    next;
+	}
+	if ( $mod =~ /^(o|dim)(.*)/ ) {	# Diminished
+	    $mod = $+;
+	    vec($chflags,3,1) = 1;
+	    vec($chflags,5,1) = 1;
+	    vec($chflags,7,1) = 1;
+	    $chmods[3] = -1;
+	    $chmods[5] = -1;
+	    $chmods[7] = -1;
+	    next;
+	}
+	if ( $mod =~ /^%(.*)/ ) {	# half-diminished 7
+	    $mod = $+;
+	    $chflags = '';
+	    vec($chflags,3,1) = 1;
+	    vec($chflags,5,1) = 1;
+	    vec($chflags,7,1) = 1;
+	    $chmods[3] = -1;
+	    $chmods[5] = -1;
+	    $chmods[7] = 0;
+	    next;
+	}
+	if ( $mod =~ /^([\#b])?(2|5|6|7|9|10|11|13)(.*)/ ) { # addition
+	    $mod = $+;
+	    # 13th implies 11th implies 9th implies 7th...
+	    if ( $2 > 7 && !(vec($chflags,7,1)) ) {
+		vec($chflags,7,1) = 1;
+		$chmods[7] = 0;
+	    }
+	    if ( $2 > 10 && !(vec($chflags,9,1)) ) {
+		vec($chflags,9,1) = 1;
+		$chmods[9] = 0;
+	    }
+	    if ( $2 > 11 && !(vec($chflags,11,1)) ) {
+		vec($chflags,11,1) = 1;
+		$chmods[11] = 1;
+	    }
+	    vec($chflags,$2,1) = 1;
+	    $chmods[$2] = 0;
+	    if ( defined $1 ) {
+		$chmods[$2] = ($1 eq '#') ? 1 : -1;
+	    }
+	    next;
+	}
+	if ( $mod =~ /^no\s*(\d+)(st|nd|rd|th)?(.*)/ ) {
+	    $mod = $+;
+	    vec($chflags,$1,1) = 1;
+	    undef $chmods[$1];
+	    next;
+	}
+
+	# Power chords.
+	if ( $mod =~ /^\/(.+)/ ) {
+	    my @ch = split(/\//, $1);
+	    foreach my $c ( @ch ) {
+		my $p = App::PlayTab::Note->parse($c);
+		croak("Unrecognized bass of chord: $chord")
+		  unless defined $p;
+		$self->{bass} ||= [];
+		push(@{$self->{bass}}, $p);
+	    }
+	    last;
+	}
+	croak("Unrecognized modification of chord: $chord");
+    }
+
+    my @vec = (0);
+    for ( 1..13 ) {
+	next unless vec($chflags,$_,1);
+	next unless defined $chmods[$_];
+	push (@vec, (0,0,2,4,5,7,9,10,12,14,16,17,19,21)[$_]+$chmods[$_]);
+    }
+
+    $self->{vec} = [@vec];
+    $self;
+}
+
+sub transpose {
+    my ($self, $xp) = @_;
+    return $self unless $xp;
+    $self->{key}->transpose($xp);
+    $self;
+}
+
+sub name {
+    my ($self) = @_;
+    my $res = $self->{key}->name;
+
+    my @v = @{$self->{vec}};
+    my $v = "@v ";
+    shift (@v);
+
+    print STDERR ("=cn=> $v\n") if $debug;
+    if ( $v =~ s/^0 (2 )?4 (6|7|8) / / ) {
+	$res .= $2 == 8 ? '+' : '';
+	$v = ' 6' . $v if $2 == 6;
+	$v = ' 2' . $v if defined $1;
+    }
+    elsif ( $v =~ s/^0 3 6 9 / / ) {
+	$res .= 'o';
+    }
+    elsif ( $v =~ s/^0 (2 )?3 (6|7|8) / / ) {
+	if ( $2 == 6 ) {
+	    $res .= ( $v =~ s/^ 10 // ) ? '%' : 'o';
+	}
+	else {
+	    $res .= 'm';
+	}
+	$v = ' 8' . $v if $2 == 8;
+	$v = ' 2' . $v if defined $1;
+    }
+    $v =~ s/^0 5 7 / 5 7 /;
+    $v =~ s/ 10 14 18 (21) / $1 /;		# 13
+    $v =~ s/ 10 14 18 (20|22) / 10 $1 /;	#  7#13 7b13
+    $v =~ s/ 10 14 (17) / $1 /;			# 11
+    $v =~ s/ 10 14 (18) / 10 $1 /;		#  7#11
+    $v =~ s/ 10 (14) / $1 /;			#  9
+    $v =~ s/ 10 (15) / 10 $1 /;			#  7#9
+    $v =~ s/ 11 14 18 (21|22) / $1 11 /;	# 13#5
+    $v =~ s/ 11 14 (17|18) / $1 11 /;		# 11#5
+    $v =~ s/ 11 (14|15) / $1 11 /;		#  9#5
+    if ( $v =~ s/ 10 / / ) {
+	$res .= '7';
+    }
+    elsif ( $v =~ s/^( \d| 10|) 11 / $1/ ) {
+	$res .= 'maj7';
+    }
+    if ( $v =~ s/ 5 7 / / ) {
+	$res .= 'sus4';
+    }
+    elsif ( $v =~ s/^0 7 / / ) {
+	$res .= 'sus2';
+    }
+    elsif ( $v =~ s/^0 4 / / ) {
+	$res .= 'no5';
+    }
+    warn("=cn=> $v\n") if $debug;
+    chop ($v);
+    $v =~ s/^ //;
+    @v = split(' ', $v);
+    foreach ( @v ) {
+	$res .= '('.('1','b2','2','b3','3','4','b5','5','#5','6','7','#7','8','b9','9','#9','b11','11','#11','12','b13','13')[$_].')';
+    }
+    my $res0 = $res;
+    $res =~ s/^([^\(]*[^\d])?\((\d+)\)([^\d][^\(]*|)$/$1$2$3/;
+    $res =~ s/7?(6|\(6\))(9|\(9\))/6.9/;
+    $res =~ s/(4|\(4\))(5|\(5\))/sus4/;
+    $res =~ s/(1|\(1\))(5|\(5\))/sus2/;
+    warn("=cn=> ", $self->{unparsed}, " -> $res0 -> $res\n") if $debug;
+
+    return $res unless $self->{bass};
+    join("/", $res, map { $_->name } @{$self->{bass}});
+}
+
+sub ps {
+    my ($self) = @_;
+    my $res = $self->{key}->ps;
+
+    my @v = @{$self->{vec}};
+    my $v = "@v ";
+    shift (@v);
+
+    warn("=cn=> $v\n") if $debug;
+    if ( $v =~ s/^0 (2 )?4 (6|7|8) / / ) {
+	$res .= $2 == 8 ? ' plus' : '';
+	$v = ' 6' . $v if $2 == 6;
+	$v = ' 2' . $v if defined $1;
+    }
+    elsif ( $v =~ s/^0 3 6 9 / / ) {
+	$res .= ' dim';
+    }
+    elsif ( $v =~ s/^0 (2 )?3 (6|7|8) / / ) {
+	if ( $2 == 6 ) {
+	    $res .= ( $v =~ s/^ 10 // ) ? ' hdim' : ' dim';
+	}
+	else {
+	    $res .= ' minus';
+	}
+	$v = ' 8' . $v 	if $2 == 8;
+	$v = ' 2' . $v  if defined $1;
+    }
+    $v =~ s/^0 5 7 / 5 7 /;
+    $v =~ s/ 10 14 18 (21) / $1 /;		# 13
+    $v =~ s/ 10 14 18 (20|22) / 10 $1 /;	#  7#13 7b13
+    $v =~ s/ 10 14 (17) / $1 /;			# 11
+    $v =~ s/ 10 14 (18) / 10 $1 /;		#  7#11
+    $v =~ s/ 10 (14) / $1 /;			#  9
+    $v =~ s/ 10 (15) / 10 $1 /;			#  7#9
+    $v =~ s/ 11 14 18 (21|22) / $1 11 /;	# 13#5
+    $v =~ s/ 11 14 (17|18) / $1 11 /;		# 11#5
+    $v =~ s/ 11 (14|15) / $1 11 /;		#  9#5
+    if ( $v =~ s/ 10 / / ) {
+	$res .= ' (7) addn';
+    }
+    elsif ( $v =~ s/^( \d| 10|) 11 / $1/ ) {
+	$res .= '-2 0 rmoveto ' if $res =~ /flat $/;
+	$res .= ' delta';
+    }
+    if ( $v =~ s/ 5 7 / / ) {
+	$res .= ' (4) susp';
+    }
+    elsif ( $v =~ s/^0 7 / / ) {
+	$res .= ' (2) susp';
+    }
+    elsif ( $v =~ s/^0 4 / / ) {
+	$res .= ' (no5) addn';
+    }
+    warn("=cn=> $v\n") if $debug;
+    chop ($v);
+    $v =~ s/^ //;
+    @v = split(' ', $v);
+    foreach ( @v ) {
+	$res .= ' ';
+	$res .= ( '(1) addn', '(2) addf', '(2) addn', '(3) addf', '(3) addn',
+		  '(4) addn', '(5) addf', '(5) addn', '(5) adds', '(6) addn',
+		  '(7) addn', '(7) adds', '(8) addn', '(9) addf', '(9) addn',
+		  '(9) adds','(11) addf','(11) addn','(11) adds',
+		 '(12) addn','(13) addf','(13) addn' )[$_];
+    }
+    warn("=cn=> ", $self->{unparsed}, " -> $res\n") if $debug;
+
+    return $res unless $self->{bass};
+
+    join(" slash ", $res, map { $_->ps } @{$self->{bass}});
+}
+
+1;
