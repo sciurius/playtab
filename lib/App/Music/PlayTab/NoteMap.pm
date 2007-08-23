@@ -1,6 +1,6 @@
 #! perl
 
-package App::PlayTab::NoteMap;
+package App::Music::PlayTab::NoteMap;
 
 use strict;
 use warnings;

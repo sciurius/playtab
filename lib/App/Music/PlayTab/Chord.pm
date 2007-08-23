@@ -1,10 +1,10 @@
 #! perl
 
-package App::PlayTab::Chord;
+package App::Music::PlayTab::Chord;
 
 use strict;
 use warnings;
-use App::PlayTab::Note;
+use App::Music::PlayTab::Note;
 use Carp;
 
 sub new {
@@ -30,7 +30,7 @@ sub parse {
     }
 
     # Parse key.
-    eval { $self->{key} = App::PlayTab::Note->parse($key) };
+    eval { $self->{key} = App::Music::PlayTab::Note->parse($key) };
     croak("Unrecognized pitch in chord: $chord") unless defined $self->{key};
 
     # Encodings: a bit is set in $chflags for every note in the chord.
@@ -142,7 +142,7 @@ sub parse {
 	if ( $mod =~ /^\/(.+)/ ) {
 	    my @ch = split(/\//, $1);
 	    foreach my $c ( @ch ) {
-		my $p = eval { App::PlayTab::Note->parse($c) };
+		my $p = eval { App::Music::PlayTab::Note->parse($c) };
 		croak("Unrecognized bass of chord: $chord")
 		  unless defined $p;
 		$self->{bass} ||= [];

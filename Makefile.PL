@@ -1,9 +1,9 @@
-# Makefile.PL -- Makefile for Music::PlayTab
+# Makefile.PL -- Makefile for App::Music::PlayTab
 # Author          : Johan Vromans
 # Created On      : Mon Feb  8 11:46:56 1999
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Apr 16 15:28:03 2007
-# Update Count    : 72
+# Last Modified On: Thu Aug 23 14:30:44 2007
+# Update Count    : 74
 # Status          : Stable
 
 # Verify perl version.
@@ -15,7 +15,7 @@ my @scripts = qw(playtab);
 
 WriteMakefile
   (
-   NAME         => 'Music::PlayTab',
+   NAME         => 'App::Music::PlayTab',
    AUTHOR	=> 'Johan Vromans (jvromans@squirrel.nl)',
    ABSTRACT	=> 'Print play tabs of songs',
    VERSION      => "0.06",

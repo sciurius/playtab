@@ -1,12 +1,12 @@
 #! perl
 
-package App::PlayTab::Note;
+package App::Music::PlayTab::Note;
 
 use strict;
 use warnings;
 use Carp;
 
-use App::PlayTab::NoteMap qw(note_to_key key_to_note);
+use App::Music::PlayTab::NoteMap qw(note_to_key key_to_note);
 
 our $VERSION = 0.01;
 
@@ -72,7 +72,7 @@ sub key {
 
 sub name {
     my $self = shift;
-    App::PlayTab::NoteMap::key_to_note($self->{key}, $self->{useflat});
+    App::Music::PlayTab::NoteMap::key_to_note($self->{key}, $self->{useflat});
 }
 
 sub ps {
