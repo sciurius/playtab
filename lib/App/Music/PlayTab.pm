@@ -4,8 +4,8 @@ my $RCS_Id = '$Id$ ';
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Aug 23 18:32:42 2007
-# Update Count    : 262
+# Last Modified On: Thu Aug 23 18:41:40 2007
+# Update Count    : 263
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -784,6 +784,8 @@ MA 02139, USA.
 
 
 =cut
+
+1;
 
 __END__
 %!PS-Adobe-2.0
