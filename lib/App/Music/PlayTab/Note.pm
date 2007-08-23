@@ -29,7 +29,7 @@ sub parse {
     $self->{unparsed} = $note;
 
     # Get out if relative scale specifier.
-    return '*' if $note eq '*';
+    return '*' if $note eq '*';	# TODO: Why?
 
     my $res;
 
@@ -53,7 +53,6 @@ sub parse {
     }
 
     # Return.
-    warn("=ch=> ", $self->{unparsed}, " -> $res\n") if $debug;
     $self->{key} = $res;
     $self;
 }
@@ -64,6 +63,11 @@ sub transpose {
     $self->{key} = ($self->{key} + $xp) % 12;
     $self->{useflat} = $xp < 0;
     $self;
+}
+
+sub key {
+    my $self = shift;
+    $self->{key};
 }
 
 sub name {
