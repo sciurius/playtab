@@ -7,8 +7,6 @@ use warnings;
 use App::PlayTab::Note;
 use Carp;
 
-my $debug = 0;
-
 sub new {
     my $pkg = shift;
     bless {}, $pkg;
@@ -20,6 +18,7 @@ sub parse {
     $self = $self->new unless ref($self);
 
     $chord = lc($chord);
+    $self->{_debug} = 1 if $chord =~ s/^\?//;
     $self->{unparsed} = $chord;
     my $key = $chord;
     my $mod = '';
@@ -31,7 +30,7 @@ sub parse {
     }
 
     # Parse key.
-    $self->{key} = App::PlayTab::Note->parse($key);
+    eval { $self->{key} = App::PlayTab::Note->parse($key) };
     croak("Unrecognized pitch in chord: $chord") unless defined $self->{key};
 
     # Encodings: a bit is set in $chflags for every note in the chord.
@@ -143,7 +142,7 @@ sub parse {
 	if ( $mod =~ /^\/(.+)/ ) {
 	    my @ch = split(/\//, $1);
 	    foreach my $c ( @ch ) {
-		my $p = App::PlayTab::Note->parse($c);
+		my $p = eval { App::PlayTab::Note->parse($c) };
 		croak("Unrecognized bass of chord: $chord")
 		  unless defined $p;
 		$self->{bass} ||= [];
@@ -162,6 +161,11 @@ sub parse {
     }
 
     $self->{vec} = [@vec];
+
+    warn("=> Chord ", $self->{unparsed}, ": ", $self->{key}->key,
+	 " (", $self->{key}->name, ") [ @vec ]\n")
+      if $self->{_debug};
+
     $self;
 }
 
@@ -180,7 +184,6 @@ sub name {
     my $v = "@v ";
     shift (@v);
 
-    print STDERR ("=cn=> $v\n") if $debug;
     if ( $v =~ s/^0 (2 )?4 (6|7|8) / / ) {
 	$res .= $2 == 8 ? '+' : '';
 	$v = ' 6' . $v if $2 == 6;
@@ -224,7 +227,8 @@ sub name {
     elsif ( $v =~ s/^0 4 / / ) {
 	$res .= 'no5';
     }
-    warn("=cn=> $v\n") if $debug;
+    my $res1 = $res;		# for debug
+
     chop ($v);
     $v =~ s/^ //;
     @v = split(' ', $v);
@@ -236,10 +240,16 @@ sub name {
     $res =~ s/7?(6|\(6\))(9|\(9\))/6.9/;
     $res =~ s/(4|\(4\))(5|\(5\))/sus4/;
     $res =~ s/(1|\(1\))(5|\(5\))/sus2/;
-    warn("=cn=> ", $self->{unparsed}, " -> $res0 -> $res\n") if $debug;
 
-    return $res unless $self->{bass};
-    join("/", $res, map { $_->name } @{$self->{bass}});
+    $res = join("/", $res, map { $_->name } @{$self->{bass}})
+      if $self->{bass};
+
+    warn("=> Chord ", $self->{unparsed}, ": ", $self->{key}->key,
+	 " (", $self->{key}->name, ") [ @{$self->{vec}} ] ->",
+	 " $res1 [ $v ] -> $res0 -> $res\n")
+      if $self->{_debug};
+
+    return $res;
 }
 
 sub ps {
@@ -250,7 +260,6 @@ sub ps {
     my $v = "@v ";
     shift (@v);
 
-    warn("=cn=> $v\n") if $debug;
     if ( $v =~ s/^0 (2 )?4 (6|7|8) / / ) {
 	$res .= $2 == 8 ? ' plus' : '';
 	$v = ' 6' . $v if $2 == 6;
@@ -295,7 +304,8 @@ sub ps {
     elsif ( $v =~ s/^0 4 / / ) {
 	$res .= ' (no5) addn';
     }
-    warn("=cn=> $v\n") if $debug;
+    my $res1 = $res;		# for debug
+
     chop ($v);
     $v =~ s/^ //;
     @v = split(' ', $v);
@@ -307,11 +317,16 @@ sub ps {
 		  '(9) adds','(11) addf','(11) addn','(11) adds',
 		 '(12) addn','(13) addf','(13) addn' )[$_];
     }
-    warn("=cn=> ", $self->{unparsed}, " -> $res\n") if $debug;
 
-    return $res unless $self->{bass};
+    $res = join(" slash ", $res, map { $_->ps } @{$self->{bass}})
+      if $self->{bass};
 
-    join(" slash ", $res, map { $_->ps } @{$self->{bass}});
+    warn("=> Chord ", $self->{unparsed}, ": ", $self->{key}->key,
+	 " (", $self->{key}->name, ") [ @{$self->{vec}} ] ->",
+	 " $res1 [ $v ] -> $res\n")
+      if $self->{_debug};
+
+    return $res;
 }
 
 1;
