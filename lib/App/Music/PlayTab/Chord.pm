@@ -17,9 +17,9 @@ sub parse {
 
     $self = $self->new unless ref($self);
 
+    $self->{_unparsed} = $chord;
     $chord = lc($chord);
     $self->{_debug} = 1 if $chord =~ s/^\?//;
-    $self->{unparsed} = $chord;
     my $key = $chord;
     my $mod = '';
 
@@ -31,7 +31,8 @@ sub parse {
 
     # Parse key.
     eval { $self->{key} = App::Music::PlayTab::Note->parse($key) };
-    croak("Unrecognized pitch in chord: $chord") unless defined $self->{key};
+    croak("Unrecognized pitch in chord: ".$self->{_unparsed})
+      unless defined $self->{key};
 
     # Encodings: a bit is set in $chflags for every note in the chord.
     # The corresponding element of $chmods is 0 (natural), -1
@@ -144,14 +145,14 @@ sub parse {
 	    foreach my $c ( @ch ) {
 	#	my $p = eval { App::Music::PlayTab::Note->parse($c) };
 		my $p = eval { App::Music::PlayTab::Chord->parse($c) };
-		croak("Unrecognized bass of chord: $chord")
+		croak("Unrecognized bass of chord: ".$self->{_unparsed})
 		  unless defined $p;
 		$self->{bass} ||= [];
 		push(@{$self->{bass}}, $p);
 	    }
 	    last;
 	}
-	croak("Unrecognized modification of chord: $chord");
+	croak("Unrecognized modification of chord: ".$self->{_unparsed});
     }
 
     my @vec = (0);
@@ -163,7 +164,7 @@ sub parse {
 
     $self->{vec} = [@vec];
 
-    warn("=> Chord ", $self->{unparsed}, ": ", $self->{key}->key,
+    warn("=> Chord ", $self->{_unparsed}, ": ", $self->{key}->key,
 	 " (", $self->{key}->name, ") [ @vec ]\n")
       if $self->{_debug};
 
@@ -245,7 +246,7 @@ sub name {
     $res = join("/", $res, map { $_->name } @{$self->{bass}})
       if $self->{bass};
 
-    warn("=> Chord ", $self->{unparsed}, ": ", $self->{key}->key,
+    warn("=> Chord ", $self->{_unparsed}, ": ", $self->{key}->key,
 	 " (", $self->{key}->name, ") [ @{$self->{vec}} ] ->",
 	 " $res1 [ $v ] -> $res0 -> $res\n")
       if $self->{_debug};
@@ -322,7 +323,7 @@ sub ps {
     $res = join(" slash ", $res, map { $_->ps } @{$self->{bass}})
       if $self->{bass};
 
-    warn("=> Chord ", $self->{unparsed}, ": ", $self->{key}->key,
+    warn("=> Chord ", $self->{_unparsed}, ": ", $self->{key}->key,
 	 " (", $self->{key}->name, ") [ @{$self->{vec}} ] ->",
 	 " $res1 [ $v ] -> $res\n")
       if $self->{_debug};
