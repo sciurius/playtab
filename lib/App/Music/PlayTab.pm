@@ -4,8 +4,8 @@ my $RCS_Id = '$Id$ ';
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Aug 21 17:22:43 2007
-# Update Count    : 186
+# Last Modified On: Thu Aug 23 18:32:42 2007
+# Update Count    : 262
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -43,11 +43,11 @@ app_options();
 print STDOUT ("ok 1\n") if $test;
 
 if ( defined $output ) {
-    open (OUTPUT, ">$output") or print STDOUT ("not ") if $test;
+    open(OUTPUT, ">$output") or print STDOUT ("not ") if $test;
     print STDOUT ("ok 2\n") if $test;
 }
 else {
-    die ("Test mode requires -output option to be set\n") if $test;
+    die("Test mode requires -output option to be set\n") if $test;
     *OUTPUT = *STDOUT;
 }
 
@@ -56,53 +56,22 @@ $trace |= ($debug || $test);
 
 ################ Presets ################
 
-# All notes, using sharps.
-my @SNotes =
-  # 0    1    2    3    4    5    6    7    8    9    10   11
-  ('C ','C#','D ','D#','E ','F ','F#','G ','G#','A ','A#','B ');
-# All notes, using flats.
-my @FNotes =
-  # 0    1    2    3    4    5    6    7    8    9    10   11
-  ('C ','Db','D ','Eb','E ','F ','Gb','G ','Ab','A ','Bb','B ');
-# The current mapping.
-my $Notes;
-
-# Reverse mapping (plain notes only).
-my %Notemap;
-for ( my $i = 0; $i < @SNotes; $i++ ) {
-    $Notemap{$1} = $i if $SNotes[$i] =~ /(.) /;
-}
+use App::Music::PlayTab::Chord;
 
 # Print dimensions.
-my $std_width  = 30;
-my $std_height = -15;
-my $std_margin = 40;
-my $std_gridscale = 8;
+my $std_width	   =  30;
+my $std_height	   = -15;
+my $std_margin	   =  40;
+my $std_gridscale  =   8;
 
-my $ps_pages = 0;
-
-my @Rom = ('', qw(I II III IV V VI VII VIII IX X XI XII));
+my @Rom = qw(I II III IV V VI VII VIII IX X XI XII);
 
 ################ The Process ################
 
 my $line;			# current line (for messages)
 my $linetype = 0;		# type of current line
 
-my $x0 = 0;
-my $y0 = 0;
-my $x = 0;
-my $y = 0;
-my $xd = 0;
-my $yd = 0;
-my $xm = 0;
-my $xw = 0;
-my $yd_width = 0;
-my $md = 0;
-my $on_top = 0;
 my $xpose = $gxpose;
-
-# Globals.
-use vars qw($chord @vec $key $chordname);
 
 ps_preamble();
 print STDOUT ("ok 3\n") if $test;
@@ -110,54 +79,57 @@ print STDOUT ("ok 3\n") if $test;
 while ( <> ) {
     next if /^\s*#/;
     next unless /\S/;
-    chop ($line = $_);
+    chomp($line = $_);
 
     s/\^\s+//;
     if ( /^!\s*(.*)/ ) {
-	control ($1);
+	control($1);
 	next;
     }
 
     if ( /^\s*\[/ ) {
 	while ( /^\s*\[([^]]+)\](.*)/ ) {
-	    chord ($1);
+	    eval { chord($1) };
+	    errout($@) if $@;
 	    $_ = $2;
 	}
 	$linetype = 2;
 	next;
     }
     elsif ( $linetype == 2 ) {
-        ps_advance ();
-        ps_advance ();
-        ps_advance ();
-        ps_advance ();
+        print_newline(4);
 	$linetype = 0;
     }
 
     if ( /^\s*\|/ ) {
-	ps_advance () if $linetype;
-	bar ($_);
+	print_newline() if $linetype;
+	bar($_);
 	$linetype = 1;
 	next;
     }
-    elsif ( $linetype == 1 && /^[-+=]/ ) {
-	ps_advance ();
+    elsif ( $linetype == 1 && /^[-+=<]/ ) {
+	print_newline();
 	$linetype = 0;
     }
 
     # Spacing/margin notes.
     if ( /^=(.*)/ ) {
-	advance (2, $1);
+	print_margin(2, $1);
 	$linetype = 0;
 	next;
     }
     if ( /^-(.*)/ ) {
-	advance (1, $1);
+	print_margin(1, $1);
 	$linetype = 0;
 	next;
     }
     if ( /^\+(.*)/ ) {
-	advance (0, $1);
+	print_margin(0, $1);
+	$linetype = 0;
+	next;
+    }
+    if ( /^\</ ) {
+	print_margin(0, undef);
 	$linetype = 0;
 	next;
     }
@@ -175,157 +147,65 @@ exit 0 unless $test;
 
 ################ Subroutines ################
 
-sub print_title {
-    my ($new, $title) = @_;
-
-    if ( $new ) {
-	print OUTPUT ('end showpage', "\n") if $ps_pages;
-	print OUTPUT ('%%Page: ', ++$ps_pages. ' ', $ps_pages, "\n",
-		      'tabdict begin', "\n");
-	$x = $y = $xm = 0; 
-	$xd = $std_width; $yd = $std_height; $md = $std_margin;
-    }
-    ps_move ();
-    print OUTPUT ($new ? 'TF (' : 'SF (', $title, ') show', "\n");
-    ps_advance ();
-    $on_top = 1;
-    $xpose = $gxpose;
-    # Use sharps when xposing up, flats when xposing down.
-    $Notes = $xpose > 0 ? \@SNotes : \@FNotes;
-}
-
-# begin scope for $prev_chord
-my $prev_chord;
-
-sub print_chord {
-    my($key, $vec, $chord) = @_;
-    $prev_chord = ps_chordname($key, $vec, $chord);
-    print OUTPUT ($prev_chord, "\n");
-}
-
-sub print_again {
-    ps_move ();
-    print OUTPUT ($prev_chord, "\n");
-    ps_step ();
-}
-
-# end scope for $prev_chord
-
-sub print_bar {
-    ps_move ();
-    print OUTPUT ("bar\n");
-    $x += 4;
-}
-
-sub print_newline {
-    ps_advance ();
-}
-
-sub print_space {
-    ps_step ();
-}
-
-sub print_rest {
-    ps_move ();
-    print OUTPUT ("rest\n");
-    ps_step ();
-}
-
-sub print_same {
-    my ($wh, $xs) = @_;
-    { my $xsave = $x;
-      $x += ($xs * $xd) / 2;
-      ps_move ();
-      print OUTPUT ("same$wh\n");
-      $x = $xsave;
-    }
-    $x += $xs * $xd;
-}
-
-sub print_turnaround {
-    ps_move ();
-    print OUTPUT ("ta\n");
-    ps_step ();
-}
-
-sub advance {
-    my ($full, $margin) = @_;
-    unless ( on_top() ) {
-	$x = 0;
-	$y += $yd * $full;
-    }
-    return unless $margin =~ /\S/;
-    $margin =~ s/^\s+//;
-    $margin =~ s/\s$//;
-    $xm = 0;
-    ps_move ();
-    print OUTPUT ('SF (', $margin, ') show', "\n");
-    $xm = $md;
-}
-
 sub bar {
     my ($line) = @_;
 
-    on_top ();
+    on_top();
 
     $line =~ s/([|.:`'])/ $1 /g;	#'`])/;
     $line =~ s/  +/ /g;
 
-    my (@c) = split (' ', $line);
+    my (@c) = split(' ', $line);
     while ( @c > 0 ) {
-	my $c = shift (@c);
-	if ( $c eq '|' ) {
-	    print_bar ();
-	    next;
-	}
-	elsif ( $c eq ':' ) {
-	    print_again ();
-	    next;
-	}
-	elsif ( $c eq '.' ) {
-	    print_space ();
-	    next;
-	}
-	elsif ( $c eq '%' ) {
-	    my $xs = 1;
-	    while ( @c > 0 && $c[0] eq '.' ) {
-		shift (@c);
-		$xs++;
+	eval {
+	    my $c = shift(@c);
+	    if ( $c eq '|' ) {
+		print_bar();
+		next;
 	    }
-	    print_same ('1', $xs);
-	    next;
-	}
-	elsif ( $c eq '-' ) {
-	    print_rest ();
-	    next;
-	}
-	elsif ( $c eq '\'' ) {
-	    ps_kern (1);
-	    next;
-	}
-	elsif ( $c eq '`' ) {
-	    ps_kern (-1);
-	    next;
-	}
-	elsif ( $c eq 'ta' || $c eq 'TA' ) {
-	    print_turnaround ();
-	    next;
-	}
+	    elsif ( $c eq ':' ) {
+		print_again();
+		next;
+	    }
+	    elsif ( $c eq '.' ) {
+		print_space();
+		next;
+	    }
+	    elsif ( $c eq '%' ) {
+		my $xs = 1;
+		while ( @c > 0 && $c[0] eq '.' ) {
+		    shift(@c);
+		    $xs++;
+		}
+		print_same('1', $xs);
+		next;
+	    }
+	    elsif ( $c eq '-' ) {
+		print_rest();
+		next;
+	    }
+	    elsif ( $c eq '\'' ) {
+		ps_skip(4);
+		next;
+	    }
+	    elsif ( $c eq '`' ) {
+		ps_skip(-4);
+		next;
+	    }
+	    elsif ( lc($c) eq 'ta' ) {
+		print_turnaround();
+		next;
+	    }
 
-	ps_move ();
-	my (@ch) = split ('/',$c);
-	my ($chord, $key, @vec);
-	while ( @ch > 1 ) {
-	    my $c = shift (@ch);
-	    ($chord, $key, @vec) = parse_chord ($c);
-	    print_chord($key, \@vec, $chord);
-	    print OUTPUT ("slash ");
-	}
-	($chord, $key, @vec) = parse_chord ($ch[0]);
-	print_chord($key, \@vec, $chord);
-	ps_step ();
+	    ps_move();
+	    my $chord = App::Music::PlayTab::Chord->parse($c);
+	    $chord->transpose($xpose) if $xpose;
+	    print_chord($chord);
+	    ps_step();
+	};
+	errout($@) if $@;
     }
-    print_newline ();
+    print_newline();
 }
 
 sub control {
@@ -333,112 +213,186 @@ sub control {
 
     # Title.
     if ( /^t(itle)?\s+(.*)/i ) {
-	print_title (1, $+);
+	print_title(1, $+);
 	return;
     }
 
     # Subtitle(s).
     if ( /^s(ub(title)?)?\s+(.*)/i ) {
-	print_title (0, $+);
+	print_title(0, $+);
 	return;
     }
 
     # Width adjustment.
-    if ( /^w(idth)?\s+([-+])?(\d+)/i ) {
-	if ( defined $2 ) {
-	    $xd += $2.$3;
-	}
-	else {
-	    $xd = $3;
-	}
+    if ( /^w(idth)?\s+([-+]?\d+)/i ) {
+	ps_set_width($2);
 	return;
     }
 
     # Height adjustment.
-    if ( /^h(eight)?\s+([-+])?(\d+)/i ) {
-	if ( defined $2 ) {
-	    $yd -= $2.$3;
-	}
-	else {
-	    $yd = -$3;
-	}
+    if ( /^h(eight)?\s+([-+]?\d+)/i ) {
+	ps_set_height($2);
 	return;
     }
 
     # Margin width adjustment.
-    if ( /^m(argin)?\s+([-+])?(\d+)/i ) {
-	if ( defined $2 ) {
-	    $md += $2.$3;
-	}
-	else {
-	    $md = $3;
-	}
+    if ( /^m(argin)?\s+([-+]?\d+)/i ) {
+	ps_set_margin($2);
 	return;
     }
 
     # Transpose.
     if ( /^x(pose)?\s+([-+])(\d+)/i ) {
 	$xpose += $2.$3;
-	# Use sharps when xposing up, flats when xposing down.
-	$Notes = $xpose > 0 ? \@SNotes : \@FNotes;
 	return;
     }
 
-    errout ("Unrecognized control");
+    errout("Unrecognized control");
 }
 
 sub chord {
     my (@l) = split(' ',$_[0]);
-    my $xpose = 0;		#### TODO: WHY?
 
-    errout ("Illegal [chord] spec, need 7 or 8 values")
+    die("Illegal [chord] spec, need 7 or 8 values")
 	unless @l == 8 || @l == 7;
-    my $ch = shift(@l);
-    my @ch = split('/', $ch);
-    my ($chordname, $key, @vec) = parse_chord($ch[0]);
+
+    my $chord = App::Music::PlayTab::Chord->parse(shift(@l));
 
     my @c = ();
     my $c = '()';
     foreach ( @l ) {
 	$_ = -1 if lc($_) eq "x";
 	if ( /^@(\d+)/ ) {
-	    $c = "($Rom[$1])" if $1 > 1;
+	    $c = "($Rom[$1-1])" if $1 > 1;
 	    next;
 	}
-	errout ("Illegal [chord] spec, need 6 numbers")
+	die("Illegal [chord] spec, need 6 numbers")
 	    unless /^-?\d$/ || @c == 6;
-	push (@c, $_);
+	push(@c, $_);
     }
 
-    on_top ();
-    $chordname = ps_chordname($key, \@vec, $chord);
-    shift(@ch);
-    while ( @ch ) {
-	my $c = shift (@ch);
-	($chord, $key, @vec) = parse_chord ($c);
-	$chordname .= " slash " . ps_notename($key);
-    }
+    on_top();
 
+    my $ps = $chord->ps;
     print OUTPUT ('1000 1000 moveto', "\n",
-		  $chordname, "\n",
+		  $ps, "\n",
 		  'currentpoint pop 1000 sub 2 div', "\n");
-    ps_move ();
+    ps_move();
     print OUTPUT (2.5*$std_gridscale, ' exch sub 8 add 0 rmoveto ',
-		  $chordname, "\n");
-    ps_move ();
+		  $ps, "\n");
+    ps_move();
     print OUTPUT ('8 ', -5-(4*$std_gridscale), " rmoveto @c $c dots\n");
-    $x += 40 + 40;
+    ps_skip(80);
 }
 
 sub text {
     my ($line) = @_;
-    my $xmsave = $xm;
-    $xm = 0;
-    on_top ();
-    ps_move ();
+    ps_push_actual_margin(0);
+    on_top();
+    ps_move();
     print OUTPUT ('SF (', $line, ') show', "\n");
-    ps_advance ();
-    $xm = $xmsave;
+    ps_advance();
+    ps_pop_actual_margin();
+}
+
+sub errout {
+    my $msg = "@_";
+    $msg =~ s/ at .*line \d+.*//s;
+    warn("$msg\n", "Line $.: $line\n");
+}
+
+################ Print Routines ################
+
+my $x0 = 0;
+my $y0 = 0;
+my $x = 0;
+my $y = 0;
+my $xd = 0;
+my $yd = 0;
+my $xw = 0;
+my $yd_width = 0;
+my $xm = 0;
+my $md = 0;
+my $on_top = 0;
+
+sub print_title {
+    my ($new, $title) = @_;
+
+    if ( $new ) {
+	ps_page();
+    }
+    ps_move();
+    print OUTPUT ($new ? 'TF (' : 'SF (', $title, ') show', "\n");
+    ps_advance();
+    $on_top = 1;
+    $xpose = $gxpose;
+}
+
+# begin scope for $prev_chord
+my $prev_chord;
+
+sub print_chord {
+    my($chord) = @_;
+    print OUTPUT ($chord->ps, "\n");
+    $prev_chord = $chord;
+}
+
+sub print_again {
+    ps_move();
+    print OUTPUT ($prev_chord->ps, "\n");
+    ps_step();
+}
+
+# end scope for $prev_chord
+
+sub print_bar {
+    ps_move();
+    print OUTPUT ("bar\n");
+    ps_skip(4);
+}
+
+sub print_newline {
+    &ps_advance;
+}
+
+sub print_space {
+    ps_step();
+}
+
+sub print_rest {
+    ps_move();
+    print OUTPUT ("rest\n");
+    ps_step();
+}
+
+sub print_same {
+    my ($wh, $xs) = @_;
+    ps_push_x(($xs * $xd) / 2);
+    ps_move();
+    print OUTPUT ("same$wh\n");
+    ps_pop_x();
+    ps_skip($xs * $xd);
+}
+
+sub print_turnaround {
+    ps_move();
+    print OUTPUT ("ta\n");
+    ps_step();
+}
+
+sub print_margin {
+    my ($full, $margin) = @_;
+    unless ( on_top() ) {
+	ps_advance($full);
+    }
+    $xm = 0, return unless defined $margin;
+    return unless $margin =~ /\S/;
+    $margin =~ s/^\s+//;
+    $margin =~ s/\s$//;
+    $xm = 0;
+    ps_move();
+    print OUTPUT ('SF (', $margin, ') show', "\n");
+    $xm = $md;
 }
 
 sub on_top {
@@ -447,6 +401,66 @@ sub on_top {
     $y = 4*$yd;
     $on_top = 0;
     return 1;
+}
+
+################ PostScript routines ################
+
+my $ps_pages = 0;
+
+sub ps_page {
+    print OUTPUT ('end showpage', "\n") if $ps_pages;
+    print OUTPUT ('%%Page: ', ++$ps_pages. ' ', $ps_pages, "\n",
+		  'tabdict begin', "\n");
+    $x = $y = $xm = 0;
+    $xd = $std_width;
+    $yd = $std_height;
+    $md = $std_margin;
+}
+
+sub ps_set_margin {
+    my $v = shift;
+    croak("ps_set_margin: number or increment\n")
+      unless $v =~ /^([-+])?(\d+)$/;
+    if ( defined $1 ) {
+	$md += $1.$2;
+    }
+    else {
+	$md = $2;
+    }
+}
+
+my @oldmargin;
+sub ps_push_actual_margin {
+    push(@oldmargin, $xm);
+    $xm = shift;
+}
+
+sub ps_pop_actual_margin {
+    $xm = pop(@oldmargin);
+}
+
+sub ps_set_width {
+    my $v = shift;
+    croak("ps_set_width: number or increment\n")
+      unless $v =~ /^([-+])?(\d+)$/;
+    if ( defined $1 ) {
+	$xd += $1.$2;
+    }
+    else {
+	$xd = $2;
+    }
+}
+
+sub ps_set_height {
+    my $v = shift;
+    croak("ps_set_height: number or increment\n")
+      unless $v =~ /^([-+])?(\d+)$/;
+    if ( defined $1 ) {
+	$yd -= $1.$2;
+    }
+    else {
+	$yd = -$2;
+    }
 }
 
 sub ps_move {
@@ -460,22 +474,35 @@ sub ps_step {
 sub ps_advance {
     $x = 0;
     $y += $yd;
+    $y += ($_[0]-1)*$yd if defined $_[0];
 }
 
-sub ps_kern {
-    my ($k) = @_;
-    $x += $k * 4;
+sub ps_skip {
+    $x += $_[0];
+}
+
+my @oldx;
+sub ps_push_x {
+    push(@oldx, $x);
+    $x += shift;
+}
+
+sub ps_pop_x {
+    $x = pop(@oldx);
 }
 
 sub ps_preamble {
     if ( defined $preamble ) {
-	open (DATA, $preamble) or die ("$preamble: $!\n");
+	open(DATA, $preamble) or die("$preamble: $!\n");
     }
     while ( <DATA> ) {
 	s/\$std_gridscale/$std_gridscale/g;
 	print OUTPUT ($_);
     }
-    $x0 = 50; $y0 = 800; $xd = $std_width; $yd = $std_height;
+    $x0 = 50;
+    $y0 = 800;
+    $xd = $std_width;
+    $yd = $std_height;
     $x = $y = $xm = 0;
     $ps_pages = 0;
 }
@@ -487,357 +514,6 @@ end showpage
 %%Pages: $ps_pages
 %%EOF
 EOD
-}
-
-sub parse_note {
-    my ($note) = @_;
-
-    # Parse note name and return internal code.
-    # Side-effect: sets $use_flat if appropriate.
-
-    # Trim.
-    $note =~ s/\s+$//;
-
-    # Get out if relative scale specifier.
-    return '*' if $note eq '*';
-
-    my $res;
-
-    # Try sharp notes, e.g. Ais, C#.
-    if ( $note =~ /^([a-g])(is|\#)$/i ) {
-	$res = $Notemap{uc($1)} + 1;
-	$res = 0 if $res >= 12;
-	$Notes = \@SNotes unless $xpose;
-    }
-    # Try flat notes, e.g. Es, Bes, Db.
-    elsif ( $note =~ /^([a-g])(e?s|b)$/i ) {
-	$res = $Notemap{uc($1)} - 1;
-	$res = 11 if $res < 0;
-	$Notes = \@FNotes unless $xpose;
-    }
-    # Try plain note, e.g. A, C.
-    elsif ( $note =~ /^([a-g])$/i ) {
-	$res = $Notemap{uc($1)};
-    }
-    # No more tries.
-    else {
-	errout ("Unrecognized note name \"$note\"");
-    }
-
-    # Return.
-    print STDERR ("=ch=> $note -> $res\n") if $debug;
-    $res;
-}
-
-sub parse_chord {
-    my ($chord) = @_;
-
-    $chord = lc($chord);
-    my $mod;
-
-    # Separate the chord key from the modifications.
-    if ( $chord =~ /(^[a-g*](\#|b|s|es|is)?)(.*)/ ) {
-	$key = $1;
-	$mod = $3;
-	$mod = chop($key) . $mod
-	    if $2 eq 's' && substr($3,0,2) eq 'us';
-    }
-    else {
-	$key = $chord;
-	$mod = '';
-    }
-
-    # Parse key.
-    print STDERR ("=pc=> $chord -> [$key,$mod]\n") if $debug;
-    $key = parse_note ($key);
-
-    # Encodings: a bit is set in $chflags for every note in the chord.
-    # The corresponding element of $chmods is 0 (natural), -1
-    # (lowered), 1 (raised) or undef (suppressed).
-
-    my $chflags = '';
-    my @chmods = (0) x 14;
-
-    # Assume major triad.
-    vec($chflags,3,1) = 1;
-    vec($chflags,5,1) = 1;
-    $chmods[3] = 0;
-    $chmods[5] = 0;
-
-    $mod =~ s/^-/min/;		# Minor triad
-    $mod =~ s/^\+/aug/;		# Augmented triad
-    $mod =~ s/^0/dim/;		# Diminished
-
-    # Then other modifications.
-    while ( $mod ne '' ) {
-	if ( $mod =~ /^[()._](.*)/ ) {	# syntactic sugar
-	    $mod = $+;
-	    next;
-	}
-	if ( $mod =~ /^maj7?(.*)/ ) {	# Maj7
-	    $mod = $+;
-	    vec($chflags,7,1) = 1;
-	    $chmods[7] = 1;
-	    next;
-	}
-	if ( $mod =~ /^(min|m)(.*)/ ) {	# Minor triad
-	    $mod = $+;
-	    vec($chflags,3,1) = 1;
-	    $chmods[3] = -1;
-	    next;
-	}
-	if ( $mod =~ /^sus2(.*)/ ) {	# Suspended second
-	    $mod = $+;
-	    vec($chflags,3,1) = 0;
-	    undef $chmods[3];
-	    next;
-	}
-	if ( $mod =~ /^sus4?(.*)/ ) {	# Suspended fourth
-	    $mod = $+;
-	    vec($chflags,4,1) = 1;	# does it?
-	    undef $chmods[3];
-	    $chmods[4] = 0;
-	    next;
-	}
-	if ( $mod =~ /^aug(.*)/ ) {		# Augmented
-	    $mod = $+;
-	    vec($chflags,5,1) = 1;
-	    $chmods[5] = 1;
-	    next;
-	}
-	if ( $mod =~ /^(o|dim)(.*)/ ) {	# Diminished
-	    $mod = $+;
-	    vec($chflags,3,1) = 1;
-	    vec($chflags,5,1) = 1;
-	    vec($chflags,7,1) = 1;
-	    $chmods[3] = -1;
-	    $chmods[5] = -1;
-	    $chmods[7] = -1;
-	    next;
-	}
-	if ( $mod =~ /^%(.*)/ ) {	# half-diminished 7
-	    $mod = $+;
-	    $chflags = '';
-	    vec($chflags,3,1) = 1;
-	    vec($chflags,5,1) = 1;
-	    vec($chflags,7,1) = 1;
-	    $chmods[3] = -1;
-	    $chmods[5] = -1;
-	    $chmods[7] = 0;
-	    next;
-	}
-	if ( $mod =~ /^([\#b])?(2|5|6|7|9|10|11|13)(.*)/ ) { # addition
-	    $mod = $+;
-	    # 13th implies 11th implies 9th implies 7th...
-	    if ( $2 > 7 && !(vec($chflags,7,1)) ) {
-		vec($chflags,7,1) = 1;
-		$chmods[7] = 0;
-	    }
-	    if ( $2 > 10 && !(vec($chflags,9,1)) ) {
-		vec($chflags,9,1) = 1;
-		$chmods[9] = 0;
-	    }
-	    if ( $2 > 11 && !(vec($chflags,11,1)) ) {
-		vec($chflags,11,1) = 1;
-		$chmods[11] = 1;
-	    }
-	    vec($chflags,$2,1) = 1;
-	    $chmods[$2] = 0;
-	    if ( defined $1 ) {
-		$chmods[$2] = ($1 eq '#') ? 1 : -1;
-	    }
-	    next;
-	}
-	if ( $mod =~ /^no\s*(\d+)(st|nd|rd|st)?(.*)/ ) {
-	    $mod = $+;
-	    vec($chflags,$1,1) = 1;
-	    undef $chmods[$1];
-	    next;
-	}
-	errout ("Unknown chord modification: \"$mod\"");
-	last;
-    }
-
-    @vec = (0);
-    for (1..13) {
-	next unless vec($chflags,$_,1);
-	next unless defined $chmods[$_];
-	push (@vec, (0,0,2,4,5,7,9,10,12,14,16,17,19,21)[$_]+$chmods[$_]);
-    }
-    $chord = chordname($key, \@vec, $chord);
-    print STDERR ("=pc=> $chord -> $key\[@vec]\n") if $debug;
-    ("\u$chord", $key, @vec);
-
-    # TODO: maug
-}
-
-sub chordname {
-    my ($key, $vec, $chord) = @_;
-    my $res = $Notes->[$key eq '*' ? 0 : $key];
-    $res =~ s/\s+$//;
-
-    my @v = @$vec;
-    shift (@v);
-
-    my $v = "@$vec ";
-    print STDERR ("=cn=> $v\n") if $debug;
-    if ( $v =~ s/^0 (2 )?4 (6|7|8) / / ) {
-	$res .= $2 == 8 ? '+' : '';
-	$v = ' 6' . $v if $2 == 6;
-	$v = ' 2' . $v if defined $1;
-    }
-    elsif ( $v =~ s/^0 3 6 9 / / ) {
-	$res .= 'o';
-    }
-    elsif ( $v =~ s/^0 (2 )?3 (6|7|8) / / ) {
-	if ( $2 == 6 ) {
-	    $res .= ( $v =~ s/^ 10 // ) ? '%' : 'o';
-	}
-	else {
-	    $res .= 'm';
-	}
-	$v = ' 8' . $v if $2 == 8;
-	$v = ' 2' . $v if defined $1;
-    }
-    $v =~ s/^0 5 7 / 5 7 /;
-    $v =~ s/ 10 14 18 (21) / $1 /;		# 13
-    $v =~ s/ 10 14 18 (20|22) / 10 $1 /;	#  7#13 7b13
-    $v =~ s/ 10 14 (17) / $1 /;			# 11
-    $v =~ s/ 10 14 (18) / 10 $1 /;		#  7#11
-    $v =~ s/ 10 (14) / $1 /;			#  9
-    $v =~ s/ 10 (15) / 10 $1 /;			#  7#9
-    $v =~ s/ 11 14 18 (21|22) / $1 11 /;	# 13#5
-    $v =~ s/ 11 14 (17|18) / $1 11 /;		# 11#5
-    $v =~ s/ 11 (14|15) / $1 11 /;		#  9#5
-    if ( $v =~ s/ 10 / / ) {
-	$res .= '7';
-    }
-    elsif ( $v =~ s/^( \d| 10)* 11 / $1/ ) {
-	$res .= 'maj7';
-    }
-    if ( $v =~ s/ 5 7 / / ) {
-	$res .= 'sus4';
-    }
-    elsif ( $v =~ s/^0 7 / / ) {
-	$res .= 'sus2';
-    }
-    elsif ( $v =~ s/^0 4 / / ) {
-	$res .= 'no5';
-    }
-    print STDERR ("=cn=> $v\n") if $debug;
-    chop ($v);
-    $v =~ s/^ //;
-    @v = split(' ', $v);
-    foreach ( @v ) {
-	$res .= '('.('1','b2','2','b3','3','4','b5','5','#5','6','7','#7','8','b9','9','#9','b11','11','#11','12','b13','13')[$_].')';
-    }
-    my $res0 = $res;
-    $res =~ s/^([^\(]*[^\d])?\((\d+)\)([^\d][^\(]*)?$/$1$2$3/;
-    $res =~ s/7?(6|\(6\))(9|\(9\))/6.9/;
-    $res =~ s/(4|\(4\))(5|\(5\))/sus4/;
-    $res =~ s/(1|\(1\))(5|\(5\))/sus2/;
-    print STDERR ("=cn=> $chord -> $res0 -> $res\n") if $debug;
-    $res;
-}
-
-sub ps_notename {
-    my ($key) = @_;
-    my $res = $Notes->[$key eq '*' ? 0 : (($key+$xpose)%12)];
-    $res =~ s/\s+$//;
-    if ( $res =~ /(.)b/ ) {
-	$res = '('.$1.') root flat ';
-    }
-    elsif ( $res =~ /(.)#/ ) {
-	$res = '('.$1.') root sharp ';
-    }
-    else {
-	$res = '('.$res.') root ';
-    }
-}
-
-sub ps_chordname {
-    my ($key, $vec, $chord) = @_;
-
-    my $res = $Notes->[$key eq '*' ? 0 : (($key+$xpose)%12)];
-    $res =~ s/\s+$//;
-    if ( $res =~ /(.)b/ ) {
-	$res = '('.$1.') root flat ';
-    }
-    elsif ( $res =~ /(.)#/ ) {
-	$res = '('.$1.') root sharp ';
-    }
-    else {
-	$res = '('.$res.') root ';
-    }
-
-    my @v = @$vec;
-    shift (@v);
-
-    my $v = "@$vec ";
-    print STDERR ("=cn=> $v\n") if $debug;
-    if ( $v =~ s/^0 (2 )?4 (6|7|8) / / ) {
-	$res .= $2 == 8 ? 'plus ' : '';
-	$v = ' 6' . $v if $2 == 6;
-	$v = ' 2' . $v if defined $1;
-    }
-    elsif ( $v =~ s/^0 3 6 9 / / ) {
-	$res .= 'dim ';
-    }
-    elsif ( $v =~ s/^0 (2 )?3 (6|7|8) / / ) {
-	if ( $2 == 6 ) {
-	    $res .= ( $v =~ s/^ 10 // ) ? 'hdim' : 'dim';
-	}
-	else {
-	    $res .= 'minus ';
-	}
-	$v = ' 8' . $v 	if $2 == 8;
-	$v = ' 2' . $v  if defined $1;
-    }
-    $v =~ s/^0 5 7 / 5 7 /;
-    $v =~ s/ 10 14 18 (21) / $1 /;		# 13
-    $v =~ s/ 10 14 18 (20|22) / 10 $1 /;	#  7#13 7b13
-    $v =~ s/ 10 14 (17) / $1 /;			# 11
-    $v =~ s/ 10 14 (18) / 10 $1 /;		#  7#11
-    $v =~ s/ 10 (14) / $1 /;			#  9
-    $v =~ s/ 10 (15) / 10 $1 /;			#  7#9
-    $v =~ s/ 11 14 18 (21|22) / $1 11 /;	# 13#5
-    $v =~ s/ 11 14 (17|18) / $1 11 /;		# 11#5
-    $v =~ s/ 11 (14|15) / $1 11 /;		#  9#5
-    if ( $v =~ s/ 10 / / ) {
-	$res .= '(7) addn ';
-    }
-    elsif ( $v =~ s/^( \d| 10)* 11 / $1/ ) {
-	$res .= '-2 0 rmoveto ' if $res =~ /flat $/;
-	$res .= 'delta ';
-    }
-    if ( $v =~ s/ 5 7 / / ) {
-	$res .= '(4) susp ';
-    }
-    elsif ( $v =~ s/^0 7 / / ) {
-	$res .= '(2) susp ';
-    }
-    elsif ( $v =~ s/^0 4 / / ) {
-	$res .= '(no5) addn ';
-    }
-    print STDERR ("=cn=> $v\n") if $debug;
-    chop ($v);
-    $v =~ s/^ //;
-    @v = split(' ', $v);
-    foreach ( @v ) {
-	$res .= ('(1) addn ','(2) addf ','(2) addn ','(3) addf ','(3) addn ',
-		 '(4) addn ','(5) addf ','(5) addn ','(5) adds ','(6) addn ',
-		 '(7) addn ','(7) adds ','(8) addn ','(9) addf ','(9) addn ',
-		 '(9) adds ','(11) addf ','(11) addn ','(11) adds ',
-		 '(12) addn ','(13) addf ','(13) addn ')[$_];
-    }
-    print STDERR ("=cn=> $chord -> $res\n") if $debug;
-    $res;
-}
-
-sub errout {
-    my (@msg) = @_;
-    print STDERR (join (' ', @msg), "\n",
-		  "Line $.: $line\n");
 }
 
 ################ Command Line Options ################
@@ -868,7 +544,7 @@ sub app_options() {
 	app_usage(2);
     }
     app_ident if $ident;
-    app_usage (0), syntax(), exit(0) if $help;
+    app_usage(0), syntax(), exit(0) if $help;
 }
 
 sub app_ident {
@@ -1115,7 +791,7 @@ __END__
 %%DocumentFonts: Helvetica
 %%EndComments
 %%BeginProcSet: Symbols 0
-/tabdict 50 dict def 
+/tabdict 50 dict def
 tabdict begin
 /m { moveto } bind def
 /dim {
@@ -1124,7 +800,7 @@ tabdict begin
     1 -2 rmoveto (@) show moveto } def
 /hdim {
     currentpoint
-    /MSyms findfont 18 scalefont setfont 
+    /MSyms findfont 18 scalefont setfont
     1 -2 rmoveto (^) show moveto } def
 /minus {
     currentpoint
@@ -1135,32 +811,32 @@ tabdict begin
     /Symbol findfont 12 scalefont setfont
     1 8 rmoveto (+) show moveto } def
 /delta {
-    /Symbol findfont 12 scalefont setfont 
+    /Symbol findfont 12 scalefont setfont
     1 -3 rmoveto (D) show -1 3 rmoveto } def
 /sharp {
     /MSyms findfont 13 scalefont setfont
     2 0 rmoveto (f) show -1 0 rmoveto } def
 /flat {
-    /MSyms findfont 16 scalefont setfont 
+    /MSyms findfont 16 scalefont setfont
     2 -2 rmoveto (s) show -2 2 rmoveto } def
 /natural {
     /MSyms findfont 13 scalefont setfont
     2 0 rmoveto (d) show -1 0 rmoveto } def
 /addn {
-    /Helvetica findfont 12 scalefont setfont 
+    /Helvetica findfont 12 scalefont setfont
     0 -3 rmoveto show 0 3 rmoveto } def
 /adds {
     /MSyms findfont 9 scalefont setfont
-    2 -2 rmoveto (f) show -1 2 rmoveto 
-    /Helvetica findfont 12 scalefont setfont 
+    2 -2 rmoveto (f) show -1 2 rmoveto
+    /Helvetica findfont 12 scalefont setfont
     0 -3 rmoveto show 0 3 rmoveto } def
 /addf {
     /MSyms findfont 12 scalefont setfont
-    2 -4 rmoveto (s) show -1 4 rmoveto 
-    /Helvetica findfont 12 scalefont setfont 
+    2 -4 rmoveto (s) show -1 4 rmoveto
+    /Helvetica findfont 12 scalefont setfont
     0 -3 rmoveto show 0 3 rmoveto } def
 /maj7 {
-    /Symbol findfont 15 scalefont setfont 
+    /Symbol findfont 15 scalefont setfont
     0 -2 rmoveto (D) show 0 2 rmoveto } def
 /root {
     /Helvetica findfont 16 scalefont setfont
@@ -1205,11 +881,11 @@ griddict begin
 
   /grid {				% -- grid --
     gsave currentpoint
-    6 
+    6
     { 0 gridheight rlineto gridscale gridscale gridwidth sub rmoveto }
     repeat
     moveto
-    5 
+    5
     { gridwidth 0 rlineto 0 gridwidth sub gridscale rmoveto }
     repeat
     stroke grestore
@@ -1218,7 +894,7 @@ griddict begin
   /dot {				% string fret dot --
     gsave
     exch 6 exch sub gridscale mul	% str fret -> fret y
-    exch dup 5 exch abs sub gridscale mul half-incr sub	% fret y -> y fret x 
+    exch dup 5 exch abs sub gridscale mul half-incr sub	% fret y -> y fret x
     exch 3 1 roll rmoveto
 
     % It is tempting to use the more enhanced format (that places o
@@ -1229,7 +905,7 @@ griddict begin
     { gsave
       gridwidth 20 div
 	    dup neg dup rmoveto
-	    dup dup rlineto 
+	    dup dup rlineto
 	    dup dup rlineto
 	    dup neg dup rmoveto
 	    dup dup neg exch rmoveto
@@ -1255,8 +931,8 @@ tabdict begin
     dup () ne
     { gsave
       half-incr neg gridheight gridscale sub rmoveto
-      displ-font setfont 
-      dup stringwidth pop neg half-incr rmoveto show grestore 
+      displ-font setfont
+      dup stringwidth pop neg half-incr rmoveto show grestore
     }
     { pop }
     ifelse
@@ -1264,7 +940,7 @@ tabdict begin
     1 1 6
     {	% fret string {...} --
 	exch dup
-	0 ne 
+	0 ne
 	{ dot }
 	{ pop pop }
 	ifelse
@@ -1294,15 +970,15 @@ or currentgray 0 ne or{charStr false charpath setmatrix Fill}
 /BuildChar{AltRT6 begin exch begin BC2 end end}B
 /BC2{save exch StrokeWidth setlinewidth/Strk 0 store
 Encoding exch get dup CharDefs exch known not{pop/.notdef}if
-CharDefs exch get newpath dup type exec restore}B 
+CharDefs exch get newpath dup type exec restore}B
 /UVec[{rmoveto}{rlineto}{rcurveto}{ShowExt}{]concat}{Cache}{setlinewidth}
 {ShowInt}{setlinecap}{setlinejoin}{gsave}{[}{Fill}{Eofill}{stroke}{SetWid}
 {100 mul add}{100 mul}{100 div}{Cp}{Sstrk}{setgray}]def
 /UCS{dup 200 lt{100 sub}{dup 233 lt{216 sub 100 mul add}
 {233 sub UVec exch get exec}ifelse}ifelse}B
-/CD{/NF exch def{exch dup/FID ne{exch NF 3 1 roll put}  
+/CD{/NF exch def{exch dup/FID ne{exch NF 3 1 roll put} 
 {pop pop}ifelse}forall NF}B
-/MN{1 index length/Len exch def dup length Len add string dup 
+/MN{1 index length/Len exch def dup length Len add string dup
 Len 4 -1 roll putinterval dup 0 4 -1 roll putinterval}B
 /RC{(|______)anchorsearch {1 index MN cvn/NewN exch def cvn
 findfont dup maxlength dict CD dup/FontName NewN put dup
@@ -1320,7 +996,7 @@ MacVec 16#27 /quotesingle put  MacVec 16#60 /grave put/NUL/SOH/STX/ETX
 /dagger/degree/cent/sterling/section/bullet/paragraph/germandbls
 /register/copyright/trademark/acute/dieresis/notequal/AE/Oslash
 /infinity/plusminus/lessequal/greaterequal/yen/mu/partialdiff/summation
-/product/pi/integral/ordfeminine/ordmasculine/Omega/ae/oslash 
+/product/pi/integral/ordfeminine/ordmasculine/Omega/ae/oslash
 /questiondown/exclamdown/logicalnot/radical/florin/approxequal/Delta/guillemotleft
 /guillemotright/ellipsis/nbspace/Agrave/Atilde/Otilde/OE/oe
 /endash/emdash/quotedblleft/quotedblright/quoteleft/quoteright/divide/lozenge
@@ -1340,21 +1016,21 @@ MacVec 128 128 getinterval astore pop end end
 /UnderlinePosition -20 def/UnderlineThickness 20 def end
 /Encoding AltRT6/MacVec get def CharDefs begin/.notdef{500 0 setcharwidth} def
 /at<A0645EA79171D9EE78ADE94E644E866486EB7A647A426442EBFC786ED9E94A644A3C
-643CEB7E647E8C648CEBFCF5>def 
+643CEB7E647E8C648CEBFCF5>def
 /L<96D964525E8BD96AD9EE6464E98064EAC164D9EA4864EAFC75D973E95E5D4D5E4968
 EB5F70677A7578EB766174536E4CEBFC83A5E95E5D4E5E4A68EB5F7167787478EB746374
-536E4CEBFCF5>def 
+536E4CEBFCF5>def
 /R<B4645C879F84D9EE758CE96A64EA7CA7EA686FEA666A6063585FEB6062545D5865EB
 676A61715971EB5B635762555AEB625C6A557155EB696468627365EB6A6571697167EBFC
-F5>def 
+F5>def
 /asciicircum<A0645E979281D9EE78ADE94E644E866486EB7A647A426442EBFC786ED9
-E94A644A3C643CEB7E647E8C648CEBFC887DD9E9401EEA6864EA88AAEAFCF5>def 
+E94A644A3C643CEB7E647E8C648CEBFC887DD9E9401EEA6864EA88AAEAFCF5>def
 /d<A0646B489376D9EE706FD9E96463D7EA7D6CEA643DEA6964EA6465D9EA4B5CEA648B
-EAFC759CE9786BEA6447EA505DEAFCF5>def 
+EAFC759CE9786BEA6447EA505DEAFCF5>def
 /f<B4645B3EA980D9EE7346E9648CD9EA6964EA643CD7EAFC8C50E9648CD9EA6964EA64
-3CD7EAFC6469E96473EAA078EA6455EAFC6496E96473EAA078EA6455EAFCF5>def 
+3CD7EAFC6469E96473EAA078EA6455EAFC6496E96473EAA078EA6455EAFCF5>def
 /s<A0645E698F7FD9EE797FE9726E7D7B6D94EB616A536A4F64EB605FEA6497EA5F64EA
-645AD7EAFC69A4E96A67EA6D687060705BEB655162515C4AEB5A59EAFCF5>def 
+645AD7EAFC69A4E96A67EA6D687060705BEB655162515C4AEB5A59EAFCF5>def
 end/EFN[]def
 end systemdict/currentpacking known{SavPak setpacking}if
 /MSyms $MSyms definefont pop
