@@ -142,7 +142,8 @@ sub parse {
 	if ( $mod =~ /^\/(.+)/ ) {
 	    my @ch = split(/\//, $1);
 	    foreach my $c ( @ch ) {
-		my $p = eval { App::Music::PlayTab::Note->parse($c) };
+	#	my $p = eval { App::Music::PlayTab::Note->parse($c) };
+		my $p = eval { App::Music::PlayTab::Chord->parse($c) };
 		croak("Unrecognized bass of chord: $chord")
 		  unless defined $p;
 		$self->{bass} ||= [];
@@ -292,7 +293,7 @@ sub ps {
 	$res .= ' (7) addn';
     }
     elsif ( $v =~ s/^( \d| 10|) 11 / $1/ ) {
-	$res .= '-2 0 rmoveto ' if $res =~ /flat $/;
+	$res .= ' -2 0 rmoveto' if $res =~ / flat$/;
 	$res .= ' delta';
     }
     if ( $v =~ s/ 5 7 / / ) {
