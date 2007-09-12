@@ -4,8 +4,8 @@ my $RCS_Id = '$Id$ ';
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Aug 23 18:41:40 2007
-# Update Count    : 263
+# Last Modified On: Wed Sep 12 15:35:25 2007
+# Update Count    : 294
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -156,11 +156,14 @@ sub bar {
     $line =~ s/  +/ /g;
 
     my (@c) = split(' ', $line);
+    my $firstbar = 1;
+
     while ( @c > 0 ) {
 	eval {
 	    my $c = shift(@c);
 	    if ( $c eq '|' ) {
-		print_bar();
+		print_bar($firstbar);
+		$firstbar = 0;
 		next;
 	    }
 	    elsif ( $c eq ':' ) {
@@ -247,6 +250,12 @@ sub control {
 	return;
     }
 
+    # Bar numbering
+    if ( /^n(umber)?\s+([-+]?\d+)?/i ) {
+	set_barno(defined $2 ? $2 ? $2 < 0 ? $2+1 : $2 : undef : 1);
+	return;
+    }
+
     errout("Unrecognized control");
 }
 
@@ -314,6 +323,11 @@ my $yd_width = 0;
 my $xm = 0;
 my $md = 0;
 my $on_top = 0;
+my $barno;
+
+sub set_barno {
+    $barno = shift;
+}
 
 sub print_title {
     my ($new, $title) = @_;
@@ -325,6 +339,7 @@ sub print_title {
     print OUTPUT ($new ? 'TF (' : 'SF (', $title, ') show', "\n");
     ps_advance();
     $on_top = 1;
+    undef $barno;
     $xpose = $gxpose;
 }
 
@@ -346,8 +361,20 @@ sub print_again {
 # end scope for $prev_chord
 
 sub print_bar {
+    my ($first) = @_;
     ps_move();
-    print OUTPUT ("bar\n");
+    if ( defined($barno) ) {
+	if ( $first ) {
+	    print OUTPUT $barno > 0 ? ("($barno) barn\n") : ("bar\n");
+	}
+	else {
+	    print OUTPUT ("bar\n");
+	    $barno++;
+	}
+    }
+    else {
+	print OUTPUT ("bar\n");
+    }
     ps_skip(4);
 }
 
@@ -717,6 +744,10 @@ You can transpose an individual song with '!x I<amount>', where
 I<amount> can range from -11 to +11, inclusive. A positive transpose
 value will make sharps, a negative value will make flats.
 
+'!n' enables bar numbering. '!n 0' disables numbering, '!n I<n>'
+starts numbering at I<n>. I<n> may be negative, e.g., to skip
+numbering an intro.
+
 Look at the examples, that is (currently) the best way to get grip on
 what the program does.
 
@@ -852,6 +883,13 @@ tabdict begin
 /bar {
     1 setlinewidth
     currentpoint 0 -3 rmoveto 0 16 rlineto stroke moveto } def
+/barn {
+    gsave /Helvetica findfont 8 scalefont setfont
+    % 0 14 rmoveto dup stringwidth pop 2 div neg 0 rmoveto
+    -2 8 rmoveto dup stringwidth pop neg 0 rmoveto
+    show grestore
+    bar
+    } def
 /same1 {
     /MSyms findfont 10 scalefont setfont
     (L) dup stringwidth pop 2 div neg 0 rmoveto show } def
