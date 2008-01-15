@@ -16,10 +16,10 @@ sub parse {
     my ($self, $chord) = @_;
 
     $self = $self->new unless ref($self);
-
+    delete $self->{bass};
     $self->{_unparsed} = $chord;
     $chord = lc($chord);
-    $self->{_debug} = 1 if $chord =~ s/^\?//;
+    $self->{_debug} = $chord =~ s/^\?//;
     my $key = $chord;
     my $mod = '';
 
@@ -143,8 +143,7 @@ sub parse {
 	if ( $mod =~ /^\/(.+)/ ) {
 	    my @ch = split(/\//, $1);
 	    foreach my $c ( @ch ) {
-	#	my $p = eval { App::Music::PlayTab::Note->parse($c) };
-		my $p = eval { App::Music::PlayTab::Chord->parse($c) };
+		my $p = eval { __PACKAGE__->new->parse($c) };
 		croak("Unrecognized bass of chord: ".$self->{_unparsed})
 		  unless defined $p;
 		$self->{bass} ||= [];
@@ -167,6 +166,9 @@ sub parse {
     warn("=> Chord ", $self->{_unparsed}, ": ", $self->{key}->key,
 	 " (", $self->{key}->name, ") [ @vec ]\n")
       if $self->{_debug};
+
+    # Traditional chords do not include a duration.
+    $self->{duration} = 0;
 
     $self;
 }
@@ -252,6 +254,16 @@ sub name {
       if $self->{_debug};
 
     return $res;
+}
+
+sub duration {
+    my ($self) = @_;
+    $self->{duration};
+}
+
+sub duration_base {
+    my ($self) = @_;
+    16;
 }
 
 sub ps {
