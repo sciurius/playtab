@@ -1,3 +1,43 @@
+# Plain
+C	C	(C) root
+Cis	C#	(C) root sharp
+C#	C#	(C) root sharp
+
+Des	Db	(D) root flat
+Ds	Db	(D) root flat
+Db	Db	(D) root flat
+D	D	(D) root
+Dis	D#	(D) root sharp
+D#	D#	(D) root sharp
+
+Ees	Eb	(E) root flat
+Es	Eb	(E) root flat
+Eb	Eb	(E) root flat
+E	E	(E) root
+
+F	F	(F) root
+Fis	F#	(F) root sharp
+F#	F#	(F) root sharp
+
+Ges	Gb	(G) root flat
+Gs	Gb	(G) root flat
+Gb	Gb	(G) root flat
+G	G	(G) root
+Gis	G#	(G) root sharp
+G#	G#	(G) root sharp
+
+Aes	Ab	(A) root flat
+As	Ab	(A) root flat
+Ab	Ab	(A) root flat
+A	A	(A) root
+Ais	A#	(A) root sharp
+A#	A#	(A) root sharp
+
+Bes	Bb	(B) root flat
+Bs	Bb	(B) root flat
+Bb	Bb	(B) root flat
+B	B	(B) root
+
 # Minor.
 C-	Cm	(C) root minus
 Cmin	Cm	(C) root minus
