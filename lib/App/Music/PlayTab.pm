@@ -4,8 +4,8 @@ my $RCS_Id = '$Id$ ';
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Sep 12 15:35:25 2007
-# Update Count    : 294
+# Last Modified On: Tue Jan 15 11:23:38 2008
+# Update Count    : 318
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -33,6 +33,7 @@ my $output;
 my $preamble;
 my $gxpose = 0;			# global xpose value
 my $verbose = 0;		# verbose processing
+my $lilypond = 0;		# use LilyPond syntax
 
 # Development options (not shown with -help).
 my $debug = 0;			# debugging
@@ -56,8 +57,6 @@ $trace |= ($debug || $test);
 
 ################ Presets ################
 
-use App::Music::PlayTab::Chord;
-
 # Print dimensions.
 my $std_width	   =  30;
 my $std_height	   = -15;
@@ -78,6 +77,7 @@ print STDOUT ("ok 3\n") if $test;
 
 while ( <> ) {
     next if /^\s*#/;
+    next if $lilypond && /^\s*%%/;
     next unless /\S/;
     chomp($line = $_);
 
@@ -107,28 +107,28 @@ while ( <> ) {
 	$linetype = 1;
 	next;
     }
-    elsif ( $linetype == 1 && /^[-+=<]/ ) {
+    elsif ( $linetype == 1 && /^%?[-+=<]/ ) {
 	print_newline();
 	$linetype = 0;
     }
 
     # Spacing/margin notes.
-    if ( /^=(.*)/ ) {
+    if ( /^%?=(.*)/ ) {
 	print_margin(2, $1);
 	$linetype = 0;
 	next;
     }
-    if ( /^-(.*)/ ) {
+    if ( /^%?-(.*)/ ) {
 	print_margin(1, $1);
 	$linetype = 0;
 	next;
     }
-    if ( /^\+(.*)/ ) {
+    if ( /^%?\+(.*)/ ) {
 	print_margin(0, $1);
 	$linetype = 0;
 	next;
     }
-    if ( /^\</ ) {
+    if ( /^%?\</ ) {
 	print_margin(0, undef);
 	$linetype = 0;
 	next;
@@ -152,7 +152,12 @@ sub bar {
 
     on_top();
 
-    $line =~ s/([|.:`'])/ $1 /g;	#'`])/;
+    if ( $lilypond ) {
+	$line =~ s/([|`'])/ $1 /g;	#'`])/;
+    }
+    else {
+	$line =~ s/([|.:`'])/ $1 /g;	#'`])/;
+    }
     $line =~ s/  +/ /g;
 
     my (@c) = split(' ', $line);
@@ -201,11 +206,22 @@ sub bar {
 	    }
 
 	    ps_move();
-	    my $chord = App::Music::PlayTab::Chord->parse($c);
-	    $chord->transpose($xpose) if $xpose;
-	    print_chord($chord);
-	    ps_step();
+	    my $chord = parse_chord($c);
+
+	    if ( $chord->{key} >= 0 ) {
+		$chord->transpose($xpose) if $xpose;
+		print_chord($chord);
+		ps_step();
+	    }
+	    else {
+		print_rest();
+	    }
+	    if ( my $d = $chord->duration ) {
+		$d = int($d / ($chord->duration_base / 4));
+		unshift(@c, ('.') x ($d-1));
+	    }
 	};
+	die($@) if $@ =~ /can\'t locate/i;
 	errout($@) if $@;
     }
     print_newline();
@@ -256,7 +272,29 @@ sub control {
 	return;
     }
 
+    # LilyPond syntax
+    if ( /^l(?:y|ilypond)?(?:\s+(\d+))?/i ) {
+	$lilypond = defined $1 ? $1 : 1;
+	return;
+    }
     errout("Unrecognized control");
+}
+
+my $chordparser;
+sub parse_chord {
+    my $chord = shift;
+    unless ( $chordparser ) {
+	#if ( $chord =~ /^[a-g](es|is)?[1248:]/ ) {
+	if ( $lilypond ) {
+	    require App::Music::PlayTab::LyChord;
+	    $chordparser = App::Music::PlayTab::LyChord->new;
+	}
+	else {
+	    require App::Music::PlayTab::Chord;
+	    $chordparser = App::Music::PlayTab::Chord->new;
+	}
+    }
+    $chordparser->parse($chord);
 }
 
 sub chord {
@@ -265,7 +303,7 @@ sub chord {
     die("Illegal [chord] spec, need 7 or 8 values")
 	unless @l == 8 || @l == 7;
 
-    my $chord = App::Music::PlayTab::Chord->parse(shift(@l));
+    my $chord = parse_chord(shift(@l));
 
     my @c = ();
     my $c = '()';
