@@ -19,10 +19,13 @@ BEGIN {
     close($td);
 }
 
-use Test::More tests => 1 + 2 * @tests;
+use Test::More tests => 2 + 2 * @tests;
 BEGIN {
     use_ok qw(App::Music::PlayTab::Chord);
 }
+
+my $parser = App::Music::PlayTab::Chord->new;
+ok($parser, "parser object");
 
 # Run the tests.
 # Input is
@@ -31,7 +34,7 @@ BEGIN {
 foreach ( @tests ) {
     my ($chord, $name, $ps) = split(/\t/, $_);
     $name ||= $chord;
-    my $c = App::Music::PlayTab::Chord->parse($chord);
+    my $c = $parser->parse($chord);
     my $res = $c->name;
     is($res, $name, "$chord: name");
     ok(1, "$chord: no ps"), next unless $ps;
