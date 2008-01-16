@@ -271,3 +271,13 @@ EOD
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+App::Music::PlayTab::PostScript::Preamble - PostScript preamble.
+
+=head1 DESCRIPTION
+
+This is an internal module for the App::Music::PlayTab application.

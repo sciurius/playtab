@@ -91,3 +91,13 @@ sub ps {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+App::Music::PlayTab::Note - Parse note names.
+
+=head1 DESCRIPTION
+
+This is an internal module for the App::Music::PlayTab application.

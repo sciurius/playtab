@@ -6,15 +6,16 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Jan 16 14:58:59 2008
-# Update Count    : 338
+# Last Modified On: Wed Jan 16 16:12:32 2008
+# Update Count    : 349
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
 
 use strict;
+use warnings;
 
-our $VERSION = "2.90";
+our $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)/g;
 
 # Package or program libraries, if appropriate.
 # $LIBDIR = $ENV{'LIBDIR'} || '/usr/local/lib/sample';
@@ -62,7 +63,7 @@ my $linetype = 0;		# type of current line
 my $xpose = $gxpose;
 
 sub ::run {
-    @ARGV = @_ if @_;
+    local (@ARGV) = @_ ? @_ : @ARGV;
 
     app_options();
     print STDOUT ("ok 1\n") if $test;
@@ -635,11 +636,12 @@ sub app_usage($) {
     app_ident;
     print STDERR <<EndOfUsage;
 Usage: $0 [options] [file ...]
-    -output XXX		output file name
-    -transpose +/-N     transpose all
-    -help		this message
-    -ident		show identification
-    -verbose		verbose information
+    --output XXX	output file name
+    --transpose +/-N    transpose all
+    --lilypond		use LilyPond chord syntax
+    --help		this message
+    --ident		show identification
+    --verbose		verbose information
 EndOfUsage
     exit $exit if $exit != 0;
 }
@@ -690,20 +692,31 @@ playtab - print chords of songs in a tabular fashion
 
 =head1 SYNOPSIS
 
+=head2 playtab
+
 playtab [options] [file ...]
 
  Options:
-   -transpose +/-N      transpose all songs
-   -output XXX		set outout file
-   -ident		show identification
-   -help		brief help message
-   -verbose		verbose information
+   --transpose +/-N     transpose all songs
+   --output XXX		set outout file
+   --lilypond		accept chords in LilyPond syntax
+   --ident		show identification
+   --help		brief help message
+   --verbose		verbose information
+
+=head2 App::Music::PlayTab
+
+ use App::Music::PlayTab;
+ run();			# arguments in @ARGV
+ run(@args);		# explicit arguments
+
+ perl -MApp::Music::PlayTab -e run ...arguments...
 
 =head1 OPTIONS
 
 =over 8
 
-=item B<-transpose> I<amount>
+=item B<--transpose> I<amount>
 
 Transposes all songs by I<amount>. This can be B<+> or B<-> 11 semitones.
 
@@ -712,19 +725,23 @@ when transposing down, chords will de represented flat if necessary.
 For example, chord A transposed +1 will become A-sharp, but when
 transposed -11 it will become B-flat.
 
-=item B<-output> I<file>
+=item B<--output> I<file>
 
 Designates I<file> as the output file for the program.
 
-=item B<-help>
+=item B<--lilypond>
+
+Interpet chord names according to LilyPond syntax.
+
+=item B<--help>
 
 Print a brief help message and exits.
 
-=item B<-ident>
+=item B<--ident>
 
 Prints program identification.
 
-=item B<-verbose>
+=item B<--verbose>
 
 More verbose information.
 
@@ -756,7 +773,8 @@ example to indicate the composer.
 
 The text "Bossanova" is printed below the title and subtitle.
 
-The "=" indicates some vertical space.
+The "=" indicates some vertical space. Likewise, you can use '-' and
+'+' as '=', but with a different vertical spacing.
 
 The next lines show the bars of the song. In the first bar is the c-9
 chord (Cminor9), followed by three dots. The dots indicate that this
@@ -800,6 +818,9 @@ value will make sharps, a negative value will make flats.
 starts numbering at I<n>. I<n> may be negative, e.g., to skip
 numbering an intro.
 
+'!ly' or '!lilypond' enables LilyPond chord name recognition. If
+followed by a '0', switches to classical chord name syntax.
+
 Look at the examples, that is (currently) the best way to get grip on
 what the program does.
 
@@ -842,6 +863,45 @@ Have fun, and let me know your ideas!
   %               Repeat
   /               Powerchord constructor   [D/G D/E-]
   --------------------------------------------------------------
+
+=head1 LILYPOND INPUT SYNTAX
+
+  Notes: c, d, e, f, g, a, b.
+  Raised with suffix 'is', e.g. ais.
+  Lowered with suffix 'es', e.g. bes, ees.
+
+  Chords: note + optional duration + optional modifiers.
+
+  Duration = 1, 2, 4, 8, with possible dots, e.g., "2.".
+  No duration means: use the duration of the previous chord.
+
+  Modifiers are preceeded with a ":".
+
+  Modifiers       Meaning                 [examples]
+  --------------------------------------------------------------
+  nothing         major triad             c4
+  m               minor triad             c4:m
+  aug             augmented triad         c4:aug
+  dim             diminished triad        c4:dim
+  --------------------------------------------------------------
+  maj             major 7th chord         c4:maj
+  6,7,9,11,13     chord additions         c4:7  c4:6.9 (dot required)
+  sus sus4, sus2  suspended 4th, 2nd      c4:sus
+  --------------------------------------------------------------
+  +               raise the pitch of an added note   c4:11.9+
+  -               lower the pitch of an added note   c4:11.9-
+  --------------------------------------------------------------
+  ^               substract a note from a chord      c4:9.^11
+  --------------------------------------------------------------
+
+  Other:          Meaning
+  --------------------------------------------------------------
+  r               Rest                    r2
+  s               Rest                    s4
+  /               Powerchord constructor  d/g   d/e:m
+  --------------------------------------------------------------
+
+See also: http://lilypond.org/doc/stable/Documentation/user/lilypond/Chord-names
 
 =head1 AUTHOR
 

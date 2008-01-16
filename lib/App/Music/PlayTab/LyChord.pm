@@ -182,3 +182,13 @@ sub parse {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+App::Music::PlayTab::LyChord - Parse LilyPond chords.
+
+=head1 DESCRIPTION
+
+This is an internal module for the App::Music::PlayTab application.
