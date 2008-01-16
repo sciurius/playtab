@@ -11,22 +11,18 @@ print "1..6\n";
 our $base;
 
 my $prefix = "";
-my $script = "";
 
 if ( -d "t" ) {
     $prefix = "t/";
-    $script = "script/playtab";
-}
-else {
-    $script = "../script/playtab";
 }
 
 { package PlayTab;
-  @ARGV = ("-test",
-	   "-output", "${prefix}test.ps",
-	   "-preamble", "${prefix}dummy.pre",
-	   "${prefix}${base}.ptb");
-  require($script);
+  require App::Music::PlayTab;
+  ::run( "-test",
+	 "-output", "${prefix}test.ps",
+	 "-preamble", "${prefix}dummy.pre",
+	 "${prefix}${base}.ptb",
+       );
 }
 
 my $ok = !differ ("${prefix}test.ps", "${prefix}${base}.ps");
