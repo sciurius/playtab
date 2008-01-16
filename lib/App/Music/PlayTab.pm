@@ -6,8 +6,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Jan 16 16:12:32 2008
-# Update Count    : 349
+# Last Modified On: Wed Jan 16 16:20:09 2008
+# Update Count    : 350
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -25,7 +25,7 @@ our $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)/g;
 # Package name.
 my $my_package = 'Sciurix';
 # Program name and version.
-my ($my_name, $my_version) = $RCS_Id =~ /: (.+).pl,v ([\d.]+)/;
+my ($my_name, $my_version) = $RCS_Id =~ /: (.+).pm,v ([\d.]+)/;
 # Tack '*' if it is not checked in into RCS.
 $my_version .= '*' if length('$Locker$ ') > 12;
 

@@ -66,6 +66,9 @@ what the program does.
 Oh, I almost forgot: it can print guitar chord diagrams as well. 
 See "bluebossa", "sophisticatedlady" and some others.
 
+If you are a LilyPond adept, it can accept chord specifications the
+LilyPond way as well.
+
 Have fun, and let me know your ideas!
 
 ----------------------------------------------------------------------------
