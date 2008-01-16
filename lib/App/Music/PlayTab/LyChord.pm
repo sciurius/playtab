@@ -15,12 +15,14 @@ sub parse {
 
     $self->{_unparsed} = $chord;
     $self->{_debug} = 1 if $chord =~ s/^\?//;
+    $self->{_isrest} = 0;
+
     my $key = $chord;
     my $mod = '';
 
     # Catch rests.
     if ( $chord =~ /(^[rs])(\d+\.*)?/ ) {
-	$self->{key} = -1;
+	$self->{_isrest} = 1;
 	if ( defined $2 ) {
 	    my ($dur, $xt) = $2 =~ /^(\d+)(\.*)$/;
 	    $dur = $self->duration_base / $dur;

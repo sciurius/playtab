@@ -266,6 +266,10 @@ sub duration_base {
     16;
 }
 
+sub is_rest {
+    shift->{_isrest};
+}
+
 sub ps {
     my ($self) = @_;
     my $res = $self->{key}->ps;
