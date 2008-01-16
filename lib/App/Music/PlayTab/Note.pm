@@ -4,11 +4,11 @@ package App::Music::PlayTab::Note;
 
 use strict;
 use warnings;
+
+our $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)/g;
+
 use Carp;
-
 use App::Music::PlayTab::NoteMap qw(note_to_key key_to_note);
-
-our $VERSION = 0.01;
 
 my $debug;
 

@@ -4,6 +4,9 @@ package App::Music::PlayTab::Chord;
 
 use strict;
 use warnings;
+
+our $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)/g;
+
 use App::Music::PlayTab::Note;
 use Carp;
 

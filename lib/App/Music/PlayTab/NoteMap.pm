@@ -5,7 +5,7 @@ package App::Music::PlayTab::NoteMap;
 use strict;
 use warnings;
 
-our $VERSION = 0.01;
+our $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)/g;
 
 =head1 NAME
 
