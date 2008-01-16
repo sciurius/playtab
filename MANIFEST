@@ -8,6 +8,7 @@ lib/App/Music/PlayTab/Chord.pm
 lib/App/Music/PlayTab/LyChord.pm
 lib/App/Music/PlayTab/Note.pm
 lib/App/Music/PlayTab/NoteMap.pm
+lib/App/Music/PlayTab/PostScript/Preamble.pm
 zzexamples/TOC
 zzexamples/allblues.dat
 zzexamples/anighttunisia.dat
