@@ -1,16 +1,20 @@
 #!/usr/bin/perl
 my $RCS_Id = '$Id$ ';
 
+package App::Music::PlayTab;
+
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Jan 15 11:23:38 2008
-# Update Count    : 318
+# Last Modified On: Wed Jan 16 14:58:59 2008
+# Update Count    : 338
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
 
 use strict;
+
+our $VERSION = "2.90";
 
 # Package or program libraries, if appropriate.
 # $LIBDIR = $ENV{'LIBDIR'} || '/usr/local/lib/sample';
@@ -40,21 +44,6 @@ my $debug = 0;			# debugging
 my $trace = 0;			# trace (show process)
 my $test = 0;			# test
 
-app_options();
-print STDOUT ("ok 1\n") if $test;
-
-if ( defined $output ) {
-    open(OUTPUT, ">$output") or print STDOUT ("not ") if $test;
-    print STDOUT ("ok 2\n") if $test;
-}
-else {
-    die("Test mode requires -output option to be set\n") if $test;
-    *OUTPUT = *STDOUT;
-}
-
-# Options post-processing.
-$trace |= ($debug || $test);
-
 ################ Presets ################
 
 # Print dimensions.
@@ -72,78 +61,97 @@ my $linetype = 0;		# type of current line
 
 my $xpose = $gxpose;
 
-ps_preamble();
-print STDOUT ("ok 3\n") if $test;
+sub ::run {
+    @ARGV = @_ if @_;
 
-while ( <> ) {
-    next if /^\s*#/;
-    next if $lilypond && /^\s*%%/;
-    next unless /\S/;
-    chomp($line = $_);
+    app_options();
+    print STDOUT ("ok 1\n") if $test;
 
-    s/\^\s+//;
-    if ( /^!\s*(.*)/ ) {
-	control($1);
-	next;
+    if ( defined $output ) {
+	open(OUTPUT, ">$output") or print STDOUT ("not ") if $test;
+	print STDOUT ("ok 2\n") if $test;
+    }
+    else {
+	die("Test mode requires -output option to be set\n") if $test;
+	*OUTPUT = *STDOUT;
     }
 
-    if ( /^\s*\[/ ) {
-	while ( /^\s*\[([^]]+)\](.*)/ ) {
-	    eval { chord($1) };
-	    errout($@) if $@;
-	    $_ = $2;
+    # Options post-processing.
+    $trace |= ($debug || $test);
+
+    ps_preamble();
+    print STDOUT ("ok 3\n") if $test;
+
+    while ( <> ) {
+	next if /^\s*#/;
+	next if $lilypond && /^\s*%%/;
+	next unless /\S/;
+	chomp($line = $_);
+
+	s/\^\s+//;
+	if ( /^!\s*(.*)/ ) {
+	    control($1);
+	    next;
 	}
-	$linetype = 2;
-	next;
-    }
-    elsif ( $linetype == 2 ) {
-        print_newline(4);
-	$linetype = 0;
-    }
 
-    if ( /^\s*\|/ ) {
-	print_newline() if $linetype;
-	bar($_);
-	$linetype = 1;
-	next;
-    }
-    elsif ( $linetype == 1 && /^%?[-+=<]/ ) {
-	print_newline();
-	$linetype = 0;
-    }
+	if ( /^\s*\[/ ) {
+	    while ( /^\s*\[([^]]+)\](.*)/ ) {
+		eval { chord($1) };
+		errout($@) if $@;
+		$_ = $2;
+	    }
+	    $linetype = 2;
+	    next;
+	}
+	elsif ( $linetype == 2 ) {
+	    print_newline(4);
+	    $linetype = 0;
+	}
 
-    # Spacing/margin notes.
-    if ( /^%?=(.*)/ ) {
-	print_margin(2, $1);
-	$linetype = 0;
-	next;
-    }
-    if ( /^%?-(.*)/ ) {
-	print_margin(1, $1);
-	$linetype = 0;
-	next;
-    }
-    if ( /^%?\+(.*)/ ) {
-	print_margin(0, $1);
-	$linetype = 0;
-	next;
-    }
-    if ( /^%?\</ ) {
-	print_margin(0, undef);
-	$linetype = 0;
-	next;
-    }
+	if ( /^\s*\|/ ) {
+	    print_newline() if $linetype;
+	    bar($_);
+	    $linetype = 1;
+	    next;
+	}
+	elsif ( $linetype == 1 && /^%?[-+=<]/ ) {
+	    print_newline();
+	    $linetype = 0;
+	}
 
-    text($_);
-    $linetype = 0;
+	# Spacing/margin notes.
+	if ( /^%?=(.*)/ ) {
+	    print_margin(2, $1);
+	    $linetype = 0;
+	    next;
+	}
+	if ( /^%?-(.*)/ ) {
+	    print_margin(1, $1);
+	    $linetype = 0;
+	    next;
+	}
+	if ( /^%?\+(.*)/ ) {
+	    print_margin(0, $1);
+	    $linetype = 0;
+	    next;
+	}
+	if ( /^%?\</ ) {
+	    print_margin(0, undef);
+	    $linetype = 0;
+	    next;
+	}
+
+	text($_);
+	$linetype = 0;
+    }
+    print STDOUT ("ok 4\n") if $test;
+
+    ps_trailer ();
+    print STDOUT ("ok 5\n") if $test;
+
+    close OUTPUT if defined $output;
+    exit 0 unless $test;
 }
-print STDOUT ("ok 4\n") if $test;
-
-ps_trailer ();
-print STDOUT ("ok 5\n") if $test;
-
-close OUTPUT if defined $output;
-exit 0 unless $test;
 
 ################ Subroutines ################
 
@@ -153,6 +161,7 @@ sub bar {
     on_top();
 
     if ( $lilypond ) {
+	# LilyPond chords use : and ., so don't split on these.
 	$line =~ s/([|`'])/ $1 /g;	#'`])/;
     }
     else {
@@ -169,15 +178,12 @@ sub bar {
 	    if ( $c eq '|' ) {
 		print_bar($firstbar);
 		$firstbar = 0;
-		next;
 	    }
 	    elsif ( $c eq ':' ) {
 		print_again();
-		next;
 	    }
 	    elsif ( $c eq '.' ) {
 		print_space();
-		next;
 	    }
 	    elsif ( $c eq '%' ) {
 		my $xs = 1;
@@ -186,39 +192,35 @@ sub bar {
 		    $xs++;
 		}
 		print_same('1', $xs);
-		next;
 	    }
 	    elsif ( $c eq '-' ) {
 		print_rest();
-		next;
 	    }
 	    elsif ( $c eq '\'' ) {
 		ps_skip(4);
-		next;
 	    }
 	    elsif ( $c eq '`' ) {
 		ps_skip(-4);
-		next;
 	    }
 	    elsif ( lc($c) eq 'ta' ) {
 		print_turnaround();
-		next;
-	    }
-
-	    ps_move();
-	    my $chord = parse_chord($c);
-
-	    if ( $chord->{key} >= 0 ) {
-		$chord->transpose($xpose) if $xpose;
-		print_chord($chord);
-		ps_step();
 	    }
 	    else {
-		print_rest();
-	    }
-	    if ( my $d = $chord->duration ) {
-		$d = int($d / ($chord->duration_base / 4));
-		unshift(@c, ('.') x ($d-1));
+		ps_move();
+		my $chord = parse_chord($c);
+
+		if ( $chord->is_rest ) {
+		    print_rest();
+		}
+		else {
+		    $chord->transpose($xpose) if $xpose;
+		    print_chord($chord);
+		    ps_step();
+		}
+		if ( my $d = $chord->duration ) {
+		    $d = int($d / ($chord->duration_base / 4));
+		    unshift(@c, ('.') x ($d-1));
+		}
 	    }
 	};
 	die($@) if $@ =~ /can\'t locate/i;
@@ -281,20 +283,25 @@ sub control {
 }
 
 my $chordparser;
+my $lilyparser;
 sub parse_chord {
     my $chord = shift;
-    unless ( $chordparser ) {
-	#if ( $chord =~ /^[a-g](es|is)?[1248:]/ ) {
-	if ( $lilypond ) {
+    my $parser;
+    if ( $lilypond ) {
+	unless ( $lilyparser ) {
 	    require App::Music::PlayTab::LyChord;
-	    $chordparser = App::Music::PlayTab::LyChord->new;
+	    $lilyparser = App::Music::PlayTab::LyChord->new;
 	}
-	else {
+	$parser = $lilyparser;
+    }
+    else {
+	unless ( $chordparser ) {
 	    require App::Music::PlayTab::Chord;
 	    $chordparser = App::Music::PlayTab::Chord->new;
 	}
+	$parser = $chordparser;
     }
-    $chordparser->parse($chord);
+    $parser->parse($chord);
 }
 
 sub chord {
@@ -557,13 +564,20 @@ sub ps_pop_x {
 }
 
 sub ps_preamble {
+    my $data;
     if ( defined $preamble ) {
 	open(DATA, $preamble) or die("$preamble: $!\n");
+	local($/);
+	$data = <DATA>;
+	close(DATA);
     }
-    while ( <DATA> ) {
-	s/\$std_gridscale/$std_gridscale/g;
-	print OUTPUT ($_);
+    else {
+	require App::Music::PlayTab::PostScript::Preamble;
+	$data = App::Music::PlayTab::PostScript::Preamble->preamble;
     }
+    $data =~ s/\$std_gridscale/$std_gridscale/g;
+    print OUTPUT ($data);
+
     $x0 = 50;
     $y0 = 800;
     $xd = $std_width;
@@ -855,265 +869,3 @@ MA 02139, USA.
 =cut
 
 1;
-
-__END__
-%!PS-Adobe-2.0
-%%Pages: (atend)
-%%DocumentFonts: Helvetica
-%%EndComments
-%%BeginProcSet: Symbols 0
-/tabdict 50 dict def
-tabdict begin
-/m { moveto } bind def
-/dim {
-    currentpoint
-    /MSyms findfont 18 scalefont setfont
-    1 -2 rmoveto (@) show moveto } def
-/hdim {
-    currentpoint
-    /MSyms findfont 18 scalefont setfont
-    1 -2 rmoveto (^) show moveto } def
-/minus {
-    currentpoint
-    /Symbol findfont 12 scalefont setfont
-    1 8 rmoveto (-) show moveto } def
-/plus {
-    currentpoint
-    /Symbol findfont 12 scalefont setfont
-    1 8 rmoveto (+) show moveto } def
-/delta {
-    /Symbol findfont 12 scalefont setfont
-    1 -3 rmoveto (D) show -1 3 rmoveto } def
-/sharp {
-    /MSyms findfont 13 scalefont setfont
-    2 0 rmoveto (f) show -1 0 rmoveto } def
-/flat {
-    /MSyms findfont 16 scalefont setfont
-    2 -2 rmoveto (s) show -2 2 rmoveto } def
-/natural {
-    /MSyms findfont 13 scalefont setfont
-    2 0 rmoveto (d) show -1 0 rmoveto } def
-/addn {
-    /Helvetica findfont 12 scalefont setfont
-    0 -3 rmoveto show 0 3 rmoveto } def
-/adds {
-    /MSyms findfont 9 scalefont setfont
-    2 -2 rmoveto (f) show -1 2 rmoveto
-    /Helvetica findfont 12 scalefont setfont
-    0 -3 rmoveto show 0 3 rmoveto } def
-/addf {
-    /MSyms findfont 12 scalefont setfont
-    2 -4 rmoveto (s) show -1 4 rmoveto
-    /Helvetica findfont 12 scalefont setfont
-    0 -3 rmoveto show 0 3 rmoveto } def
-/maj7 {
-    /Symbol findfont 15 scalefont setfont
-    0 -2 rmoveto (D) show 0 2 rmoveto } def
-/root {
-    /Helvetica findfont 16 scalefont setfont
-    show } def
-/slash {
-    /Helvetica findfont 16 scalefont setfont
-    0 -4 rmoveto (/) show } def
-/susp {
-    /Helvetica findfont 12 scalefont setfont
-    0 -3 rmoveto (sus) show show 0 3 rmoveto } def
-/bar {
-    1 setlinewidth
-    currentpoint 0 -3 rmoveto 0 16 rlineto stroke moveto } def
-/barn {
-    gsave /Helvetica findfont 8 scalefont setfont
-    % 0 14 rmoveto dup stringwidth pop 2 div neg 0 rmoveto
-    -2 8 rmoveto dup stringwidth pop neg 0 rmoveto
-    show grestore
-    bar
-    } def
-/same1 {
-    /MSyms findfont 10 scalefont setfont
-    (L) dup stringwidth pop 2 div neg 0 rmoveto show } def
-/rest {
-    /Helvetica findfont 16 scalefont setfont
-    (\261) show } def
-/resth {
-    /MSyms findfont 16 scalefont setfont
-    (R) show } def
-/ta {
-    /Helvetica findfont 14 scalefont setfont
-    (T.A.) show	} def
-/TF {
-    /Helvetica findfont 16 scalefont setfont } def
-/SF {
-    /Helvetica findfont 12 scalefont setfont } def
-end
-%%EndProcSet
-%%BeginProcSet: Grid 0 0
-% Routines for the drawing of chords.
-/griddict 10 dict def
-griddict begin
-  /gridscale $std_gridscale def
-  /gridwidth gridscale 5 mul def
-  /gridheight gridscale 4 mul def
-  /half-incr gridscale 2 div def
-  /dot-size gridscale 0.35 mul def
-  /displ-font /Times-Roman findfont gridscale 1.25 mul scalefont def
-
-  /grid {				% -- grid --
-    gsave currentpoint
-    6
-    { 0 gridheight rlineto gridscale gridscale gridwidth sub rmoveto }
-    repeat
-    moveto
-    5
-    { gridwidth 0 rlineto 0 gridwidth sub gridscale rmoveto }
-    repeat
-    stroke grestore
-  } def
-
-  /dot {				% string fret dot --
-    gsave
-    exch 6 exch sub gridscale mul	% str fret -> fret y
-    exch dup 5 exch abs sub gridscale mul half-incr sub	% fret y -> y fret x
-    exch 3 1 roll rmoveto
-
-    % It is tempting to use the more enhanced format (that places o
-    % and x above the grid) but there is a chord caption.
-    % fret {...} --
-    -1 ne
-    { currentpoint dot-size 0 360 arc fill }
-    { gsave
-      gridwidth 20 div
-	    dup neg dup rmoveto
-	    dup dup rlineto
-	    dup dup rlineto
-	    dup neg dup rmoveto
-	    dup dup neg exch rmoveto
-	    dup dup neg rlineto
-	        dup neg rlineto
-      gridwidth 50 div setlinewidth stroke
-      grestore
-    } ifelse
-    grestore
-  } def	
-end
-tabdict begin
-/dots {				% e a d g b e offset dots --
-    griddict begin
-    gsave
-    1 setlinewidth
-    0 setgray
-
-    grid
-
-    % Chord offset, if greater than 1.
-    % offset {...} --
-    dup () ne
-    { gsave
-      half-incr neg gridheight gridscale sub rmoveto
-      displ-font setfont
-      dup stringwidth pop neg half-incr rmoveto show grestore
-    }
-    { pop }
-    ifelse
-
-    1 1 6
-    {	% fret string {...} --
-	exch dup
-	0 ne
-	{ dot }
-	{ pop pop }
-	ifelse
-    }
-    for
-    end
-} def
-end
-%%EndProcSet
-%%EndProlog
-%%BeginFont: MSyms
-systemdict/currentpacking known{/SavPak currentpacking def true setpacking}if
-userdict/AltRT6 known{{currentfile(   )readstring{(%%%)eq{exit}if}{pop}ifelse}loop}if
-userdict begin/AltRT6 39 dict def AltRT6 begin/NL 0 def/B{bind def}bind def
-/Cache{NL 0 eq{setcachedevice}{6{pop}repeat}ifelse 0 0 moveto}B
-/SetWid{NL 0 eq{0 setcharwidth setgray}{pop setgray}ifelse 0 0 moveto}B
-/ShowInt{/NL NL 1 add store BC2 grestore/NL NL 1 sub store}B
-/charStr(.)def/Strk 0 def/Sstrk{/Strk 1 store}B
-/Cfill{PaintType 0 eq{Strk 0 eq{exec}{gsave exec grestore
-currentgray 0 ne{0 setgray}if stroke}ifelse}{pop stroke}ifelse}B
-/Fill{{fill}Cfill}def/Eofill{{eofill}Cfill}def/Cp{closepath 0 0 moveto}def
-/ShowExt{EFN exch get findfont setfont matrix currentmatrix exch
-InvMtx concat 0 0 moveto charStr 0 3 -1 roll put PaintType 0 ne Strk 0 ne
-or currentgray 0 ne or{charStr false charpath setmatrix Fill}
-{charStr show pop}ifelse grestore}B/stringtype{{UCS}forall}B
-/arraytype/exec load def/packedarraytype/exec load def
-/BuildChar{AltRT6 begin exch begin BC2 end end}B
-/BC2{save exch StrokeWidth setlinewidth/Strk 0 store
-Encoding exch get dup CharDefs exch known not{pop/.notdef}if
-CharDefs exch get newpath dup type exec restore}B
-/UVec[{rmoveto}{rlineto}{rcurveto}{ShowExt}{]concat}{Cache}{setlinewidth}
-{ShowInt}{setlinecap}{setlinejoin}{gsave}{[}{Fill}{Eofill}{stroke}{SetWid}
-{100 mul add}{100 mul}{100 div}{Cp}{Sstrk}{setgray}]def
-/UCS{dup 200 lt{100 sub}{dup 233 lt{216 sub 100 mul add}
-{233 sub UVec exch get exec}ifelse}ifelse}B
-/CD{/NF exch def{exch dup/FID ne{exch NF 3 1 roll put} 
-{pop pop}ifelse}forall NF}B
-/MN{1 index length/Len exch def dup length Len add string dup
-Len 4 -1 roll putinterval dup 0 4 -1 roll putinterval}B
-/RC{(|______)anchorsearch {1 index MN cvn/NewN exch def cvn
-findfont dup maxlength dict CD dup/FontName NewN put dup
-/Encoding MacVec put NewN exch definefont pop}{pop}ifelse}B
-/RF{dup cvn FontDirectory exch known{pop}{RC}ifelse}B
-/MacVec 256 array def MacVec 0 /Helvetica findfont
-/Encoding get 0 128 getinterval putinterval MacVec 127 /DEL put
-MacVec 16#27 /quotesingle put  MacVec 16#60 /grave put/NUL/SOH/STX/ETX
-/EOT/ENQ/ACK/BEL/BS/HT/LF/VT/FF/CR/SO/SI/DLE/DC1/DC2/DC3/DC4/NAK/SYN
-/ETB/CAN/EM/SUB/ESC/FS/GS/RS/US MacVec 0 32 getinterval astore pop
-/Adieresis/Aring/Ccedilla/Eacute/Ntilde/Odieresis/Udieresis/aacute
-/agrave/acircumflex/adieresis/atilde/aring/ccedilla/eacute/egrave
-/ecircumflex/edieresis/iacute/igrave/icircumflex/idieresis/ntilde/oacute
-/ograve/ocircumflex/odieresis/otilde/uacute/ugrave/ucircumflex/udieresis
-/dagger/degree/cent/sterling/section/bullet/paragraph/germandbls
-/register/copyright/trademark/acute/dieresis/notequal/AE/Oslash
-/infinity/plusminus/lessequal/greaterequal/yen/mu/partialdiff/summation
-/product/pi/integral/ordfeminine/ordmasculine/Omega/ae/oslash
-/questiondown/exclamdown/logicalnot/radical/florin/approxequal/Delta/guillemotleft
-/guillemotright/ellipsis/nbspace/Agrave/Atilde/Otilde/OE/oe
-/endash/emdash/quotedblleft/quotedblright/quoteleft/quoteright/divide/lozenge
-/ydieresis/Ydieresis/fraction/currency/guilsinglleft/guilsinglright/fi/fl
-/daggerdbl/periodcentered/quotesinglbase/quotedblbase
-/perthousand/Acircumflex/Ecircumflex/Aacute
-/Edieresis/Egrave/Iacute/Icircumflex/Idieresis/Igrave/Oacute/Ocircumflex
-/apple/Ograve/Uacute/Ucircumflex/Ugrave/dotlessi/circumflex/tilde
-/macron/breve/dotaccent/ring/cedilla/hungarumlaut/ogonek/caron
-MacVec 128 128 getinterval astore pop end end
-/$MSyms 19 dict def $MSyms begin/PaintType 0 def/FontType 3 def
-/StrokeWidth 0 def/FontBBox[-30 -60 296 185]def %/UniqueID 5449203 def
-/FontMatrix[0.008333 0 0 0.008333 0 0]def/InvMtx[120 0 0 120 0 0]def
-/CharDefs 7 dict def/FontName (MSyms) def
-/BuildChar{AltRT6/BuildChar get exec}def
-/FontInfo 3 dict def FontInfo begin
-/UnderlinePosition -20 def/UnderlineThickness 20 def end
-/Encoding AltRT6/MacVec get def CharDefs begin/.notdef{500 0 setcharwidth} def
-/at<A0645EA79171D9EE78ADE94E644E866486EB7A647A426442EBFC786ED9E94A644A3C
-643CEB7E647E8C648CEBFCF5>def
-/L<96D964525E8BD96AD9EE6464E98064EAC164D9EA4864EAFC75D973E95E5D4D5E4968
-EB5F70677A7578EB766174536E4CEBFC83A5E95E5D4E5E4A68EB5F7167787478EB746374
-536E4CEBFCF5>def
-/R<B4645C879F84D9EE758CE96A64EA7CA7EA686FEA666A6063585FEB6062545D5865EB
-676A61715971EB5B635762555AEB625C6A557155EB696468627365EB6A6571697167EBFC
-F5>def
-/asciicircum<A0645E979281D9EE78ADE94E644E866486EB7A647A426442EBFC786ED9
-E94A644A3C643CEB7E647E8C648CEBFC887DD9E9401EEA6864EA88AAEAFCF5>def
-/d<A0646B489376D9EE706FD9E96463D7EA7D6CEA643DEA6964EA6465D9EA4B5CEA648B
-EAFC759CE9786BEA6447EA505DEAFCF5>def
-/f<B4645B3EA980D9EE7346E9648CD9EA6964EA643CD7EAFC8C50E9648CD9EA6964EA64
-3CD7EAFC6469E96473EAA078EA6455EAFC6496E96473EAA078EA6455EAFCF5>def
-/s<A0645E698F7FD9EE797FE9726E7D7B6D94EB616A536A4F64EB605FEA6497EA5F64EA
-645AD7EAFC69A4E96A67EA6D687060705BEB655162515C4AEB5A59EAFCF5>def
-end/EFN[]def
-end systemdict/currentpacking known{SavPak setpacking}if
-/MSyms $MSyms definefont pop
-/MSyms findfont/EFN get AltRT6 begin{RF}forall end
-%%EndFont
-%%BeginSetup
-%%PaperSize: A4
-%%EndSetup
