@@ -6,8 +6,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Jan 16 16:20:09 2008
-# Update Count    : 350
+# Last Modified On: Thu Jan 17 11:03:26 2008
+# Update Count    : 356
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -28,6 +28,9 @@ my $my_package = 'Sciurix';
 my ($my_name, $my_version) = $RCS_Id =~ /: (.+).pm,v ([\d.]+)/;
 # Tack '*' if it is not checked in into RCS.
 $my_version .= '*' if length('$Locker$ ') > 12;
+
+use base qw(Exporter);
+our @EXPORT = qw(run);
 
 ################ Command line parameters ################
 
@@ -62,7 +65,7 @@ my $linetype = 0;		# type of current line
 
 my $xpose = $gxpose;
 
-sub ::run {
+sub run {
     local (@ARGV) = @_ ? @_ : @ARGV;
 
     app_options();
@@ -688,7 +691,7 @@ EOD
 
 =head1 NAME
 
-playtab - print chords of songs in a tabular fashion
+App::Music::PlayTab - Print chords of songs in a tabular fashion.
 
 =head1 SYNOPSIS
 
@@ -805,6 +808,8 @@ For example:
     | f- . | c7 . | f- . | aso . |
     | as f7 | bes-7 es7 | as - | bes-7 es7 |
 
+To see how this looks, see http://johan.vromans.org/software/sw_playtab.html .
+
 You can modify the width of the bars with a '!w' control. Standard
 width of a beat is 30. '!w +5' increases the width to 35. '!w 25' sets
 it to 25. You get the idea. You can also change the height with '!h'
@@ -911,20 +916,7 @@ Johan Vromans, Squirrel Consultancy E<lt>jvromans@squirrel.nlE<gt>
 
 This program is Copyright 1990,2007 by Johan Vromans.
 This program is free software; you can redistribute it and/or
-modify it under the terms of the Perl Artistic License or the
-GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any
-later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-If you do not have a copy of the GNU General Public License write to
-the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, 
-MA 02139, USA.
-
+modify it under the same terms as Perl.
 
 =cut
 

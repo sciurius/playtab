@@ -17,12 +17,12 @@ if ( -d "t" ) {
 }
 
 { package PlayTab;
-  require App::Music::PlayTab;
-  ::run( "-test",
-	 "-output", "${prefix}test.ps",
-	 "-preamble", "${prefix}dummy.pre",
-	 "${prefix}${base}.ptb",
-       );
+  use App::Music::PlayTab;
+  run( "-test",
+       "-output", "${prefix}test.ps",
+       "-preamble", "${prefix}dummy.pre",
+       "${prefix}${base}.ptb",
+     );
 }
 
 my $ok = !differ ("${prefix}test.ps", "${prefix}${base}.ps");
