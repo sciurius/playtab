@@ -6,8 +6,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Jan 17 11:03:26 2008
-# Update Count    : 356
+# Last Modified On: Mon Oct  6 10:23:48 2008
+# Update Count    : 361
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -715,7 +715,24 @@ playtab [options] [file ...]
 
  perl -MApp::Music::PlayTab -e run ...arguments...
 
-=head1 OPTIONS
+=head1 DESCRIPTION
+
+This utility program is intended for musicians. It produces tabular
+chord diagrams that are very handy for playing rhythm guitar or bass
+in jazz, blues, and popular music.
+
+I wrote it since in official (and unofficial) sheet music, I find it
+often hard to stick to the structure of the piece. Also, as a guitar
+player, I do not need all the detailed notes and such that are only
+important for melody instruments. And I cannot turn over the pages
+while playing.
+
+For more info and examples,
+see http://johan.vromans.org/software/sw_playtab.html .
+
+B<playtab> is just a trivial wrapper around the App::Music::PlayTab module.
+
+=head1 COMMAND LINE OPTIONS
 
 =over 8
 
@@ -754,7 +771,7 @@ Input file(s).
 
 =back
 
-=head1 DESCRIPTION
+=head1 INPUT SYNTAX
 
 The input for playtab is plain ASCII. It contains the chords, the
 division in bars, with optional annotations.
@@ -908,15 +925,20 @@ Have fun, and let me know your ideas!
 
 See also: http://lilypond.org/doc/stable/Documentation/user/lilypond/Chord-names
 
+=head1 SEE ALSO
+
+http://chordie.sourceforge.net/
+
 =head1 AUTHOR
 
 Johan Vromans, Squirrel Consultancy E<lt>jvromans@squirrel.nlE<gt>
 
 =head1 COPYRIGHT AND DISCLAIMER
 
-This program is Copyright 1990,2007 by Johan Vromans.
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl.
+This program is Copyright 1990,2008 by Johan Vromans.
+
+This program is free software; you may redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =cut
 
