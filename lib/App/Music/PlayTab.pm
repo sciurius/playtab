@@ -6,8 +6,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Oct  6 10:23:48 2008
-# Update Count    : 361
+# Last Modified On: Mon Oct  6 10:35:01 2008
+# Update Count    : 367
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -62,6 +62,7 @@ my @Rom = qw(I II III IV V VI VII VIII IX X XI XII);
 
 my $line;			# current line (for messages)
 my $linetype = 0;		# type of current line
+my $posttext;
 
 my $xpose = $gxpose;
 
@@ -230,6 +231,12 @@ sub bar {
 	die($@) if $@ =~ /can\'t locate/i;
 	errout($@) if $@;
     }
+    if ( defined $posttext ) {
+	ps_skip(4);
+	ps_move();
+	print OUTPUT ('SF (', $posttext, ') show', "\n");
+	undef $posttext;
+    }
     print_newline();
 }
 
@@ -283,6 +290,13 @@ sub control {
 	$lilypond = defined $1 ? $1 : 1;
 	return;
     }
+
+    if ( /^\>\s+(.+)/i ) {
+	$posttext = $1;
+	return;
+    }
+
+
     errout("Unrecognized control");
 }
 
