@@ -78,6 +78,14 @@ sub parse {
 	    $chmods[7] = 1;
 	    next;
 	}
+	if ( $mod =~ /^m(?:in)?7(?:\.?(.*))?/ ) {	# Minor triad 7
+	    $mod = $+;
+	    vec($chflags,7,1) = 1;
+	    $chmods[7] = 1;
+	    vec($chflags,3,1) = 1;
+	    $chmods[3] = -1;
+	    next;
+	}
 	if ( $mod =~ /^m(?:\.?(.*))?/ ) {	# Minor triad
 	    $mod = $+;
 	    vec($chflags,3,1) = 1;
