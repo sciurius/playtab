@@ -1,13 +1,12 @@
 #!/usr/bin/perl
-my $RCS_Id = '$Id$ ';
 
 package App::Music::PlayTab;
 
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Oct  6 10:35:01 2008
-# Update Count    : 367
+# Last Modified On: Tue Apr 19 16:32:40 2011
+# Update Count    : 369
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -15,7 +14,7 @@ package App::Music::PlayTab;
 use strict;
 use warnings;
 
-our $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)/g;
+our $VERSION = "2.021";
 
 # Package or program libraries, if appropriate.
 # $LIBDIR = $ENV{'LIBDIR'} || '/usr/local/lib/sample';
@@ -25,9 +24,7 @@ our $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)/g;
 # Package name.
 my $my_package = 'Sciurix';
 # Program name and version.
-my ($my_name, $my_version) = $RCS_Id =~ /: (.+).pm,v ([\d.]+)/;
-# Tack '*' if it is not checked in into RCS.
-$my_version .= '*' if length('$Locker$ ') > 12;
+my ($my_name, $my_version) = ( 'playtab', $VERSION );
 
 use base qw(Exporter);
 our @EXPORT = qw(run);
