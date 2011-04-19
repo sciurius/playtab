@@ -1,11 +1,18 @@
 #! perl
 
+# Author          : Johan Vromans
+# Created On      : Wed Aug 22 22:33:31 2007
+# Last Modified By: Johan Vromans
+# Last Modified On: Tue Apr 19 16:25:06 2011
+# Update Count    : 6
+# Status          : Unknown, Use with caution!
+
 package App::Music::PlayTab::Note;
 
 use strict;
 use warnings;
 
-our $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)/g;
+our $VERSION = "1.005";
 
 use Carp;
 use App::Music::PlayTab::NoteMap qw(note_to_key key_to_note);

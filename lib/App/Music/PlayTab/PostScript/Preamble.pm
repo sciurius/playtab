@@ -1,9 +1,18 @@
+#! perl
+
+# Author          : Johan Vromans
+# Created On      : Tue Apr 19 16:25:30 2011
+# Last Modified By: Johan Vromans
+# Last Modified On: Tue Apr 19 16:25:44 2011
+# Update Count    : 1
+# Status          : Unknown, Use with caution!
+
 package App::Music::PlayTab::PostScript::Preamble;
 
 use strict;
 use warnings;
 
-our $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)/g;
+our $VERSION = "1.002";
 
 sub preamble {
 <<'EOD';

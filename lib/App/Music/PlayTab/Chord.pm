@@ -1,11 +1,18 @@
 #! perl
 
+# Author          : Johan Vromans
+# Created On      : Wed Aug 22 22:33:31 2007
+# Last Modified By: Johan Vromans
+# Last Modified On: Tue Apr 19 16:27:30 2011
+# Update Count    : 13
+# Status          : Unknown, Use with caution!
+
 package App::Music::PlayTab::Chord;
 
 use strict;
 use warnings;
 
-our $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)/g;
+our $VERSION = "1.010";
 
 use App::Music::PlayTab::Note;
 use Carp;
@@ -70,7 +77,7 @@ sub parse {
 	if ( $mod =~ /^(min|m)7(.*)/ ) { # Minor triad + 7
 	    $mod = $+;
 	    vec($chflags,7,1) = 1;
-	    $chmods[7] = 1;
+	    $chmods[7] = 0;
 	    vec($chflags,3,1) = 1;
 	    $chmods[3] = -1;
 	    next;
