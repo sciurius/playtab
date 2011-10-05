@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Jan 15 15:59:16 2008
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Apr 19 16:27:42 2011
-# Update Count    : 8
+# Last Modified On: Wed Oct  5 12:00:16 2011
+# Update Count    : 10
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::LyChord;
@@ -99,6 +99,10 @@ sub parse {
 	    $chmods[3] = -1;
 	    next;
 	}
+
+	# Transform 7sus4 into something we can parse.
+	$mod =~ s/^(\d+)sus(\d?)/sus$2.$1/;
+
 	if ( $mod =~ /^sus2(?:\.(.*))?/ ) {	# Suspended second
 	    $mod = $+;
 	    vec($chflags,3,1) = 0;
