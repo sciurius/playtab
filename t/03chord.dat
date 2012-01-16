@@ -97,7 +97,10 @@ Cno5th	Cno5	(C) root (no5) addn
 # Some harder ones.
 Csus4b13	C7sus4(b13)	(C) root (7) addn (4) susp (13) addf
 
-# F#11 will be interpreted as F# 11, need a separator is F #11 is meant.
-F_#11/A	F7(#11)/A	(F) root (7) addn (11) adds slash (A) root
-F6#11/A	F7(6)(#11)/A	(F) root (7) addn (6) addn (11) adds slash (A) root
+# F#11 will be interpreted as F# 11, need a separator if F #11 is meant.
+F_#11/A	F7(#11)/A	(F) root (7) addn (11) adds slash (A) hroot
+F6#11/A	F7(6)(#11)/A	(F) root (7) addn (6) addn (11) adds slash (A) hroot
+
+F_#11\A	F7(#11)\A	(F) root (7) addn (11) adds bslash (A) hroot
+F6#11\A	F7(6)(#11)\A	(F) root (7) addn (6) addn (11) adds bslash (A) hroot
 

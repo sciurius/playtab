@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Wed Aug 22 22:33:31 2007
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Apr 19 16:27:30 2011
-# Update Count    : 13
+# Last Modified On: Mon Jan 16 17:01:50 2012
+# Update Count    : 29
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Chord;
@@ -27,6 +27,7 @@ sub parse {
 
     $self = $self->new unless ref($self);
     delete $self->{bass};
+    delete $self->{high};
     $self->{_unparsed} = $chord;
     $chord = lc($chord);
     $self->{_debug} = $chord =~ s/^\?//;
@@ -157,6 +158,20 @@ sub parse {
 	    next;
 	}
 
+	# High add-ons.
+	if ( $mod =~ /^\\([^\/]+)(.*)/ ) {
+	    my @ch = split(/\\/, $1);
+	    $mod = $2;
+	    foreach my $c ( @ch ) {
+		my $p = eval { __PACKAGE__->new->parse($c) };
+		croak("Unrecognized add of chord: ".$self->{_unparsed})
+		  unless defined $p;
+		$self->{high} ||= [];
+		push(@{$self->{high}}, $p);
+	    }
+	    last;
+	}
+
 	# Power chords.
 	if ( $mod =~ /^\/(.+)/ ) {
 	    my @ch = split(/\//, $1);
@@ -195,6 +210,12 @@ sub transpose {
     my ($self, $xp) = @_;
     return $self unless $xp;
     $self->{key}->transpose($xp);
+    if ( $self->{bass} ) {
+	$_->transpose($xp) for @{$self->{bass}};
+    }
+    if ( $self->{high} ) {
+	$_->transpose($xp) for @{$self->{high}};
+    }
     $self;
 }
 
@@ -263,6 +284,8 @@ sub name {
     $res =~ s/(4|\(4\))(5|\(5\))/sus4/;
     $res =~ s/(1|\(1\))(5|\(5\))/sus2/;
 
+    $res = join("\\", $res, map { $_->name } @{$self->{high}})
+      if $self->{high};
     $res = join("/", $res, map { $_->name } @{$self->{bass}})
       if $self->{bass};
 
@@ -354,8 +377,17 @@ sub ps {
 		 '(12) addn','(13) addf','(13) addn' )[$_];
     }
 
-    $res = join(" slash ", $res, map { $_->ps } @{$self->{bass}})
-      if $self->{bass};
+    if ( $self->{high} ) {
+	my $t = join(" bslash ", map { $_->ps } @{$self->{high}});
+	$t =~ s/root/hroot/g;
+	$res = join(" bslash ", $res, $t);
+    }
+
+    if ( $self->{bass} ) {
+	my $t = join(" slash ", map { $_->ps } @{$self->{bass}});
+	$t =~ s/root/hroot/g;
+	$res = join(" slash ", $res, $t);
+    }
 
     warn("=> Chord ", $self->{_unparsed}, ": ", $self->{key}->key,
 	 " (", $self->{key}->name, ") [ @{$self->{vec}} ] ->",

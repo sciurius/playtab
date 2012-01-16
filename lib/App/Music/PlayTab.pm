@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Apr 19 16:32:40 2011
-# Update Count    : 369
+# Last Modified On: Mon Jan 16 17:02:13 2012
+# Update Count    : 371
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -14,7 +14,7 @@ package App::Music::PlayTab;
 use strict;
 use warnings;
 
-our $VERSION = "2.022";
+our $VERSION = "2.023";
 
 # Package or program libraries, if appropriate.
 # $LIBDIR = $ENV{'LIBDIR'} || '/usr/local/lib/sample';
@@ -86,7 +86,7 @@ sub run {
 
     while ( <> ) {
 	next if /^\s*#/;
-	next if $lilypond && /^\s*%%/;
+	next if $lilypond && /^\s*%/;
 	next unless /\S/;
 	chomp($line = $_);
 

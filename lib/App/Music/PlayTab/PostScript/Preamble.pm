@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 19 16:25:30 2011
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Apr 19 16:25:44 2011
-# Update Count    : 1
+# Last Modified On: Wed May  4 22:59:06 2011
+# Update Count    : 5
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::PostScript::Preamble;
@@ -71,9 +71,15 @@ tabdict begin
 /root {
     /Helvetica findfont 16 scalefont setfont
     show } def
+/hroot {
+    /Helvetica findfont 12 scalefont setfont
+    show } def
 /slash {
     /Helvetica findfont 16 scalefont setfont
     0 -4 rmoveto (/) show } def
+/bslash {
+    /Helvetica findfont 16 scalefont setfont
+    0 4 rmoveto (\\) show 0 3 rmoveto } def
 /susp {
     /Helvetica findfont 12 scalefont setfont
     0 -3 rmoveto (sus) show show 0 3 rmoveto } def
