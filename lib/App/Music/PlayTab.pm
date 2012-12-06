@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Jan 16 17:02:13 2012
-# Update Count    : 371
+# Last Modified On: Thu May  3 15:44:37 2012
+# Update Count    : 374
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -87,6 +87,7 @@ sub run {
     while ( <> ) {
 	next if /^\s*#/;
 	next if $lilypond && /^\s*%/;
+	$lilypond && s/\s+%\s*\d+\s*$//;
 	next unless /\S/;
 	chomp($line = $_);
 
