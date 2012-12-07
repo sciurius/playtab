@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu May  3 15:44:37 2012
-# Update Count    : 374
+# Last Modified On: Fri Dec  7 14:11:24 2012
+# Update Count    : 376
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -14,7 +14,7 @@ package App::Music::PlayTab;
 use strict;
 use warnings;
 
-our $VERSION = "2.023";
+our $VERSION = "2.024";
 
 # Package or program libraries, if appropriate.
 # $LIBDIR = $ENV{'LIBDIR'} || '/usr/local/lib/sample';
@@ -947,7 +947,7 @@ Johan Vromans, Squirrel Consultancy E<lt>jvromans@squirrel.nlE<gt>
 
 =head1 COPYRIGHT AND DISCLAIMER
 
-This program is Copyright 1990,2008 by Johan Vromans.
+This program is Copyright 1990,2013 by Johan Vromans.
 
 This program is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.

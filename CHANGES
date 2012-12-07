@@ -1,3 +1,9 @@
+2.024	Dec 07 2012
+
+	Add a different musical symbols font to prevent conversion
+	problems.
+	Remove some obsolete code.
+
 2.023	Jan 16 2012
 
 	Add (experimental) support for high notes.
