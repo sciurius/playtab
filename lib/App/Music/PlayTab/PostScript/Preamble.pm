@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 19 16:25:30 2011
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Dec  7 14:10:46 2012
-# Update Count    : 39
+# Last Modified On: Sun Jan 27 16:58:59 2013
+# Update Count    : 45
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::PostScript::Preamble;
@@ -53,9 +53,10 @@ tabdict begin
     sfsz 5 gt { 2 } { 1 } ifelse neg -2 rmoveto } def
 /flat {
     /MSyms findfont sfsz scalefont setfont
-    sfsz 5 gt { 2 } { 1 } ifelse 0 rmoveto
+    sfsz 5 gt { 2 } { 1 } ifelse 2 rmoveto
     /Flat glyphshow
-    sfsz 5 gt { 2 } { 1 } ifelse neg 0 rmoveto } def
+    %sfsz 5 gt { 2 } { 1 } ifelse neg -2 rmoveto
+    1 -2 rmoveto } def
 /natural {
     /MSyms findfont 20 scalefont setfont
     2 0 rmoveto /Natural glyphshow -1 0 rmoveto } def
