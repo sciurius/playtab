@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Dec  7 14:11:24 2012
-# Update Count    : 376
+# Last Modified On: Wed Feb 27 19:11:39 2013
+# Update Count    : 379
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -326,7 +326,8 @@ sub chord {
     die("Illegal [chord] spec, need 7 or 8 values")
 	unless @l == 8 || @l == 7;
 
-    my $chord = parse_chord(shift(@l));
+    my $cn = shift(@l);
+    my $chord = eval { parse_chord($cn) };
 
     my @c = ();
     my $c = '()';
@@ -343,7 +344,8 @@ sub chord {
 
     on_top();
 
-    my $ps = $chord->ps;
+    my $ps = $chord ? $chord->ps : "($cn) root";
+
     print OUTPUT ('1000 1000 moveto', "\n",
 		  $ps, "\n",
 		  'currentpoint pop 1000 sub 2 div', "\n");
