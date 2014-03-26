@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Feb 27 19:11:39 2013
-# Update Count    : 379
+# Last Modified On: Wed Mar 26 08:38:45 2014
+# Update Count    : 397
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -39,6 +39,8 @@ my $preamble;
 my $gxpose = 0;			# global xpose value
 my $verbose = 0;		# verbose processing
 my $lilypond = 0;		# use LilyPond syntax
+my $bpm = 4;
+my $syntax;			 # show syntax help
 
 # Development options (not shown with -help).
 my $debug = 0;			# debugging
@@ -221,7 +223,7 @@ sub bar {
 		    ps_step();
 		}
 		if ( my $d = $chord->duration ) {
-		    $d = int($d / ($chord->duration_base / 4));
+		    $d = int($d / ($chord->duration_base / $bpm));
 		    unshift(@c, ('.') x ($d-1));
 		}
 	    }
@@ -286,6 +288,7 @@ sub control {
     # LilyPond syntax
     if ( /^l(?:y|ilypond)?(?:\s+(\d+))?/i ) {
 	$lilypond = defined $1 ? $1 : 1;
+	$bpm = ($lilypond && defined $1) ? $1 : 4;
 	return;
     }
 
@@ -629,6 +632,8 @@ sub app_options() {
     if ( !GetOptions('output=s'	=> \$output,
 		     'preamble=s' => \$preamble,
 		     'transpose|x=i' => \$gxpose,
+		     'lilypond=i' => \$lilypond,
+		     'syntax'	=> \$syntax,
 		     'ident'	=> \$ident,
 		     'verbose'	=> \$verbose,
 		     'trace'	=> \$trace,
@@ -641,7 +646,16 @@ sub app_options() {
 	app_usage(2);
     }
     app_ident if $ident;
-    app_usage(0), syntax(), exit(0) if $help;
+    if ( $help ) {
+	app_usage(0);
+	exit(0);
+    }
+    if ( $syntax ) {
+	$lilypond ? ly_syntax() : syntax();
+	pr_syntax();
+	exit(0);
+    }
+    $bpm = $lilypond if $lilypond;
 }
 
 sub app_ident {
@@ -655,8 +669,9 @@ sub app_usage($) {
 Usage: $0 [options] [file ...]
     --output XXX	output file name
     --transpose +/-N    transpose all
-    --lilypond		use LilyPond chord syntax
+    --lilypond N	use LilyPond chord syntax, N = bpm
     --help		this message
+    --syntax		explain chord syntax
     --ident		show identification
     --verbose		verbose information
 EndOfUsage
@@ -697,7 +712,50 @@ Other:          Meaning
 %               Repeat pattern
 /               Powerchord constructor   [D/G D/E-]
 --------------------------------------------------------------
+EOD
+}
 
+sub ly_syntax {
+    print STDERR <<EOD;
+Notes: c, d, e, f, g, a, b.
+Raised with suffix 'is', e.g. ais.
+Lowered with suffix 'es', e.g. bes, ees.
+
+Chords: note + optional duration + optional modifiers.
+
+Duration = 1, 2, 4, 8, with possible dots, e.g., "2.".
+No duration means: use the duration of the previous chord.
+
+Modifiers are preceeded with a ":".
+
+Modifiers       Meaning                 [examples]
+--------------------------------------------------------------
+nothing         major triad             c4
+m               minor triad             c4:m
+aug             augmented triad         c4:aug
+dim             diminished triad        c4:dim
+--------------------------------------------------------------
+maj             major 7th chord         c4:maj
+6,7,9,11,13     chord additions         c4:7  c4:6.9 (dot required)
+sus sus4, sus2  suspended 4th, 2nd      c4:sus
+--------------------------------------------------------------
++               raise the pitch of an added note   c4:11.9+
+-               lower the pitch of an added note   c4:11.9-
+--------------------------------------------------------------
+^               substract a note from a chord      c4:9.^11
+--------------------------------------------------------------
+
+Other:          Meaning
+--------------------------------------------------------------
+r               Rest                    r2
+s               Rest                    s4
+/               Powerchord constructor  d/g   d/e:m
+--------------------------------------------------------------
+EOD
+}
+
+sub pr_syntax {
+    print STDERR <<EOD;
 EOD
 }
 
@@ -716,7 +774,8 @@ playtab [options] [file ...]
  Options:
    --transpose +/-N     transpose all songs
    --output XXX		set outout file
-   --lilypond		accept chords in LilyPond syntax
+   --lilypond N		accept chords in LilyPond syntax, N = bpm
+   --syntax		print chord syntax
    --ident		show identification
    --help		brief help message
    --verbose		verbose information
@@ -738,8 +797,8 @@ in jazz, blues, and popular music.
 I wrote it since in official (and unofficial) sheet music, I find it
 often hard to stick to the structure of the piece. Also, as a guitar
 player, I do not need all the detailed notes and such that are only
-important for melody instruments. And I cannot turn over the pages
-while playing.
+important for melody instruments. And usually I cannot turn over the
+pages while playing.
 
 For more info and examples,
 see http://johan.vromans.org/software/sw_playtab.html .
@@ -754,8 +813,8 @@ B<playtab> is just a trivial wrapper around the App::Music::PlayTab module.
 
 Transposes all songs by I<amount>. This can be B<+> or B<-> 11 semitones.
 
-When transposing up, chords will de represented sharp if necessary;
-when transposing down, chords will de represented flat if necessary.
+When transposing up, chords will be represented sharp if necessary;
+when transposing down, chords will be represented flat if necessary.
 For example, chord A transposed +1 will become A-sharp, but when
 transposed -11 it will become B-flat.
 
