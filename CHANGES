@@ -1,6 +1,16 @@
+2.025	Mar 26 2014
+
+	Add --syntax and --lilypond options.
+	Add help for syntax and lilypond syntax.
+	Allow numeric (bpm) argument for !ly directive.
+	Add example song, free of copyrights.
+	Be liberate with 'chord' names.
+	Finetuning of new musical symbols.
+	Rename songs to use .ptb file extension instead of .dat.
+
 2.024	Dec 07 2012
 
-	Add a different musical symbols font to prevent conversion
+	Add a different musical symbols font to prevent PDF conversion
 	problems.
 	Remove some obsolete code.
 

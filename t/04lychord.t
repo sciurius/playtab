@@ -7,9 +7,9 @@ use warnings;
 my @tests;
 BEGIN {
     my $td;
-    open($td, "<", "04lychord.dat")
-      or open($td, "<", "t/04lychord.dat")
-	or die("04lychord.dat: $!\n");
+    open($td, "<", "04lychord.ptb")
+      or open($td, "<", "t/04lychord.ptb")
+	or die("04lychord.ptb: $!\n");
     while ( <$td> ) {
 	next unless /\S/;
 	next if /^#/;

@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Mar 26 08:38:45 2014
-# Update Count    : 397
+# Last Modified On: Wed Mar 26 10:54:22 2014
+# Update Count    : 398
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -14,7 +14,7 @@ package App::Music::PlayTab;
 use strict;
 use warnings;
 
-our $VERSION = "2.024";
+our $VERSION = "2.025";
 
 # Package or program libraries, if appropriate.
 # $LIBDIR = $ENV{'LIBDIR'} || '/usr/local/lib/sample';
