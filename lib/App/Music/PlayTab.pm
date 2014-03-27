@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Mar 27 16:50:21 2014
-# Update Count    : 450
+# Last Modified On: Thu Mar 27 20:55:48 2014
+# Update Count    : 454
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -186,9 +186,14 @@ sub bar {
 	eval {
 	    my $c = shift(@c);
 	    if ( $c eq '|' ) {
-		$firstbar and @m = ();
-		$barnumber++ unless $firstbar;
-		$firstbar = 0;
+		if ( $firstbar ) {
+		    $firstbar = 0;
+		}
+		else {
+		    push( @{ $entry->{measures} }, [ @m ] );
+		    $barnumber++;
+		}
+		@m = ();
 	    }
 	    elsif ( $c eq ':' ) {
 		push( @m, $m[-1] );
@@ -236,7 +241,6 @@ sub bar {
 	errout($@) if $@;
     }
 
-    $entry->{measures} = \@m;
     push_entry();
 }
 
@@ -360,9 +364,11 @@ sub chord {
 
 sub text {
     my ($line) = @_;
+    set_width("+0");
+    set_height("+0");
+    set_margin("+0");
     $entry->{prefix} = $line;
     $entry->{pfx_vsp} = 0;
-    $entry->{measures} = [];
     push_entry();
 }
 
