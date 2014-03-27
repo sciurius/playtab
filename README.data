@@ -1,0 +1,33 @@
+Internal data structure for a PlayTab entry.
+
+$data => {
+
+  title    => "title text",
+
+  subtitle => [ "subtitle1", ... ],
+
+  lines    => [
+
+    { width     => 30,
+      height    => 10,
+      margin    => 10,
+      barnumber => 1,
+      bpm       => 4,
+      prefix    => "pfx text",
+      pfx_vsp   => 1,  
+      measures  => [
+	[ A::M::P::Chord object [ , ... ] ],
+	[ A::M::P::Chord object [ , ... ] ],
+	[ A::M::P::Chord object [ , ... ] ],
+	[ A::M::P::Chord object [ , ... ] ],
+      ],
+      chords    => [ A::M::P::Chord object, offset, strings ],
+      postfix   => "postfix text",
+    },
+    ...
+  ],
+
+};
+
+One of "pfx", "measures" or "chords" must be present.
+Chord object may be a fixed text like "space" or "Am".
