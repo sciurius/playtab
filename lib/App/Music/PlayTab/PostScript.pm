@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Mar 27 20:54:32 2014
-# Update Count    : 37
+# Last Modified On: Fri Mar 28 09:26:21 2014
+# Update Count    : 52
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::PostScript;
@@ -23,8 +23,11 @@ sub generate {
     my ( $self, $args ) = @_;
     my $opus = $args->{opus};
 
-    use Data::Dumper;
-#    warn Dumper($opus);
+    if ( 0 ) {
+	use Data::Dumper;
+	warn Dumper($opus);
+	exit;
+    }
 
     *OUTPUT = *STDOUT;
 
@@ -32,9 +35,7 @@ sub generate {
     ps_preamble();
     set_whmb( $std_width, $std_height, $std_margin, undef );
     print_title( 1, $opus->{title} );
-    print_newline();
     print_title( 0, $_ ) foreach @{ $opus->{subtitle} };
-    print_newline();
 
     foreach my $line ( @{ $opus->{lines} } ) {
 
@@ -52,7 +53,9 @@ sub generate {
 	    foreach ( @{ $line->{measures} } ) {
 		foreach my $c ( @$_ ) {
 		    if ( UNIVERSAL::can( $c, 'ps' ) ) {
+			ps_move();
 			print_chord($c);
+			ps_step();
 		    }
 		    else {
 			my $fun = "print_$c";
@@ -67,13 +70,13 @@ sub generate {
 		ps_move();
 		print OUTPUT ('SF (', $line->{postfix}, ') show', "\n");
 	    }
-	    print_newline();
+	    print_newline(2);
 	    next;
 	}
 
 	if ( $line->{chords} ) {
-
-	    print_newline();
+	    print_margin( 0, "C H O R D S" );
+	    print_newline(1);
 	    next;
 	}
 
@@ -197,6 +200,14 @@ sub print_margin {
     ps_move();
     print OUTPUT ('SF (', $margin, ') show', "\n");
     $xm = $md;
+}
+
+sub print_hmore {
+    ps_skip(4);
+}
+
+sub print_less {
+    ps_skip(-4);
 }
 
 sub on_top {
