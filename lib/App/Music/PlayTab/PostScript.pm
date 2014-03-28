@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Mar 28 09:26:21 2014
-# Update Count    : 52
+# Last Modified On: Fri Mar 28 14:56:52 2014
+# Update Count    : 69
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::PostScript;
@@ -23,7 +23,7 @@ sub generate {
     my ( $self, $args ) = @_;
     my $opus = $args->{opus};
 
-    if ( 0 ) {
+    if (  0 ) {
 	use Data::Dumper;
 	warn Dumper($opus);
 	exit;
@@ -37,6 +37,8 @@ sub generate {
     print_title( 1, $opus->{title} );
     print_title( 0, $_ ) foreach @{ $opus->{subtitle} };
 
+    my $prev_line = "";
+
     foreach my $line ( @{ $opus->{lines} } ) {
 
 	if ( $line->{measures} ) {
@@ -45,11 +47,20 @@ sub generate {
 		      $line->{margin},
 		      $line->{barnumber} );
 
+	    if ( $prev_line eq 'bars' ) {
+		print_newline(2);
+	    }
+	    elsif ( $prev_line ) {
+	    }
+	    else {
+		print_newline();
+	    }
+
 	    if ( $line->{prefix} && $line->{prefix} ne "" ) {
 		print_margin( $line->{pfx_vsp}, $line->{prefix} );
 	    }
 
-	    print_bar(1);
+	    print_bar(1) if @{ $line->{measures} };
 	    foreach ( @{ $line->{measures} } ) {
 		foreach my $c ( @$_ ) {
 		    if ( UNIVERSAL::can( $c, 'ps' ) ) {
@@ -66,23 +77,23 @@ sub generate {
 		print_bar(0);
 	    }
 	    if ( $line->{postfix} && $line->{postfix} ne "" ) {
-		ps_skip(4);
-		ps_move();
-		print OUTPUT ('SF (', $line->{postfix}, ') show', "\n");
+		print_postfix( $line->{postfix} );
 	    }
-	    print_newline(2);
+	    $prev_line = 'bars';
 	    next;
 	}
 
 	if ( $line->{chords} ) {
+	    print_newline();
 	    print_margin( 0, "C H O R D S" );
-	    print_newline(1);
+	    $prev_line = 'chords';
 	    next;
 	}
 
 	if ( $line->{prefix} && $line->{prefix} ne "" ) {
-	    print_margin( $line->{pfx_vsp}, $line->{prefix} );
 	    print_newline();
+	    print_margin( 0, $line->{prefix} );
+	    $prev_line = '';
 	    next;
 	}
     }
@@ -108,6 +119,7 @@ my $std_gridscale = 8;
 
 sub set_whmb {
     ( $xd, $yd, $md, $barno ) = @_;
+    $xm = $md;
 }
 
 sub print_title {
@@ -200,6 +212,12 @@ sub print_margin {
     ps_move();
     print OUTPUT ('SF (', $margin, ') show', "\n");
     $xm = $md;
+}
+
+sub print_postfix {
+    ps_skip(4);
+    ps_move();
+    print OUTPUT ('SF (', $_[0], ') show', "\n");
 }
 
 sub print_hmore {

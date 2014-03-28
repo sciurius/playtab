@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Mar 28 09:25:48 2014
-# Update Count    : 456
+# Last Modified On: Fri Mar 28 14:40:35 2014
+# Update Count    : 458
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -119,6 +119,7 @@ sub run {
 	if ( /^%?[-+=<]/ && $entry->{prefix} && $entry->{prefix} ne "" ) {
 	    set_height("+0");
 	    set_margin("+0");
+	    $entry->{measures} = [];
 	    push_entry();
 	}
 
