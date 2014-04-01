@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Mar 28 14:40:35 2014
-# Update Count    : 458
+# Last Modified On: Tue Apr  1 14:26:47 2014
+# Update Count    : 504
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -30,6 +30,7 @@ use Getopt::Long;
 sub app_options();
 
 my $output;
+my $generate = 'PostScript';
 my $preamble;
 my $gxpose = 0;			# global xpose value
 my $verbose = 0;		# verbose processing
@@ -42,13 +43,6 @@ my $debug = 0;			# debugging
 my $trace = 0;			# trace (show process)
 my $test = 0;			# test
 
-################ Presets ################
-
-# Standard dimensions /  offsets.
-my $std_width	   =  30;
-my $std_height	   = -15;
-my $std_margin	   =  40;
-
 ################ The Process ################
 
 my $line;			# current line (for messages)
@@ -57,7 +51,13 @@ my $xpose = $gxpose;
 
 my $data;			# opus being constructed
 my $entry;			# entry under construction
-my $barnumber;
+my $width  = 30;		# horizontal 'step' for chords
+my $height = -15;		# vertical 'step' for lines
+my $margin = 40;		# default indentation, if required
+my $indent = 0;			# actual indentation
+my $barnumber;			# barnumber
+
+use App::Music::PlayTab::Output;
 
 use Clone qw(clone);
 
@@ -78,13 +78,12 @@ sub run {
 
     # Options post-processing.
     $trace |= ($debug || $test);
+    $xpose = $gxpose;
 
     print STDOUT ("ok 3\n") if $test;
 
     $data = {};
     $entry = {};
-
-    set_std();
 
     while ( <> ) {
 	next if /^\s*#/;
@@ -117,8 +116,8 @@ sub run {
 	# Spacing/margin notes.
 
 	if ( /^%?[-+=<]/ && $entry->{prefix} && $entry->{prefix} ne "" ) {
-	    set_height("+0");
-	    set_margin("+0");
+	    $entry->{height} = $height;
+	    $entry->{margin} = 0;
 	    $entry->{measures} = [];
 	    push_entry();
 	}
@@ -139,17 +138,25 @@ sub run {
 	    next;
 	}
 	if ( /^%?\</ ) {	# cancel margin changes
-	    set_margin(0);
+	    $margin = $indent = 0;
 	    next;
 	}
 
 	# Text. Treat as +Prefix without measures.
-	text($_);
+	if ( $entry->{prefix} && $entry->{prefix} ne "" ) {
+	    $entry->{height} = $height;
+	    $entry->{margin} = 0;
+	    $entry->{measures} = [];
+	    push_entry();
+	}
+	text($line);
     }
 
-    require App::Music::PlayTab::PostScript;
-    App::Music::PlayTab::PostScript->generate({
+    App::Music::PlayTab::Output->new({
+        generate => $generate,
+    })->generate({
 	opus => $data,
+	output => $output,
     });
 
     print STDOUT ("ok 4\n") if $test;
@@ -172,11 +179,12 @@ sub bar {
     my ($line) = @_;
 
     my @m = ();
-    set_barno("+0");
-    set_width("+0");
-    set_height("+0");
-    set_margin("+0");
-    $entry->{bpm} = $bpm;
+    $indent = $margin if $entry->{prefix} && $entry->{prefix} ne "";
+    $entry->{barno}  = $barnumber if $barnumber;
+    $entry->{width}  = $width;
+    $entry->{height} = $height;
+    $entry->{margin} = $indent if $indent;
+    $entry->{bpm}    = $bpm;
 
     if ( $lilypond ) {
 	# LilyPond chords use : and ., so don't split on these.
@@ -204,7 +212,7 @@ sub bar {
 		@m = ();
 	    }
 	    elsif ( $c eq ':' ) {
-		push( @m, $m[-1] );
+		push( @m, "again" );
 	    }
 	    elsif ( $c eq '.' ) {
 		push( @m, "space" );
@@ -215,7 +223,7 @@ sub bar {
 		    shift(@c);
 		    $xs++;
 		}
-		push( @m, "same" );
+		push( @m, [ "same", 1, $xs ] );
 	    }
 	    elsif ( $c eq '-' ) {
 		push( @m, "rest" );
@@ -282,6 +290,7 @@ sub control {
     # Margin width adjustment.
     if ( /^m(argin)?\s+([-+]?\d+)/i ) {
 	set_margin($2);
+	$indent = $margin if $indent;
 	return;
     }
 
@@ -364,7 +373,7 @@ sub chord {
 	push( @{ $data->{lines}->[-1]->{chords} }, \@c  );
     }
     else {
-	set_margin("+0");
+	$entry->{margin} = 0;
 	$entry->{chords} = [ \@c ];
 	push_entry();
     }
@@ -372,9 +381,8 @@ sub chord {
 
 sub text {
     my ($line) = @_;
-    set_width("+0");
-    set_height("+0");
-    set_margin("+0");
+    $entry->{height} = $height;
+    $entry->{margin} = 0;
     $entry->{prefix} = $line;
     $entry->{pfx_vsp} = 0;
     push_entry();
@@ -386,19 +394,7 @@ sub errout {
     warn("$msg\n", "Line $.: $line\n");
 }
 
-################ Print Routines ################
-
-my $xd = 0;
-my $yd = 0;
-my $xm = 0;
-my $md = 0;
-
-sub set_std {
-    $xm = 0;
-    $xd = $std_width;
-    $yd = $std_height;
-    $md = $std_margin;
-}
+################ Helper Routines ################
 
 sub _set_incr {
     my $var = shift;
@@ -415,9 +411,9 @@ sub _set_incr {
     $entry->{$var} = $$ref;
 }
 
-sub set_width  { unshift( @_, "width",  \$xd ); goto &_set_incr }
-sub set_height { unshift( @_, "height", \$yd ); goto &_set_incr }
-sub set_margin { unshift( @_, "margin", \$md ); goto &_set_incr }
+sub set_width  { unshift( @_, "width",     \$width  ); goto &_set_incr }
+sub set_height { unshift( @_, "height",    \$height ); goto &_set_incr }
+sub set_margin { unshift( @_, "margin",    \$margin ); goto &_set_incr }
 sub set_barno  { unshift( @_, "barnumber", \$barnumber ); goto &_set_incr }
 
 ################ Command Line Options ################
@@ -434,6 +430,9 @@ sub app_options() {
     return unless @ARGV > 0;
 
     if ( !GetOptions('output=s'	=> \$output,
+		     'generate=s' => \$generate,
+		     'ps'	=> sub { $generate = 'ps' },
+		     'pdf'	=> sub { $generate = 'pdf' },
 		     'preamble=s' => \$preamble,
 		     'transpose|x=i' => \$gxpose,
 		     'lilypond=i' => \$lilypond,

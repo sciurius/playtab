@@ -31,3 +31,4 @@ $data => {
 
 One of "pfx", "measures" or "chords" must be present.
 Chord object may be a fixed text like "space" or "Am".
+Or an array ref like [ "same", 1, 4 ] .

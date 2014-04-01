@@ -3,11 +3,11 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 19 16:25:30 2011
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun Jan 27 16:58:59 2013
-# Update Count    : 45
+# Last Modified On: Tue Apr  1 12:29:04 2014
+# Update Count    : 47
 # Status          : Unknown, Use with caution!
 
-package App::Music::PlayTab::PostScript::Preamble;
+package App::Music::PlayTab::Output::PostScript::Preamble;
 
 use strict;
 use warnings;
