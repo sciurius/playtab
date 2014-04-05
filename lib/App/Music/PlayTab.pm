@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Apr  1 14:26:47 2014
-# Update Count    : 504
+# Last Modified On: Sat Apr  5 22:23:13 2014
+# Update Count    : 513
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -56,6 +56,8 @@ my $height = -15;		# vertical 'step' for lines
 my $margin = 40;		# default indentation, if required
 my $indent = 0;			# actual indentation
 my $barnumber;			# barnumber
+my $s_margin = $margin;		# save values
+my $s_indent = 0;		# save values
 
 use App::Music::PlayTab::Output;
 
@@ -138,6 +140,8 @@ sub run {
 	    next;
 	}
 	if ( /^%?\</ ) {	# cancel margin changes
+	    $s_margin = $margin;
+	    $s_indent = $indent;
 	    $margin = $indent = 0;
 	    next;
 	}
@@ -293,6 +297,11 @@ sub control {
 	$indent = $margin if $indent;
 	return;
     }
+    if ( /^m(argin)?/i ) {
+	$margin = $s_margin;
+	$indent = $s_indent;
+	return;
+    }
 
     # Transpose.
     if ( /^x(pose)?\s+([-+])(\d+)/i ) {
@@ -373,7 +382,8 @@ sub chord {
 	push( @{ $data->{lines}->[-1]->{chords} }, \@c  );
     }
     else {
-	$entry->{margin} = 0;
+	$entry->{margin} = $margin;
+	$entry->{height} = $height;
 	$entry->{chords} = [ \@c ];
 	push_entry();
     }
@@ -706,7 +716,10 @@ To see how this looks, see http://johan.vromans.org/software/sw_playtab.html .
 You can modify the width of the bars with a '!w' control. Standard
 width of a beat is 30. '!w +5' increases the width to 35. '!w 25' sets
 it to 25. You get the idea. You can also change the height with '!h'
-(default is 15) and margin with '!m' (default width is 40).
+(default is 15) and margin with '!m' (default width is 40). You can
+restore the margin to its default value with '<'. This will save the
+current settings, and '!m' without argument will restore the saved
+settings.
 
 You can transpose an individual song with '!x I<amount>', where
 I<amount> can range from -11 to +11, inclusive. A positive transpose

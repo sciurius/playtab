@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Apr  1 14:18:08 2014
-# Update Count    : 155
+# Last Modified On: Sat Apr  5 21:32:05 2014
+# Update Count    : 163
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output;
@@ -92,7 +92,16 @@ sub generate {
 	}
 
 	if ( $line->{chords} ) {
-	    $gen->print_text("C H O R D S");
+
+	    if ( $line->{pfx_vsp} && $prev_line ) {
+		$gen->print_newline( $line->{pfx_vsp} );
+	    }
+
+	    if ( $line->{prefix} && $line->{prefix} ne "" ) {
+		$gen->print_text( $line->{prefix} );
+	    }
+
+	    $gen->print_grids( $line->{chords} );
 	    $gen->print_newline();
 	    $prev_line = 'chords';
 	    next;

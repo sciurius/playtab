@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Apr  1 14:28:20 2014
-# Update Count    : 170
+# Last Modified On: Sat Apr  5 22:59:15 2014
+# Update Count    : 199
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output::PostScript;
@@ -47,6 +47,7 @@ my $y = 0;			# actual y pos
 
 my $barno;
 my $std_gridscale = 8;
+my $title;
 
 # New page, and init the backend if needed.
 sub print_setup {
@@ -87,10 +88,11 @@ sub print_setupline {
 }
 
 sub print_title {
-    my ( $self, $title, $text ) = @_;
-    $self->print_text( $text, $title ? 'TF' : 'SF' );
+    my ( $self, $ttle, $text ) = @_;
+    $self->print_text( $text, $ttle ? 'TF' : 'SF' );
     $self->print_newline();
     undef $barno;
+    $title = $text if $ttle;
 }
 
 sub print_chord {
@@ -187,6 +189,52 @@ sub print_less {
     ps_skip(-4);
 }
 
+sub print_grids {
+    my ( $self, $grids ) = @_;
+
+    my $n = int( ( 570 - $md - 60 ) / 80 );
+
+    my $i = 0;
+    foreach my $ch ( @$grids ) {
+	$self->print_grid($ch);
+	if ( ++$i >= $n ) {
+	    $self->print_newline(4);
+	    $i = 0;
+	}
+	else {
+	    ps_gridstep();
+	}
+    }
+    $self->print_newline(3);
+}
+
+my @Rom = qw(I II III IV V VI VII VIII IX X XI XII);
+
+sub print_grid {
+    my ( $self, $grid ) = @_;
+
+    my @c = @$grid;
+    my $chord = shift(@c);
+    my $ps = ref($chord) ? $chord->ps : "($chord) show";
+    print { $fh } ('1000 1000 moveto', "\n",
+		   $ps, "\n",
+		   'currentpoint pop 1000 sub 2 div', "\n");
+    ps_move();
+    print { $fh } (2.5*$std_gridscale, ' exch sub 8 add 0 rmoveto ',
+		   $ps, "\n");
+    ps_move();
+
+    my $c = shift(@c);
+    if ( $c ) {
+	$c = "($Rom[$c-1])"
+    }
+    else {
+	$c = '()';
+    }
+
+    print { $fh } ('8 ', -5-(4*$std_gridscale), " rmoveto @c $c dots\n");
+}
+
 ################ PostScript routines ################
 
 my $ps_pages  = 0;
@@ -201,10 +249,24 @@ sub ps_page {
 }
 
 sub ps_move {
+
+    if ( $page_top+$y < 50 ) {
+	ps_page();
+	my $xm = $md;
+	$md = 0;
+	ps_move();
+	print { $fh } ( 'TF', ' (', $title, ') show', "\n");
+	$md = $xm;
+	ps_advance(3);
+	ps_move();
+    }
+
     print { $fh } ($page_left+$x+$md, ' ' , $page_top+$y, ' m ');
 }
 
 sub ps_step { ps_skip($xd) }
+
+sub ps_gridstep { ps_skip(80) } # #### TODO: what width?
 
 sub ps_advance {
     $x = 0;

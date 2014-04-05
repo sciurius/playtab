@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Jan 15 15:59:16 2008
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Oct  5 12:00:16 2011
-# Update Count    : 10
+# Last Modified On: Sat Apr  5 22:44:08 2014
+# Update Count    : 11
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::LyChord;
@@ -59,6 +59,7 @@ sub parse {
     }
 
     # Parse key.
+    delete $self->{key};
     eval { $self->{key} = App::Music::PlayTab::Note->parse($key) };
     croak("Unrecognized pitch in chord: ".$self->{_unparsed})
       unless defined $self->{key};
