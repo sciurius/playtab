@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr  5 22:59:15 2014
-# Update Count    : 199
+# Last Modified On: Sat Apr  5 23:20:03 2014
+# Update Count    : 209
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output::PostScript;
@@ -238,8 +238,10 @@ sub print_grid {
 ################ PostScript routines ################
 
 my $ps_pages  = 0;
-my $page_left = 0;		# left margin of page
-my $page_top  = 0;		# top margin of page
+my $page_left;		# left margin of page
+my $page_right;		# right margin of page
+my $page_top;		# top margin of page
+my $page_bottom;	# bottom margin of page;
 
 sub ps_page {
     print { $fh } ('end showpage', "\n") if $ps_pages;
@@ -250,15 +252,12 @@ sub ps_page {
 
 sub ps_move {
 
-    if ( $page_top+$y < 50 ) {
+    if ( $page_top+$y < $page_bottom ) {
 	ps_page();
-	my $xm = $md;
-	$md = 0;
-	ps_move();
-	print { $fh } ( 'TF', ' (', $title, ') show', "\n");
-	$md = $xm;
+	my $pp = "Page $ps_pages";
+	print { $fh } ( "$page_left $page_top m TF ($title) show\n" );
+	print { $fh } ( "$page_right $page_top m SF ($pp) rshow\n" );
 	ps_advance(3);
-	ps_move();
     }
 
     print { $fh } ($page_left+$x+$md, ' ' , $page_top+$y, ' m ');
@@ -301,8 +300,12 @@ sub ps_preamble {
     $data =~ s/\$std_gridscale/$std_gridscale/g;
     print { $fh } ($data);
 
-    $page_left = 50;
-    $page_top = 800;
+    # A4 format is 595 pt x 842 pt.
+    $page_left   =  50;
+    $page_right  = 550;
+    $page_top    = 800;
+    $page_bottom =  50;
+
     $x = $y = 0;
     $ps_pages = 0;
 }

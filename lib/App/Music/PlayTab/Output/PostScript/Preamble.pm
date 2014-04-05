@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 19 16:25:30 2011
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Apr  1 12:29:04 2014
-# Update Count    : 47
+# Last Modified On: Sat Apr  5 23:16:29 2014
+# Update Count    : 48
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output::PostScript::Preamble;
@@ -26,6 +26,9 @@ tabdict begin
 /m { moveto } bind def
 /glyphwidth { % name *glyphwidth* wx wy
     gsave nulldevice 0 0 moveto glyphshow currentpoint grestore
+} bind def
+/rshow {
+    dup stringwidth pop 2 div neg 0 rmoveto show
 } bind def
 /dim {
     currentpoint
