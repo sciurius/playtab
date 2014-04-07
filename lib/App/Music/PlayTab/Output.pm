@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr  5 21:32:05 2014
-# Update Count    : 163
+# Last Modified On: Mon Apr  7 11:02:51 2014
+# Update Count    : 167
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output;
@@ -19,12 +19,20 @@ sub new {
     my $self = bless {}, $pkg;
 
     my $generator = $args->{generate};
-    $generator = 'PostScript' if $generator eq 'ps';
-    $generator = 'PDF' if $generator eq 'pdf';
     my $genpkg = __PACKAGE__ . "::" . $generator;
     eval "use $genpkg";
     die("Cannot find backend for $generator\n$@") if $@;
     $self->{generator} = $genpkg->new($args);
+
+    if ( $args->{output} && $args->{output} ne "-" ) {
+	open( $self->{fh}, '>', $args->{output} )
+	  or die( $args->{output}, ": $!\n" );
+	$self->{fhneedclose} = 1;
+    }
+    else {
+	$self->{fh} = *STDOUT;
+	$self->{fhneedclose} = 0;
+    }
 
     $self;
 }
@@ -34,6 +42,7 @@ sub finish {
     return unless $self->{generator};
     $self->{generator}->print_finish;
     undef $self->{generator};
+    $self->{fh}->close if $self->{fhneedclose};
 }
 
 sub DESTROY {
@@ -44,6 +53,7 @@ sub generate {
     my ( $self, $args ) = @_;
 
     my $gen = $self->{generator};
+    $gen->{fh} = $self->{fh};
     if ( $gen->{raw} ) {
 	$gen->generate($args);
 	return;

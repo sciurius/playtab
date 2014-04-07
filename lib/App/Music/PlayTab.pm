@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr  5 22:23:13 2014
-# Update Count    : 513
+# Last Modified On: Mon Apr  7 11:03:46 2014
+# Update Count    : 516
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -30,7 +30,7 @@ use Getopt::Long;
 sub app_options();
 
 my $output;
-my $generate = 'PostScript';
+my $generate;
 my $preamble;
 my $gxpose = 0;			# global xpose value
 my $verbose = 0;		# verbose processing
@@ -81,6 +81,28 @@ sub run {
     # Options post-processing.
     $trace |= ($debug || $test);
     $xpose = $gxpose;
+
+    if ( $generate ) {
+	if ( $generate eq 'ps' ) {
+	    $generate = 'PostScript';
+	}
+	elsif ( $generate eq 'pdf' ) {
+	    $generate = 'PDF';
+	}
+    }
+    elsif ( $output ) {
+	if ( $output =~ /\.ps$/i ) {
+	    $generate = 'PostScript';
+	}
+	elsif ( $output =~ /\.pdf$/i ) {
+	    $generate = 'PDF';
+	}
+	elsif ( $output =~ /\.dmp$/i ) {
+	    $generate = 'Dump';
+	}
+    }
+
+    $generate ||= 'PDF';
 
     print STDOUT ("ok 3\n") if $test;
 
@@ -158,9 +180,9 @@ sub run {
 
     App::Music::PlayTab::Output->new({
         generate => $generate,
+	output => $output,
     })->generate({
 	opus => $data,
-	output => $output,
     });
 
     print STDOUT ("ok 4\n") if $test;
@@ -441,8 +463,6 @@ sub app_options() {
 
     if ( !GetOptions('output=s'	=> \$output,
 		     'generate=s' => \$generate,
-		     'ps'	=> sub { $generate = 'ps' },
-		     'pdf'	=> sub { $generate = 'pdf' },
 		     'preamble=s' => \$preamble,
 		     'transpose|x=i' => \$gxpose,
 		     'lilypond=i' => \$lilypond,
