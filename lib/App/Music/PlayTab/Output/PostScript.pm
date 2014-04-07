@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Apr  7 11:11:06 2014
-# Update Count    : 213
+# Last Modified On: Mon Apr  7 13:17:17 2014
+# Update Count    : 221
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output::PostScript;
@@ -59,7 +59,7 @@ sub print_setup {
 	$md = $std_margin;
 	undef $barno;
     }
-    ps_page();
+    ps_page(1);
 }
 
 sub print_finish {
@@ -231,23 +231,26 @@ sub print_grid {
 ################ PostScript routines ################
 
 my $ps_pages  = 0;
+my $ps_page = 1;	# first logical page
 my $page_left;		# left margin of page
 my $page_right;		# right margin of page
 my $page_top;		# top margin of page
 my $page_bottom;	# bottom margin of page;
 
 sub ps_page {
+    my ( $first ) = @_;
     $fh->print('end showpage', "\n") if $ps_pages;
     $fh->print('%%Page: ', ++$ps_pages. ' ', $ps_pages, "\n",
 		  'tabdict begin', "\n");
     $x = $y = 0;
+    $ps_page = $first ? 1 : $ps_page+1;
 }
 
 sub ps_move {
 
     if ( $page_top+$y < $page_bottom ) {
 	ps_page();
-	my $pp = "Page $ps_pages";
+	my $pp = "Page $ps_page";
 	$fh->print( "$page_left $page_top m TF ($title) show\n" );
 	$fh->print( "$page_right $page_top m SF ($pp) rshow\n" );
 	ps_advance(3);

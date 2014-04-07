@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Apr  7 12:04:11 2014
-# Update Count    : 519
+# Last Modified On: Mon Apr  7 13:07:49 2014
+# Update Count    : 526
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -104,10 +104,14 @@ sub run {
 
     $generate ||= 'PDF';
 
+    my $gen = App::Music::PlayTab::Output->new({
+		      generate => $generate,
+		      output => $output,
+	        });
+
     print STDOUT ("ok 3\n") if $test;
 
-    $data = {};
-    $entry = {};
+    reset_globals();
 
     while ( <> ) {
 	next if /^\s*#/;
@@ -177,13 +181,12 @@ sub run {
 	}
 	text($line);
     }
-
-    App::Music::PlayTab::Output->new({
-        generate => $generate,
-	output => $output,
-    })->generate({
-	opus => $data,
-    });
+    continue {
+	if ( eof ) {
+	    $gen->generate({ opus => $data });
+	    reset_globals();
+	}
+    }
 
     print STDOUT ("ok 4\n") if $test;
 
@@ -197,6 +200,18 @@ sub push_entry {
     return unless $entry && keys(%$entry);
     push( @{ $data->{lines} }, $entry );
     $entry = {};
+}
+
+sub reset_globals {
+    $data = {};
+    $entry = {};
+    $width  = 30;		# horizontal 'step' for chords
+    $height = -15;		# vertical 'step' for lines
+    $margin = 40;		# default indentation, if required
+    $indent = 0;		# actual indentation
+    undef $barno;		# barnumber (slightly magical)
+    $s_margin = $margin;	# save values
+    $s_indent = 0;		# save values
 }
 
 ################ Subroutines ################
@@ -433,23 +448,23 @@ sub _set_incr {
     my $ref = shift;
     my $v = shift;
     croak("set_$var: number or increment expected\n")
-      unless $v =~ /^(=\s*)?([-+])?(\d+)$/;
-    if ( defined($2) && !defined($1) ) {
-	$$ref += $2.$3;
+      unless $v =~ /^([-+])?(\d+)$/;
+    if ( defined($1) ) {
+	$$ref += $1.$2;
     }
     else {
-	$$ref = $3;
+	$$ref = $2;
     }
-    $entry->{$var} = $$ref;
+    $entry->{$var} = $$ref if $var;
 }
 
 sub set_width  { unshift( @_, "width",     \$width  ); goto &_set_incr }
 sub set_height { unshift( @_, "height",    \$height ); goto &_set_incr }
 sub set_margin { unshift( @_, "margin",    \$margin ); goto &_set_incr }
 sub set_barno  {
-    unshift( @_, "___barno", \$barno );
+    # Values: 0 = disable, >0 = use, <0 lead-in.
+    unshift( @_, undef, \$barno );
     &_set_incr;
-    delete $entry->{___barno};	# doesn't belong here
     $barno = undef unless $barno;
 }
 
