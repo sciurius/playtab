@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Apr  7 11:08:13 2014
-# Update Count    : 212
+# Last Modified On: Mon Apr  7 11:11:06 2014
+# Update Count    : 213
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output::PostScript;
@@ -75,7 +75,7 @@ sub print_setupline {
     $xd     = $line->{width};
     $yd     = $line->{height};
     $md     = $line->{margin} || 0;
-    $barno  = $line->{barnumber};
+    $barno  = $line->{barno};
 }
 
 sub print_title {

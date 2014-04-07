@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Apr  7 11:03:46 2014
-# Update Count    : 516
+# Last Modified On: Mon Apr  7 12:04:11 2014
+# Update Count    : 519
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -55,7 +55,7 @@ my $width  = 30;		# horizontal 'step' for chords
 my $height = -15;		# vertical 'step' for lines
 my $margin = 40;		# default indentation, if required
 my $indent = 0;			# actual indentation
-my $barnumber;			# barnumber
+my $barno;			# barnumber (slightly magical)
 my $s_margin = $margin;		# save values
 my $s_indent = 0;		# save values
 
@@ -206,7 +206,7 @@ sub bar {
 
     my @m = ();
     $indent = $margin if $entry->{prefix} && $entry->{prefix} ne "";
-    $entry->{barno}  = $barnumber if $barnumber;
+    $entry->{barno}  = $barno if defined $barno && $barno > 0;
     $entry->{width}  = $width;
     $entry->{height} = $height;
     $entry->{margin} = $indent if $indent;
@@ -233,7 +233,7 @@ sub bar {
 		}
 		else {
 		    push( @{ $entry->{measures} }, [ @m ] );
-		    $barnumber++;
+		    $barno++ if defined $barno;
 		}
 		@m = ();
 	    }
@@ -433,12 +433,12 @@ sub _set_incr {
     my $ref = shift;
     my $v = shift;
     croak("set_$var: number or increment expected\n")
-      unless $v =~ /^([-+])?(\d+)$/;
-    if ( defined $1 ) {
-	$$ref += $1.$2;
+      unless $v =~ /^(=\s*)?([-+])?(\d+)$/;
+    if ( defined($2) && !defined($1) ) {
+	$$ref += $2.$3;
     }
     else {
-	$$ref = $2;
+	$$ref = $3;
     }
     $entry->{$var} = $$ref;
 }
@@ -446,7 +446,12 @@ sub _set_incr {
 sub set_width  { unshift( @_, "width",     \$width  ); goto &_set_incr }
 sub set_height { unshift( @_, "height",    \$height ); goto &_set_incr }
 sub set_margin { unshift( @_, "margin",    \$margin ); goto &_set_incr }
-sub set_barno  { unshift( @_, "barnumber", \$barnumber ); goto &_set_incr }
+sub set_barno  {
+    unshift( @_, "___barno", \$barno );
+    &_set_incr;
+    delete $entry->{___barno};	# doesn't belong here
+    $barno = undef unless $barno;
+}
 
 ################ Command Line Options ################
 
