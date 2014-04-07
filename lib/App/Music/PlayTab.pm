@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Apr  7 13:07:49 2014
-# Update Count    : 526
+# Last Modified On: Mon Apr  7 14:31:16 2014
+# Update Count    : 527
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -459,7 +459,14 @@ sub _set_incr {
 }
 
 sub set_width  { unshift( @_, "width",     \$width  ); goto &_set_incr }
-sub set_height { unshift( @_, "height",    \$height ); goto &_set_incr }
+
+sub set_height {
+    unshift( @_, "height",    \$height );
+    $height = -$height;
+    &_set_incr;
+    $height = -$height;
+}
+
 sub set_margin { unshift( @_, "margin",    \$margin ); goto &_set_incr }
 sub set_barno  {
     # Values: 0 = disable, >0 = use, <0 lead-in.
