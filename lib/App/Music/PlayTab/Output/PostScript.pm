@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Apr  7 13:17:17 2014
-# Update Count    : 221
+# Last Modified On: Thu Apr 17 10:45:03 2014
+# Update Count    : 223
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output::PostScript;
@@ -80,7 +80,7 @@ sub print_setupline {
 
 sub print_title {
     my ( $self, $ttle, $text ) = @_;
-    $self->print_text( $text, $ttle ? 'TF' : 'SF' );
+    $self->print_text( $text, 0, $ttle ? 'TF' : 'SF' );
     $self->print_newline();
     undef $barno;
     $title = $text if $ttle;
@@ -161,14 +161,14 @@ sub print_ta {
 sub print_postfix {
     my ( $self, $text ) = @_;
     ps_skip(4);
-    $self->print_text($text);
+    $self->print_text( $text, $md );
 }
 
 sub print_text {
-    my ( $self, $text, $font ) = @_;
+    my ( $self, $text, $xxmd, $font ) = @_;
     $font ||= 'SF';
     my $xm = $md;
-    $md = 0;
+    $md = $xxmd || 0;
     ps_move();
     $self->{fh}->print( $font, ' (', $text, ') show', "\n");
     $md = $xm;
