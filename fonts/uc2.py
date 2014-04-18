@@ -49,10 +49,11 @@ gcopy( "Repeat2Bars", 0xe4e1 )
 gcopy( "Repeat4Bars", 0xe4e2 )
 
 # Chord symbols.
+stretch = psMat.scale( 1, 1.4 )
 gcopy( "ChordDim",     0xe800 )
 gcopy( "ChordHalfDim", 0xe801 )
 gcopy( "ChordAug",     0xe802 )
-gcopy( "ChordMajor7",  0xe803 )
+gcopy( "ChordMajor7",  0xe803, stretch )
 gcopy( "ChordMinor",   0xe804 )
 
 # Fretboard symbols.
