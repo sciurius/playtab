@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Apr  7 11:02:51 2014
-# Update Count    : 167
+# Last Modified On: Thu Apr 17 15:02:47 2014
+# Update Count    : 169
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output;
@@ -62,9 +62,7 @@ sub generate {
     my $opus = $args->{opus};
 
     $gen->print_setup( $args );
-    $gen->print_title( 1, $opus->{title} );
-    $gen->print_title( 0, $_ ) foreach @{ $opus->{subtitle} };
-    $gen->print_newline(2);
+    $gen->print_setuppage( $opus->{title}, $opus->{subtitle} );
     my $prev_line = "";
 
     foreach my $line ( @{ $opus->{lines} } ) {
