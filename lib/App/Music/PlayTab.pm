@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Apr  7 14:31:16 2014
-# Update Count    : 527
+# Last Modified On: Fri Apr 18 22:15:48 2014
+# Update Count    : 532
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -61,6 +61,7 @@ my $s_indent = 0;		# save values
 
 use App::Music::PlayTab::Output;
 
+use Encode;
 use Clone qw(clone);
 
 sub run {
@@ -260,9 +261,14 @@ sub bar {
 	    }
 	    elsif ( $c eq '%' ) {
 		my $xs = 1;
-		while ( @c > 0 && $c[0] eq '.' ) {
-		    shift(@c);
-		    $xs++;
+		if ( $lilypond ) {
+		    $xs = $bpm;
+		}
+		else {
+		    while ( @c > 0 && $c[0] eq '.' ) {
+			shift(@c);
+			$xs++;
+		    }
 		}
 		push( @m, [ "same", 1, $xs ] );
 	    }
