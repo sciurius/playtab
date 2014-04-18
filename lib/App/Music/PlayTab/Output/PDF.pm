@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 15 11:02:34 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Apr 18 15:45:30 2014
-# Update Count    : 311
+# Last Modified On: Fri Apr 18 22:06:01 2014
+# Update Count    : 405
 # Status          : Unknown, Use with caution!
 
 use utf8;
@@ -48,6 +48,9 @@ my $y;				# actual y pos
 my $barno;
 my $std_gridscale = 8;
 
+use constant MS_REST    => "\x{002b}";
+use constant MS_REPT    => "\x{0024}";
+
 # New page, and init the backend if needed.
 sub print_setup {
     my ( $self, $args, $title ) = @_;
@@ -65,6 +68,8 @@ sub print_setup {
 	$xd = $std_width;
 	$yd = $std_height;
 	$md = $std_margin;
+
+	binmode( STDERR, ':utf8' );
     }
 }
 
@@ -84,7 +89,7 @@ sub print_finish {
 # New print line.
 sub print_setupline {
     my ( $self, $line ) = @_;
-    $xd     = $line->{width};
+    $xd     = $line->{width} || 0;
     $yd     = $line->{height};
     $md     = $line->{margin} || 0;
     $barno  = $line->{barno};
@@ -111,8 +116,9 @@ sub print_subtitle {
 sub print_chord {
     my ( $self, $chord ) = @_;
     if ( ref($chord) =~ /::/ ) {
+	my $save_x = $x;
 	$self->pdf_chord($chord);
-	$self->pdf_skip( $xd );
+	$x = $save_x + $xd;
 	$self->{_prev_chord} = $chord;
     }
     elsif ( ref($chord) eq 'ARRAY' ) {
@@ -133,8 +139,8 @@ sub print_again {
 sub print_bar {
     my ( $self, $first ) = @_;
     $self->pdf_checkvspace;
-    $self->{pr}->vline( $x + $md, $y + 15, 20 );
-    $self->{pr}->rtext( $barno, $x + $md - 2, $y + 11,
+    $self->{pr}->vline( $x + $md, $y + 13, 16 );
+    $self->{pr}->rtext( $barno, $x + $md - 2, $y + 9,
 			$self->{ps}->{fonts}->{barno} )
       if $first && defined($barno);
     $self->pdf_skip(4);
@@ -154,21 +160,17 @@ sub print_space {
 
 sub print_rest {
     my $self = shift;
-	$self->pdf_skip( $xd );
-    return;
-    ps_move();
-    $self->{fh}->print("rest\n");
-    ps_step();
+    $self->{pr}->msym( MS_REST, $x + $md, $y, 20 );
+    $self->pdf_skip( $xd );
 }
 
 sub print_same {
     my ( $self, $wh, $xs ) = @_;
     my $save_x = $x;
     $x += ($xs * $xd) / 2;
-    $self->{pr}->text( "\x{0024}", $x, $y,
-		       $self->{ps}->{fonts}->{msyms} );
-    $x = $save_x;
-    pdf_skip($xs * $xd);
+    $self->{pr}->ctext( MS_REPT, $x + $md, $y + 3,
+		       $self->{ps}->{fonts}->{msyms}, 25 );
+    $x = $save_x + $xs * $xd;
 }
 
 sub print_ta {
@@ -227,24 +229,22 @@ sub print_grid {
 
     my @c = @$grid;
     my $chord = shift(@c);
+    my ( $save_x, $save_y ) = ( $x, $y );
+    $y += 0;
+    $x += 28;
     if ( $chord =~ /::/ ) {
-	my $save_y = $y;
-	my $save_x = $x;
-	$y += 5;
-	$x += 20 - ( $chord->width($self) / 2 );
+	$x -= $chord->width($self) / 2;
 	$self->pdf_chord($chord);
-	$y = $save_y;
-	$x = $save_x;
     }
     else {
-	$self->{pr}->ctext( $chord,
-			    $x + $md + 20, $y + 5,
+	$self->{pr}->ctext( $chord, $x, $y,
 			    $self->{ps}->{fonts}->{chord} );
     }
+    ( $x, $y ) = ( $save_x, $save_y );
 
     # Fretboard.
     my $c = shift(@c);
-    $self->{pr}->fretboard( $x + $md, $y, 5*8, 4*8, $c, \@c );
+    $self->{pr}->fretboard( $x + $md + 8, $y - 5, 5*8, 4*8, $c, \@c );
 }
 
 sub page_settings {
@@ -258,13 +258,17 @@ sub page_settings {
 	lineheight    => 15,
 	fonts         => {
 			  title   => { name => 'Helvetica',
+				       file => $ENV{HOME}.'/.fonts/ArialMT.ttf',
 				       size => 16 },
 			  subtitle=> { name => 'Helvetica',
-				       size => 14 },
+				       file => $ENV{HOME}.'/.fonts/ArialMT.ttf',
+				       size => 12 },
 			  chord   => { file => 'Helvetica',
-				       size => 14 },
+				       file => $ENV{HOME}.'/.fonts/ArialMT.ttf',
+				       size => 17 },
 			  barno   => { file => 'Helvetica',
-				       size => 6 },
+				       file => $ENV{HOME}.'/.fonts/ArialMT.ttf',
+				       size => 8 },
 			  msyms   => { file => $ENV{HOME}.'/.fonts/MSyms.ttf',
 				       size => 15 },
 			 },
@@ -345,8 +349,7 @@ sub pdf_chord {
     my ( $self, $chord ) = @_;
     my $save_x = $x;
     $chord->pdf($self);
-    $x = $save_x;
-    $self->pdf_step();
+    $x = $save_x + $xd;
 }
 
 # PDF support routines for App::Music::PlayTab::Note.
@@ -363,16 +366,18 @@ sub pdf {
     my $name = $self->name;
 
     if ( $name =~ /(.)b/ ) {
+	my $width = $drv->{pr}->strwidth( $1,
+					  $drv->{ps}->{fonts}->{chord});
 	$drv->{pr}->text( $1, $x + $md, $y,
 			  $drv->{ps}->{fonts}->{chord} );
-	$drv->{pr}->text( MS_FLAT, $x + $md + 10, $y,
-			  $drv->{ps}->{fonts}->{msyms} );
+	$drv->{pr}->msym( MS_FLAT, $x + $md + $width + 1, $y + 3, 25 );
     }
     elsif ( $name =~ /(.)#/ ) {
+	my $width = $drv->{pr}->strwidth( $1,
+					  $drv->{ps}->{fonts}->{chord});
 	$drv->{pr}->text( $1, $x + $md, $y,
 			  $drv->{ps}->{fonts}->{chord} );
-	$drv->{pr}->text( MS_SHARP, $x + $md + 10, $y,
-			  $drv->{ps}->{fonts}->{msyms} );
+	$drv->{pr}->msym( MS_SHARP, $x + $md + $width + 1, $y + 3, 25 );
     }
     else {
 	$drv->{pr}->text( $name, $x + $md, $y,
@@ -387,15 +392,15 @@ sub width {
 				     $drv->{ps}->{fonts}->{chord});
 
     if ( $name =~ /(.)b/ ) {
-	$width += $drv->{pr}->strwidth( MS_FLAT,
-					$drv->{ps}->{fonts}->{msyms} );
+	return $drv->{pr}->strwidth( $1, $drv->{ps}->{fonts}->{chord})
+	  + 1 + $drv->{pr}->msymwidth( MS_FLAT );
     }
-    elsif ( $name =~ /(.)#/ ) {
-	$width += $drv->{pr}->strwidth( MS_SHARP,
-					$drv->{ps}->{fonts}->{msyms} );
+    if ( $name =~ /(.)#/ ) {
+	return $drv->{pr}->strwidth( $1, $drv->{ps}->{fonts}->{chord})
+	  + 1 + $drv->{pr}->msymwidth( MS_SHARP );
     }
 
-    return $width;
+    return $drv->{pr}->strwidth( $name, $drv->{ps}->{fonts}->{chord} );
 }
 
 # PDF support routines for App::Music::PlayTab::Chord.
@@ -412,44 +417,39 @@ use constant MS_MINOR    => "\x{002b}";
 sub pdf {
     my ($self, $drv) = @_;
 
+    my $width = $self->{key}->width($drv);
     $self->{key}->pdf($drv);
 
-    my $res;
+    my $res = "";
     my @v = @{$self->{vec}};
     my $v = "@v ";
     shift (@v);
 
     if ( $v =~ s/^0 (2 )?4 (6|7|8) / / ) {
 	if ( $2 == 8 ) {
-	    $drv->{pr}->text( MS_AUG, $x + $md + 10, $y + 5,
-			      $drv->{ps}->{fonts}->{msyms} );
+	    $drv->{pr}->msym( MS_AUG, $x + $md + $width + 1, $y + 8 );
 	}
 	$v = ' 6' . $v if $2 == 6;
 	$v = ' 2' . $v if defined $1;
     }
     elsif ( $v =~ s/^0 3 6 9 / / ) {
-	$drv->{pr}->text( MS_DIM, $x + $md + 10, $y + 5,
-			  $drv->{ps}->{fonts}->{msyms} );
+	$drv->{pr}->msym( MS_DIM, $x + $md + $width + 1, $y + 8 );
     }
     elsif ( $v =~ s/^0 (2 )?3 (6|7|8) / / ) {
 	if ( $2 == 6 ) {
 	    if ( $v =~ s/^ 10 // ) {
-		$drv->{pr}->text( MS_HDIM, $x + $md + 10, $y + 5,
-				  $drv->{ps}->{fonts}->{msyms} );
+		$drv->{pr}->msym( MS_HDIM, $x + $md + $width + 1, $y + 8 );
 	    }
 	    else {
-		$drv->{pr}->text( MS_DIM, $x + $md + 10, $y + 5,
-				  $drv->{ps}->{fonts}->{msyms} );
+		$drv->{pr}->msym( MS_DIM, $x + $md + $width + 1, $y + 8 );
 	    }
 	}
 	else {
-	    $drv->{pr}->text( MS_MINOR, $x + $md + 10, $y + 5,
-			      $drv->{ps}->{fonts}->{msyms} );
+	    $drv->{pr}->msym( MS_MINOR, $x + $md + $width + 1, $y + 8 );
 	}
 	$v = ' 8' . $v 	if $2 == 8;
 	$v = ' 2' . $v  if defined $1;
     }
-    return;
 
     $v =~ s/^0 5 7 / 5 7 /;
     $v =~ s/ 10 14 18 (21) / $1 /;		# 13
@@ -462,11 +462,12 @@ sub pdf {
     $v =~ s/ 11 14 (17|18) / $1 11 /;		# 11#5
     $v =~ s/ 11 (14|15) / $1 11 /;		#  9#5
     if ( $v =~ s/ 10 / / ) {
-	$res .= ' (7) addn';
+	$drv->{pr}->text( "7", $x + $md + $width + 0.5, $y - 3,
+			  $drv->{ps}->{fonts}->{chord}, 12);
     }
     elsif ( $v =~ s/^( \d| 10|) 11 / $1/ ) {
 	$res .= ' -2 0 rmoveto' if $res =~ / flat$/;
-	$res .= ' delta';
+	$drv->{pr}->msym( MS_MAJOR7, $x + $md + $width + 0.5, $y - 3 );
     }
     if ( $v =~ s/ 5 7 / / ) {
 	$res .= ' (4) susp';
@@ -498,17 +499,22 @@ sub pdf {
     }
 
     if ( $self->{bass} ) {
-	my $t = join(" slash ", map { $_->pdf } @{$self->{bass}});
-	$t =~ s/root/hroot/g;
-	$res = join(" slash ", $res, $t);
+	$drv->{pr}->{pdftext}->save;
+	$drv->{pr}->{pdftext}->scale( 0.7, 0.7 );
+	$drv->{pr}->text( "/", $x, $y, $drv->{ps}->{fonts}->{chord} );
+	foreach ( @{$self->{bass}} ) {
+	    $x += 5;
+	    $_->pdf($drv);
+	}
+	$drv->{pr}->{pdftext}->restore;
     }
 
     warn("=> Chord ", $self->{_unparsed}, ": ", $self->{key}->key,
 	 " (", $self->{key}->name, ") [ @{$self->{vec}} ] ->",
 	 " $res1 [ $v ] -> $res\n")
       if $self->{_debug};
-
     return $res;
+
 }
 
 sub width {
@@ -523,35 +529,29 @@ sub width {
 
     if ( $v =~ s/^0 (2 )?4 (6|7|8) / / ) {
 	if ( $2 == 8 ) {
-	    $width += $drv->{pr}->strwidth( MS_AUG,
-					    $drv->{ps}->{fonts}->{msyms} );
+	    $width += $drv->{pr}->msymwidth( MS_AUG );
 	}
 	$v = ' 6' . $v if $2 == 6;
 	$v = ' 2' . $v if defined $1;
     }
     elsif ( $v =~ s/^0 3 6 9 / / ) {
-	$width += $drv->{pr}->strwidth( MS_DIM,
-					$drv->{ps}->{fonts}->{msyms} );
+	$width += $drv->{pr}->msymwidth( MS_DIM );
     }
     elsif ( $v =~ s/^0 (2 )?3 (6|7|8) / / ) {
 	if ( $2 == 6 ) {
 	    if ( $v =~ s/^ 10 // ) {
-		$width += $drv->{pr}->strwidth( MS_HDIM,
-						$drv->{ps}->{fonts}->{msyms} );
+		$width += $drv->{pr}->msymwidth( MS_HDIM );
 	    }
 	    else {
-		$width += $drv->{pr}->strwidth( MS_DIM,
-						$drv->{ps}->{fonts}->{msyms} );
+		$width += $drv->{pr}->msymwidth( MS_DIM );
 	    }
 	}
 	else {
-	    $width += $drv->{pr}->strwidth( MS_MINOR,
-					    $drv->{ps}->{fonts}->{msyms} );
+	    $width += $drv->{pr}->msymwidth( MS_MINOR );
 	}
 	$v = ' 8' . $v 	if $2 == 8;
 	$v = ' 2' . $v  if defined $1;
     }
-    return $width;
 
     $v =~ s/^0 5 7 / 5 7 /;
     $v =~ s/ 10 14 18 (21) / $1 /;		# 13
@@ -564,11 +564,11 @@ sub width {
     $v =~ s/ 11 14 (17|18) / $1 11 /;		# 11#5
     $v =~ s/ 11 (14|15) / $1 11 /;		#  9#5
     if ( $v =~ s/ 10 / / ) {
-	$res .= ' (7) addn';
+	$width += $drv->{pr}->strwidth( "7", $drv->{ps}->{fonts}->{chord}, 12);
     }
     elsif ( $v =~ s/^( \d| 10|) 11 / $1/ ) {
+	$width += $drv->{pr}->msymwidth( MS_MAJOR7 );
 	$res .= ' -2 0 rmoveto' if $res =~ / flat$/;
-	$res .= ' delta';
     }
     if ( $v =~ s/ 5 7 / / ) {
 	$res .= ' (4) susp';
@@ -592,6 +592,8 @@ sub width {
 		  '(9) adds','(11) addf','(11) addn','(11) adds',
 		 '(12) addn','(13) addf','(13) addn' )[$_];
     }
+
+    return $width;
 
     if ( $self->{high} ) {
 	my $t = join(" bslash ", map { $_->pdf } @{$self->{high}});
@@ -622,6 +624,11 @@ use Encode;
 
 my %fonts;
 
+# Glyph mappings of the MSyms font.
+use constant MS_FBFILLED => "\x{002e}";
+use constant MS_FBX      => "\x{002f}";
+use constant MS_FBOPEN   => "\x{0030}";
+
 sub new {
     my ( $pkg, $drv, @file ) = @_;
     my $self = bless { drv => $drv }, $pkg;
@@ -648,12 +655,36 @@ sub ctext {
     goto &_text;
 }
 
+sub msym {
+    my ( $self, $sym, $x, $y, $size ) = @_;
+    my $font = $self->{drv}->{ps}->{fonts}->{msyms};
+    $size ||= $font->{size};
+    $self->setfont($font, $size);
+    $self->{pdftext}->translate( $x, $y );
+    $self->{pdftext}->text($sym);
+}
+
+my %msymwidth;
+
+sub msymwidth {
+    my ( $self, $sym, $size ) = @_;
+    my $key = $sym;
+    $key .= "\0$size" if defined $size;
+    $msymwidth{$key} ||= do {
+	my $font = $self->{drv}->{ps}->{fonts}->{msyms};
+	$size ||= $font->{size};
+	$self->setfont($font, $size);
+	$self->{pdftext}->advancewidth($sym);
+    };
+}
+
 sub _text {
     my ( $self, $align, $text, $x, $y, $font, $size ) = @_;
 
     $font ||= $self->{font};
     $size ||= $font->{size};
-    $text = encode( "cp1250", $text ) unless $font->{file}; # #### TODO ???
+#    $text = encode( "cp1250", $text ) unless $font->{file}; # #### TODO ???
+    $text =~ s/'/’/g;
 
     if ( 1 ) {
 	warn( "TEXT: ",
@@ -699,12 +730,17 @@ sub _getfont {
     }
 }
 
+my %strwidth;
+
 sub strwidth {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
     $size ||= $font->{size};
-    $self->setfont( $font, $size );
-    $self->{pdftext}->advancewidth($text);
+    my $key = "$text\0$font\0$size";
+    $strwidth{$key} ||= do {
+	$self->setfont( $font, $size );
+	$self->{pdftext}->advancewidth($text);
+    };
 }
 
 sub newpage {
@@ -732,11 +768,11 @@ sub hline {
     $self->{pdfgfx}->stroke;
 }
 
-my @Rom = qw(I II III IV V VI VII VIII IX X XI XII);
+my @Rom = qw(I II III IV V VI VII VIII IX X XI XII
+	     XIII XIV XV XVI XVII XVIII XIX XX XXI XXII XXIII XXIV );
 
 sub fretboard {
     my ( $self, $x, $y, $width, $height, $start, $dots ) = @_;
-    my $font = $self->{drv}->{ps}->{fonts}->{msyms};
     my $cw = $width / 5;
     my $ch = $height / 4;
 
@@ -754,7 +790,8 @@ sub fretboard {
 	my $r = $Rom[$start-1];
 	# Map to MSyms glyphs.
 	$r =~ tr/IVXLMDC/1234567/;
-	$self->rtext( $r, $x - 3, $y - 4, $font );
+	$self->rtext( $r, $x - 3, $y - 4,
+		      $self->{drv}->{ps}->{fonts}->{msyms} );
     }
     else {
 	$self->hline( $x, $y - 0.7, 5*$cw );
@@ -766,10 +803,10 @@ sub fretboard {
     $y += $ch / 2;
     foreach my $dot ( @$dots ) {
 	if ( $dot < 0 ) {
-	    $self->text( "\x{002f}", $x + 1.8, $y - $ch - 2.5, $font, 30 );
+	    $self->msym( MS_FBX, $x + 1.8, $y - $ch - 2.5, 30 );
 	}
 	elsif ( $dot > 0 ) {
-	    $self->text( "\x{002e}", $x + 1, $y - $ch*$dot - 2.7, $font, 40 );
+	    $self->msym( MS_FBFILLED, $x + 1, $y - $ch*$dot - 2.7, 40 );
 	}
 	$x += $ch;
     }
