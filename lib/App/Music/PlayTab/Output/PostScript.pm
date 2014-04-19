@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Apr 17 15:25:47 2014
-# Update Count    : 230
+# Last Modified On: Sat Apr 19 20:43:37 2014
+# Update Count    : 233
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output::PostScript;
@@ -18,17 +18,6 @@ our $VERSION = "0.001";
 
 sub new {
     bless { init => 0 }, shift;
-}
-
-sub finish {
-    my $self = shift;
-    return unless $self->{init};
-    $self->print_finish;
-    $self->{init} = 0;
-}
-
-sub DESTROY {
-    &finish;
 }
 
 # Initial default values.
@@ -49,7 +38,7 @@ my $title;
 my $fh;			   # singleton
 
 # New page, and init the backend if needed.
-sub print_setup {
+sub setup {			# API
     my ( $self, $args ) = @_;
     $fh = $self->{fh};
     unless ( $self->{init}++ ) {
@@ -60,13 +49,13 @@ sub print_setup {
     }
 }
 
-sub print_setuppage {
+sub setuppage {			# API
     my ( $self, $title, $stitles ) = @_;
     ps_page( 1, $title, $stitles );
     undef $barno;
 }
 
-sub print_finish {
+sub finish {			# API
     my $self = shift;
     return unless $self->{init};
     ps_trailer();
@@ -74,7 +63,7 @@ sub print_finish {
 }
 
 # New print line.
-sub print_setupline {
+sub setupline {			# API
     my ( $self, $line ) = @_;
     $xd     = $line->{width};
     $yd     = $line->{height};
@@ -82,7 +71,7 @@ sub print_setupline {
     $barno  = $line->{barno};
 }
 
-sub print_chord {
+sub chord {			# API
     my ( $self, $chord ) = @_;
     if ( ref($chord) =~ /::/ ) {
 	ps_chord($chord);
@@ -100,10 +89,10 @@ sub print_chord {
 
 sub print_again {
     my ( $self ) = @_;
-    $self->print_chord( $self->{_prev_chord} );
+    $self->chord( $self->{_prev_chord} );
 }
 
-sub print_bar {
+sub bar {			# API
     my ( $self, $first ) = @_;
     ps_move();
     if ( defined($barno) ) {
@@ -121,7 +110,7 @@ sub print_bar {
     ps_skip(4);
 }
 
-sub print_newline {
+sub newline {			# API
     my ( $self, $count ) = @_;
     ps_advance($count);
 }
@@ -154,13 +143,13 @@ sub print_ta {
     ps_step();
 }
 
-sub print_postfix {
+sub postfix {			# API
     my ( $self, $text ) = @_;
     ps_skip(4);
-    $self->print_text( $text, $md );
+    $self->text( $text, $md );
 }
 
-sub print_text {
+sub text {			# API
     my ( $self, $text, $xxmd, $font ) = @_;
     $font ||= 'SF';
     my $xm = $md;
@@ -178,7 +167,7 @@ sub print_less {
     ps_skip(-4);
 }
 
-sub print_grids {
+sub grids {			# API
     my ( $self, $grids ) = @_;
 
     my $n = int( ( 570 - $md - 60 ) / 80 );
@@ -187,14 +176,14 @@ sub print_grids {
     foreach my $ch ( @$grids ) {
 	$self->print_grid($ch);
 	if ( ++$i >= $n ) {
-	    $self->print_newline(4);
+	    $self->newline(4);
 	    $i = 0;
 	}
 	else {
 	    ps_gridstep();
 	}
     }
-    $self->print_newline(3);
+    $self->newline(3);
 }
 
 my @Rom = qw(I II III IV V VI VII VIII IX X XI XII);
