@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr 19 20:17:56 2014
-# Update Count    : 534
+# Last Modified On: Sat Apr 19 21:48:09 2014
+# Update Count    : 535
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -282,9 +282,6 @@ sub bar {
 	    }
 	    elsif ( $c eq '`' ) {
 		push( @m, "hless" );
-	    }
-	    elsif ( lc($c) eq 'ta' ) {
-		push( @m, "ta" );
 	    }
 	    else {
 		my $chord = parse_chord($c);

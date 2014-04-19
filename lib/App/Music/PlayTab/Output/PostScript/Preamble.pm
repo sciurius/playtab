@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 19 16:25:30 2011
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr  5 23:16:29 2014
-# Update Count    : 48
+# Last Modified On: Sat Apr 19 21:49:47 2014
+# Update Count    : 49
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output::PostScript::Preamble;
@@ -111,9 +111,6 @@ tabdict begin
 /rest {
     /Helvetica findfont 16 scalefont setfont
     /endash glyphshow } def
-/ta {
-    /Helvetica findfont 14 scalefont setfont
-    (T.A.) show	} def
 /TF {
     /Helvetica findfont 16 scalefont setfont } def
 /SF {
