@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Apr 18 22:15:48 2014
-# Update Count    : 532
+# Last Modified On: Sat Apr 19 20:17:56 2014
+# Update Count    : 534
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -68,6 +68,7 @@ sub run {
     local (@ARGV) = @_ ? @_ : @ARGV;
 
     app_options();
+    binmode( STDERR, ':utf8' );
     print STDOUT ("ok 1\n") if $test;
 
     if ( defined $output ) {
@@ -119,6 +120,7 @@ sub run {
 	next if $lilypond && /^\s*%/;
 	$lilypond && s/\s+%\s*\d+\s*$//;
 	next unless /\S/;
+	$_ = decode_utf8($_);
 	chomp($line = $_);
 
 	s/\^\s+//;
