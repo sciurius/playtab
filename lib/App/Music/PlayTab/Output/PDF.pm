@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 15 11:02:34 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr 19 23:02:53 2014
-# Update Count    : 493
+# Last Modified On: Sat May 17 21:34:03 2014
+# Update Count    : 494
 # Status          : Unknown, Use with caution!
 
 use utf8;
@@ -71,7 +71,7 @@ sub new {
     bless { }, shift;
 }
 
-# New page, and init the backend if needed.
+# Init the backend.
 sub setup {
     my ( $self, $args, $title ) = @_;
     unless ( $pr ) {
@@ -91,6 +91,7 @@ sub setup {
     }
 }
 
+# New page.
 sub setuppage {
     my ( $self, $title, $stitles ) = @_;
     $self->pdf_page( 1, $title, $stitles );

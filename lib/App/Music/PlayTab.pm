@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr 19 21:48:09 2014
-# Update Count    : 535
+# Last Modified On: Sat May 17 21:18:20 2014
+# Update Count    : 536
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -84,6 +84,8 @@ sub run {
     $trace |= ($debug || $test);
     $xpose = $gxpose;
 
+    # Actually we should probe all backends and let them register what
+    # they can handle.
     if ( $generate ) {
 	if ( $generate eq 'ps' ) {
 	    $generate = 'PostScript';
