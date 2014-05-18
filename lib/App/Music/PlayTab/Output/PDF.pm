@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 15 11:02:34 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat May 17 21:34:03 2014
-# Update Count    : 494
+# Last Modified On: Sun May 18 21:27:54 2014
+# Update Count    : 496
 # Status          : Unknown, Use with caution!
 
 use utf8;
@@ -124,7 +124,7 @@ sub bar {
 }
 
 sub chord {
-    my ( $self, $chord ) = @_;
+    my ( $self, $chord, $dup ) = @_;
     if ( ref($chord) =~ /::/ ) {
 	my $save_x = $x;
 	my $save_y = $y;
@@ -140,6 +140,9 @@ sub chord {
     else {
 	my $fun = "render__$chord";
 	$self->$fun;
+    }
+    while ( $dup-- > 1 ) {
+	$self->render__space;
     }
 }
 

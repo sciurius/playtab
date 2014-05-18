@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr 19 20:43:37 2014
-# Update Count    : 233
+# Last Modified On: Sun May 18 21:29:59 2014
+# Update Count    : 235
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output::PostScript;
@@ -72,7 +72,7 @@ sub setupline {			# API
 }
 
 sub chord {			# API
-    my ( $self, $chord ) = @_;
+    my ( $self, $chord, $dup ) = @_;
     if ( ref($chord) =~ /::/ ) {
 	ps_chord($chord);
 	$self->{_prev_chord} = $chord;
@@ -84,6 +84,9 @@ sub chord {			# API
     else {
 	my $fun = "print_$chord";
 	$self->$fun;
+    }
+    while ( $dup-- > 1 ) {
+	$self->print_space;
     }
 }
 

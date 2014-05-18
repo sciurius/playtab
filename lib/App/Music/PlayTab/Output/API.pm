@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat May 17 21:33:46 2014
-# Update Count    : 237
+# Last Modified On: Sun May 18 21:31:18 2014
+# Update Count    : 238
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output::API;
@@ -44,7 +44,7 @@ sub setupline {			# API
 }
 
 sub chord {			# API
-    my ( $self, $chord ) = @_;
+    my ( $self, $chord, $dup ) = @_;
     ...
 }
 

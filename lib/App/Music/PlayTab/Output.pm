@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr 19 20:39:59 2014
-# Update Count    : 171
+# Last Modified On: Sun May 18 22:27:09 2014
+# Update Count    : 174
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output;
@@ -86,8 +86,19 @@ sub generate {
 
 	    $gen->bar(1) if @{ $line->{measures} };
 	    foreach ( @{ $line->{measures} } ) {
-		foreach my $c ( @$_ ) {
-		    $gen->chord($c);
+		for ( my $i = 0; $i < @$_; $i++ ) {
+		    my $c = $_->[$i];
+		    # Mostly, chords are followed by a number of
+		    # 'spaces', basically chord repetitions that are
+		    # not printed. Count the spaces and pass as an
+		    # argument to the chord renderer. Note that this
+		    # should be done by the parser instead of here.
+		    my $dup = 1;
+		    while ( $i+1 < @$_ && $_->[$i+1] eq 'space' ) {
+			$i++;
+			$dup++;
+		    }
+		    $gen->chord( $c, $dup );
 		}
 		$gen->bar(0);
 	    }
