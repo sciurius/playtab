@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat May 17 21:18:20 2014
-# Update Count    : 536
+# Last Modified On: Tue Jun  3 11:02:16 2014
+# Update Count    : 540
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -118,10 +118,15 @@ sub run {
     reset_globals();
 
     while ( <> ) {
+	# Skip comment lines.
 	next if /^\s*#/;
+	# Skip LilyPond comment lines.
 	next if $lilypond && /^\s*%/;
-	$lilypond && s/\s+%\s*\d+\s*$//;
+	# Remove LilyPond line number comments.
+	$lilypond && s/\s+\%\s*\d+.*//;
+	# Skip empty lines.
 	next unless /\S/;
+
 	$_ = decode_utf8($_);
 	chomp($line = $_);
 
