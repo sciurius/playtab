@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Jun  3 11:02:16 2014
-# Update Count    : 540
+# Last Modified On: Sun Jan 18 17:17:49 2015
+# Update Count    : 550
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -237,6 +237,14 @@ sub bar {
     $entry->{margin} = $indent if $indent;
     $entry->{bpm}    = $bpm;
 
+    if ( $line =~ /^\s*\|\s*[A-G]/ ) {
+	$lilypond = 0;
+    }
+    elsif ( $line =~ /^\s*\|\s*[a-g]/ ) {
+	$lilypond = 1;
+    };
+
+
     if ( $lilypond ) {
 	# LilyPond chords use : and ., so don't split on these.
 	$line =~ s/([|`'])/ $1 /g;	#'`])/;
@@ -360,7 +368,7 @@ sub control {
 
     # Bar numbering
     if ( /^n(umber)?\s+([-+]?\d+)?/i ) {
-	set_barno(defined $2 ? $2 ? $2 < 0 ? $2+1 : $2 : undef : 1);
+	set_barno(defined $2 ? $2 ? $2 < 0 ? $2+1 : $2 : 0 : 1);
 	return;
     }
 
@@ -384,6 +392,7 @@ my $chordparser;
 my $lilyparser;
 sub parse_chord {
     my $chord = shift;
+
     my $parser;
     if ( $lilypond ) {
 	unless ( $lilyparser ) {
@@ -459,7 +468,7 @@ sub _set_incr {
     my $var = shift;
     my $ref = shift;
     my $v = shift;
-    croak("set_$var: number or increment expected\n")
+    warn("set_$var: number or increment expected\n")
       unless $v =~ /^([-+])?(\d+)$/;
     if ( defined($1) ) {
 	$$ref += $1.$2;
@@ -821,7 +830,7 @@ Have fun, and let me know your ideas!
   #               raise the pitch of the note to a sharp [C11#9]
   b               lower the pitch of the note to a flat [C11b9]
   --------------------------------------------------------------
-  no              substract a note from a chord [C9no11]
+  no              subtract a note from a chord [C9no11]
   --------------------------------------------------------------
   _ may be used to avoid ambiguity, e.g. C_#9 <-> C#9 <-> C#_9
 
@@ -861,7 +870,7 @@ Have fun, and let me know your ideas!
   +               raise the pitch of an added note   c4:11.9+
   -               lower the pitch of an added note   c4:11.9-
   --------------------------------------------------------------
-  ^               substract a note from a chord      c4:9.^11
+  ^               subtract a note from a chord       c4:9.^11
   --------------------------------------------------------------
 
   Other:          Meaning
