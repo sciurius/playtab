@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Wed Aug 22 22:33:31 2007
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Mar 29 22:27:15 2014
-# Update Count    : 30
+# Last Modified On: Sun Jan 18 15:51:41 2015
+# Update Count    : 31
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Chord;
@@ -305,6 +305,11 @@ sub duration {
 sub duration_base {
     my ($self) = @_;
     16;
+}
+
+sub bass {
+    my ( $self ) = @_;
+    $self->{bass};
 }
 
 sub is_rest {
