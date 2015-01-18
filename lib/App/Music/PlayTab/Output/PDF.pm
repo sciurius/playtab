@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 15 11:02:34 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun May 18 21:27:54 2014
-# Update Count    : 496
+# Last Modified On: Wed Jan 14 16:06:20 2015
+# Update Count    : 507
 # Status          : Unknown, Use with caution!
 
 use utf8;
@@ -167,12 +167,13 @@ sub postfix {
     $self->text( $text, $md );
 }
 
-use constant GRIDSTEP => 8;
+use constant GRIDSTEP  =>  8;
+use constant GRIDSPACE => 10;
 
 sub grids {
     my ( $self, $grids ) = @_;
 
-    my $n = int( ( 570 - $md - 60 ) / ( 10 * GRIDSTEP ) );
+    my $n = int( ( 570 - $md - 45 ) / ( GRIDSPACE * GRIDSTEP ) );
 
     my $i = 0;
     foreach my $ch ( @$grids ) {
@@ -182,7 +183,7 @@ sub grids {
 	    $i = 0;
 	}
 	else {
-	    $x += 10 * GRIDSTEP;
+	    $x += GRIDSPACE * GRIDSTEP;
 	}
     }
     $self->newline(3);
@@ -368,7 +369,7 @@ sub width {
     }
     if ( $name =~ /(.)#/ ) {
 	return $pr->strwidth( $1, $f_chord)
-	  + 1 + $pr->msymwidth( MS_SHARP );
+	  + 1 + $pr->msymwidth( MS_SHARP ) + 7;
     }
 
     return $pr->strwidth( $name, $f_chord );
@@ -700,9 +701,9 @@ sub _text {
     $font ||= $self->{font};
     $size ||= $font->{size};
 #    $text = encode( "cp1250", $text ) unless $font->{file}; # #### TODO ???
-    $text =~ s/'/’/g;
+    $text =~ s/'/’/g;		# '/;
 
-    if ( 1 ) {
+    if ( 0 ) {
 	warn( "TEXT: ",
 	      '"', $text, '" [ ',
 	      defined $x ? "x=$x " : "",
