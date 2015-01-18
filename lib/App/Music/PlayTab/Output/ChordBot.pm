@@ -5,8 +5,8 @@ package App::Music::PlayTab::Output::ChordBot;
 # Author          : Johan Vromans
 # Created On      : Mon Apr 29 10:53:55 2013
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun May 18 23:51:03 2014
-# Update Count    : 139
+# Last Modified On: Sun Jan 18 20:34:43 2015
+# Update Count    : 168
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -26,16 +26,22 @@ our $VERSION = "2.000";
 sub new {			# API
     my ( $pkg, $args ) = @_;
 
-    # Basically, we have two backends in here.
-    # ::ChordBot generates ready to play ChordBot (JSON data).
-    # ::ChordBotPl generates a Perl program that uses the
+    # Basically, we have multiple backends in here.
+    # ::ChordBot::JSON generates ready to play ChordBot (JSON data).
+    # ::ChordBot::Perl generates a Perl program that uses the
     # ChordBot modules to generate the same JSON, but that can be
     # modified after generation for specific purposes beyond the scope
     # of PlayTab.
-    # The decision what backend to use is based on the name of the
-    # output file.
+    # ::ChordBot::Song is similar to Perl, but uses the more friendly
+    # Song API.
+    # The decision what backend to use is based on the name appended
+    # to the geenrator, or, if missing, the name of the output file.
 
-    if ( $args->{output} && $args->{output} =~ /\.p[lm]$/ ) {
+    # --generate=ChordBot:Song (note: ONE colon).
+    if ( $args->{generate} =~ /(\w):(\w+)$/ ) {
+	$pkg = 'App::Music::PlayTab::Output::ChordBot::' . $2;
+    }
+    elsif ( $args->{output} && $args->{output} =~ /\.p[lm]$/ ) {
 	# Wants Perl source.
 	$pkg = 'App::Music::PlayTab::Output::ChordBot::Perl';
     }
@@ -52,6 +58,9 @@ my $chord;
 my $tempo = 120;
 my $style = "Kubiac";
 my %vec2type;
+
+use Music::ChordBot::Opus;
+use Music::ChordBot::Opus::Section;
 
 package App::Music::PlayTab::Output::ChordBot::Perl;
 
@@ -152,6 +161,7 @@ sub _render {
     else {
 	$dur = $dup;
     }
+    $type .= "/" . $ch->{bass}->[0]->name if $ch->{bass};
     $self->{fh}->print( "\$section->add_chord( ",
 			"\"$name\", \"$type\", $dur );\n");
 }
@@ -190,6 +200,152 @@ sub vec2type {
     $vec2type{$_[0]} || "Silence";
 }
 
+package App::Music::PlayTab::Output::ChordBot::Song;
+
+# Init the backend.
+sub setup {			# API
+    my ( $self, $args ) = @_;
+
+    $self->{fh}->print( <<EOD );
+#! perl
+
+use strict;
+use warnings;
+
+use Music::ChordBot::Song;
+
+EOD
+    App::Music::PlayTab::Output::ChordBot::setup_vec2type($self);
+}
+
+# New page.
+sub setuppage {			# API
+    my ( $self, $title, $stitles ) = @_;
+
+    $self->{fh}->print( <<EOD );
+song "$title";
+tempo $tempo;
+EOD
+
+    if ( $stitles ) {
+	$self->{fh}->print( "# ", $_, "\n" ) foreach @$stitles;
+    }
+
+    $self->{fh}->print( <<EOD );
+
+# One section.
+section "Section1";
+
+# Set a rather stupid default style.
+style "$style";
+EOD
+
+    return;			# N/A
+}
+
+sub finish {			# API
+    my $self = shift;
+    $self->{fh}->print("\n");
+}
+
+# New print line.
+sub setupline {			# API
+    my ( $self, $line ) = @_;
+    return;			# N/A
+}
+
+sub chord {			# API
+    my ( $self, $ch, $dup ) = @_;
+
+    if ( ref($ch) =~ /::/ ) {
+	$self->_render( $ch, $dup );
+	$self->{_prev_chord} = $ch;
+    }
+    elsif ( ref($ch) eq 'ARRAY' ) {
+	my $fun = "render__" . shift(@$ch);
+	$self->$fun( @$ch );
+    }
+    else {
+	my $fun = "render__$ch";
+	$self->$fun($dup);
+    }
+}
+
+my $pdur = -1;
+
+sub _render {
+    my ( $self, $chord, $dup ) = @_;
+
+    my $name = "C";
+    my $dur = $chord->duration;
+    my $type = "Silence";
+
+    if ( $chord->is_rest ) {
+    }
+    else {
+	$name = $chord->{key}->name;
+	$type = vec2type( "@{$chord->{vec}}" );
+    }
+    if ( $dur ) {
+	$dur = int($dur / ($chord->duration_base / 4));
+    }
+    else {
+	$dur = $dup;
+    }
+
+    $type = vec2type( "@{$chord->{vec}}" );
+
+    if ( $type =~ /^M(in|aj)$/ && !$chord->bass ) {
+	my $ir = $chord->{key}->name;
+	$ir =~ s/#$/is/;
+	$ir =~ s/([BDG])b$/$1es/;
+	$ir =~ s/([AE])b$/$1s/;
+	$ir .= "m" if $type eq "Min";
+	$ir .= " " . $dur unless $dur == $pdur;
+	$self->{fh}->print( $ir, "; ");
+    }
+    else {
+	$type .= "/" . $chord->{bass}->[0]->name if $chord->{bass};
+	$self->{fh}->print( "chord ",
+			    "\"$name\", \"$type\", $dur; ");
+    }
+    $pdur = $dur;
+}
+
+sub render__rest { }
+
+sub bar {			# API
+    my ( $self, $first ) = @_;
+    $pdur = -1, $self->{fh}->print("\n") if $first;
+    return;
+}
+
+sub newline {			# API
+    my ( $self, $count ) = @_;
+    return;			# N/A
+}
+
+sub postfix {			# API
+    my ( $self, $text ) = @_;
+    $self->{fh}->printf( "\t# %s\n", $text );
+    return;			# N/A
+}
+
+sub text {			# API
+    my ( $self, $text, $xxmd, $font ) = @_;
+    $self->{fh}->printf( "\n# %s\n", $text );
+    return;			# N/A
+}
+
+sub grids {			# API
+    my ( $self, $grids ) = @_;
+    return;			# N/A
+}
+
+sub vec2type {
+    $vec2type{$_[0]} || "Silence";
+}
+
 package App::Music::PlayTab::Output::ChordBot::JSON;
 
 # Init the backend.
@@ -201,7 +357,7 @@ sub setup {			# API
     $section->set_style($style) if $style;
     $opus->add_section($section);
     $chord = Music::ChordBot::Opus::Section::Chord->new;
-    $self->setup_vec2type;
+    App::Music::PlayTab::Output::ChordBot::setup_vec2type($self);
 }
 
 # New page.
@@ -260,6 +416,8 @@ sub _render {
     }
     $chord->root( $ch->{key}->name );
     $chord->type( vec2type( "@{$ch->{vec}}" ) );
+    $chord->bass( $ch->{bass}->[0]->name )
+      if $ch->{bass};
 }
 
 sub render__space {

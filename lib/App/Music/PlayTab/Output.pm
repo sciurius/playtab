@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Thu Mar 27 16:46:54 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun May 18 22:27:09 2014
-# Update Count    : 174
+# Last Modified On: Sun Jan 18 19:54:53 2015
+# Update Count    : 175
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output;
@@ -20,6 +20,7 @@ sub new {
 
     my $generator = $args->{generate};
     my $genpkg = __PACKAGE__ . "::" . $generator;
+    $genpkg =~ s/(\w):(\w+)$/$1/;
     eval "use $genpkg";
     die("Cannot find backend for $generator\n$@") if $@;
     $self->{generator} = $genpkg->new($args);
