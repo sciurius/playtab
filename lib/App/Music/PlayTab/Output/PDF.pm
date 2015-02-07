@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 15 11:02:34 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Jan 14 16:06:20 2015
-# Update Count    : 507
+# Last Modified On: Sat Feb  7 23:22:06 2015
+# Update Count    : 647
 # Status          : Unknown, Use with caution!
 
 use utf8;
@@ -32,9 +32,12 @@ my $ps =
 		      subtitle=> { name => 'Helvetica',
 				   file => $ENV{HOME}.'/.fonts/ArialMT.ttf',
 				   size => 12 },
-		      chord   => { file => 'Helvetica',
+		      chord_n  => { name => 'Helvetica',
 				   file => $ENV{HOME}.'/.fonts/ArialMT.ttf',
 				   size => 17 },
+		      chord_cn => { name => 'Myriad-CnSemibold',
+				   file => $ENV{HOME}.'/.fonts/Myriad-CnSemibold.ttf',
+				   size => 20 },
 		      barno   => { file => 'Helvetica',
 				   file => $ENV{HOME}.'/.fonts/ArialMT.ttf',
 				   size => 8 },
@@ -43,16 +46,17 @@ my $ps =
 		     },
   };
 
-my $f_chord = $ps->{fonts}->{chord};
-my $f_msyms = $ps->{fonts}->{msyms};
+my $f_chord;
+my $f_msyms;
+
+# Actual media box.
+my @mediabox;
 
 # Low level PDF api.
 my $pr;
 
-# Initial default values.
-my $std_width	   =  30;
-my $std_height	   = -15;
-my $std_margin	   =  40;
+# Initial delta values for width, height and margin.
+my @delta_values;
 
 # Position control.
 my $xd = 0;			# step (in bar lines)
@@ -63,31 +67,99 @@ my $y;				# actual y pos
 
 my $barno;
 my $std_gridscale = 8;
+my $condensed = 0;
 
 ################ API Functions ################
 
 # Object creation.
 sub new {
-    bless { }, shift;
+    my ( $pkg, $args ) = @_;
+    my $self = bless { }, $pkg;
+    $self;
 }
 
 # Init the backend.
 sub setup {
     my ( $self, $args, $title ) = @_;
+
+    @delta_values = ( 0, 0, 0 );
+    $ps->{fonts}->{chord} = $ps->{fonts}->{chord_n};
+    @mediabox = ( 0, 0, @{ $ps->{papersize} } );
+
+    if ( $args->{opus}->{globalsettings} ) {
+	$self->globalsettings( $args->{opus}->{globalsettings} );
+    }
+
     unless ( $pr ) {
 	$pr = PDFWriter->new;
 
 	my @tm = gmtime(time);
-	$pr->info( Title => "A nicely formatted play sheet",
-		   Creator => "PlayTab $App::Music::PlayTab::VERSION",
+	$pr->info( Title        => $args->{opus}->{title},
+		   Creator      => "PlayTab $App::Music::PlayTab::VERSION",
 		   CreationDate =>
-		   sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
-			   1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]),
+		     sprintf( "D:%04d%02d%02d%02d%02d%02d+00'00'",
+			      1900+$tm[5], 1+$tm[4], @tm[3,2,1,0] ),
 		 );
 
-	$xd = $std_width;
-	$yd = $std_height;
-	$md = $std_margin;
+    }
+
+    # newline() is called before setup_line(). Supply standard value.
+    $yd = -15;
+
+    $f_chord = $ps->{fonts}->{chord};
+    $f_msyms = $ps->{fonts}->{msyms};
+}
+
+sub globalsettings {
+    my ( $self, $args ) = @_;
+
+    my @args = @$args;
+
+    while ( @args ) {
+	my $arg = shift(@args);
+
+	if ( $arg =~ /^(10:16|800x1280)$/ ) {
+	    # 800x1280 Samsung Galaxy Note 10.1 tablet.
+	    @delta_values = ( -4, 2, 4 );
+	    $condensed  = 1;
+	    $ps->{fonts}->{chord} = $ps->{fonts}->{chord_cn};
+	    @mediabox = map { $_ * (72/150) } 80, 435, 800, 1280;
+	    $mediabox[2] += $mediabox[0];
+	    $mediabox[3] += $mediabox[1];
+	    next;
+	}
+	if ( $arg =~ /^(ipad|960x1280)$/ ) { #### IN PROGRESS
+	    # 768x1024 iPad2.
+	    @delta_values = ( -7, 2, -10 );
+	    $condensed = 0;
+	    $ps->{fonts}->{chord} = $ps->{fonts}->{chord_cn};
+	    @mediabox = map { $_ * (72/150) } 70, 440, 960, 1280;
+	    $mediabox[2] += $mediabox[0];
+	    $mediabox[3] += $mediabox[1];
+	    next;
+	}
+	if ( $arg eq "768x1024" ) { #### IN PROGRESS
+	    # 768x1024 iPad2.
+	    @delta_values = ( -12, 3, -10 );
+	    $ps->{fonts}->{chord} = $ps->{fonts}->{chord_cn};
+	    @mediabox = map { $_ * (72/150) } 90, 685, 768, 1024;
+	    $mediabox[2] += $mediabox[0];
+	    $mediabox[3] += $mediabox[1];
+	    next;
+	}
+	if ( $arg eq "narrow" ) { #### IN PROGRESS
+	    @delta_values = ( -4, 1, 4 );
+	    $condensed = 1;
+	    $ps->{fonts}->{chord} = $ps->{fonts}->{chord_cn};
+	    @mediabox = map { $_ * (72/150) } 70, 440, 800, 1280;
+	    $mediabox[2] += $mediabox[0];
+	    $mediabox[3] += $mediabox[1];
+	    next;
+	}
+	if ( $arg eq "condensed" ) {
+	    $ps->{fonts}->{chord} = $ps->{fonts}->{chord_cn};
+	    next;
+	}
     }
 }
 
@@ -108,10 +180,13 @@ sub finish {
 # New print line.
 sub setupline {
     my ( $self, $line ) = @_;
-    $xd     = $line->{width} || 0;
-    $yd     = $line->{height};
-    $md     = $line->{margin} || 0;
+    $xd = $delta_values[0] + ( $line->{width}  || 0 );
+    $yd = $delta_values[1] + ( $line->{height} || 0 );
+    $md = $delta_values[2] + ( $line->{margin} || 0 );
     $barno  = $line->{barno};
+    if ( $condensed ) {
+	$_ *= 0.7 for $xd, $md;
+    }
 }
 
 sub bar {
@@ -313,12 +388,12 @@ sub render {
     my $name = $self->name;
 
     if ( $name =~ /(.)b/ ) {
-	my $width = $pr->strwidth( $1, $f_chord);
+	my $width = $pr->strwidth( $1, $f_chord );
 	$pr->text( $x + $md, $y, $1, $f_chord );
 	$pr->msym( $x + $md + $width + 1, $y + 3, MS_FLAT, 25 );
     }
     elsif ( $name =~ /(.)#/ ) {
-	my $width = $pr->strwidth( $1, $f_chord);
+	my $width = $pr->strwidth( $1, $f_chord );
 	$pr->text( $x + $md, $y, $1, $f_chord );
 	$pr->msym( $x + $md + $width + 1, $y + 3, MS_SHARP, 25 );
     }
@@ -361,14 +436,13 @@ sub render_small {
 sub width {
     my ($self) = @_;
     my $name = $self->name;
-    my $width = $pr->strwidth($name, $f_chord);
 
     if ( $name =~ /(.)b/ ) {
-	return $pr->strwidth( $1, $f_chord)
+	return $pr->strwidth( $1, $f_chord )
 	  + 1 + $pr->msymwidth( MS_FLAT );
     }
     if ( $name =~ /(.)#/ ) {
-	return $pr->strwidth( $1, $f_chord)
+	return $pr->strwidth( $1, $f_chord )
 	  + 1 + $pr->msymwidth( MS_SHARP ) + 7;
     }
 
@@ -764,7 +838,8 @@ sub newpage {
     my ( $self ) = @_;
     #$self->{pdftext}->textend if $self->{pdftext};
     $self->{pdfpage} = $self->{pdf}->page;
-    $self->{pdfpage}->mediabox('A4');
+
+    $self->{pdfpage}->mediabox( @mediabox );
     $self->{pdftext} = $self->{pdfpage}->text;
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdfgfx}->linewidth(1);

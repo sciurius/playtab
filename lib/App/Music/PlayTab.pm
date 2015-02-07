@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun Jan 18 17:17:49 2015
-# Update Count    : 550
+# Last Modified On: Sat Feb  7 22:23:07 2015
+# Update Count    : 558
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -366,24 +366,31 @@ sub control {
 	return;
     }
 
-    # Bar numbering
+    # Bar numbering.
     if ( /^n(umber)?\s+([-+]?\d+)?/i ) {
 	set_barno(defined $2 ? $2 ? $2 < 0 ? $2+1 : $2 : 0 : 1);
 	return;
     }
 
-    # LilyPond syntax
+    # LilyPond syntax.
     if ( /^l(?:y|ilypond)?(?:\s+(\d+))?/i ) {
 	$lilypond = defined $1 ? $1 : 1;
 	$bpm = ($lilypond && defined $1) ? $1 : 4;
 	return;
     }
 
+    # Global settings for drivers and so on.
+    if ( /^g(?:lobal)?\s+(.*)/ ) {
+	use Text::ParseWords;
+	push( @{ $data->{globalsettings} }, shellwords($1) );
+	return;
+    }
+
+    # Postfix text.
     if ( /^\>\s+(.+)/i ) {
 	$entry->{postfix} = $1;
 	return;
     }
-
 
     errout("Unrecognized control");
 }
