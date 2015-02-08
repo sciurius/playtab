@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 15 11:02:34 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Feb  7 23:22:06 2015
-# Update Count    : 647
+# Last Modified On: Sun Feb  8 20:17:23 2015
+# Update Count    : 657
 # Status          : Unknown, Use with caution!
 
 use utf8;
@@ -118,33 +118,37 @@ sub globalsettings {
     while ( @args ) {
 	my $arg = shift(@args);
 
-	if ( $arg =~ /^(10:16|800x1280)$/ ) {
-	    # 800x1280 Samsung Galaxy Note 10.1 tablet.
-	    @delta_values = ( -4, 2, 4 );
-	    $condensed  = 1;
-	    $ps->{fonts}->{chord} = $ps->{fonts}->{chord_cn};
-	    @mediabox = map { $_ * (72/150) } 80, 435, 800, 1280;
-	    $mediabox[2] += $mediabox[0];
-	    $mediabox[3] += $mediabox[1];
-	    next;
-	}
-	if ( $arg =~ /^(ipad|960x1280)$/ ) { #### IN PROGRESS
-	    # 768x1024 iPad2.
-	    @delta_values = ( -7, 2, -10 );
-	    $condensed = 0;
-	    $ps->{fonts}->{chord} = $ps->{fonts}->{chord_cn};
-	    @mediabox = map { $_ * (72/150) } 70, 440, 960, 1280;
-	    $mediabox[2] += $mediabox[0];
-	    $mediabox[3] += $mediabox[1];
-	    next;
-	}
-	if ( $arg eq "768x1024" ) { #### IN PROGRESS
-	    # 768x1024 iPad2.
-	    @delta_values = ( -12, 3, -10 );
-	    $ps->{fonts}->{chord} = $ps->{fonts}->{chord_cn};
-	    @mediabox = map { $_ * (72/150) } 90, 685, 768, 1024;
-	    $mediabox[2] += $mediabox[0];
-	    $mediabox[3] += $mediabox[1];
+	if ( $arg =~ /^media=(.*)$/ ) {
+	    my $media = $1;
+	    if ( $media eq "800x1280" ) {
+		# 800x1280 Samsung Galaxy Note 10.1 tablet.
+		@delta_values = ( -4, 2, 4 );
+		$condensed  = 1;
+		$ps->{fonts}->{chord} = $ps->{fonts}->{chord_cn};
+		@mediabox = map { $_ * (72/150) } 80, 435, 800, 1280;
+		$mediabox[2] += $mediabox[0];
+		$mediabox[3] += $mediabox[1];
+	    }
+	    elsif ( $media =~ /^(ipad|960x1280)$/ ) {
+		# 768x1024 iPad2.
+		@delta_values = ( -7, 2, -10 );
+		$condensed = 0;
+		$ps->{fonts}->{chord} = $ps->{fonts}->{chord_cn};
+		@mediabox = map { $_ * (72/150) } 70, 440, 960, 1280;
+		$mediabox[2] += $mediabox[0];
+		$mediabox[3] += $mediabox[1];
+	    }
+	    elsif ( $media eq "768x1024" ) {
+		# 768x1024 iPad2.
+		@delta_values = ( -12, 3, -10 );
+		$ps->{fonts}->{chord} = $ps->{fonts}->{chord_cn};
+		@mediabox = map { $_ * (72/150) } 90, 685, 768, 1024;
+		$mediabox[2] += $mediabox[0];
+		$mediabox[3] += $mediabox[1];
+	    }
+	    else {
+		warn("PDF backend: Unrecognized media type: $media\n");
+	    }
 	    next;
 	}
 	if ( $arg eq "narrow" ) { #### IN PROGRESS
@@ -571,7 +575,7 @@ sub render {
 	#### TODO
 	$y += 5;
 	$x += $width;
-	foreach ( @{$self->{bass}} ) {
+	foreach ( @{$self->{high}} ) {
 	    $pr->text( $x + $md + 2, $y, "\\", $f_chord );
 	    $x += 7;
 	    $x += $_->{key}->render_small;
@@ -687,7 +691,7 @@ sub width {
 
     if ( $self->{high} ) {
 	foreach ( @{$self->{high}} ) {
-	    $pr->text( $x + $md + 2, $y, "\\", $f_chord );
+	    $pr->strwidth( "\\", $f_chord );
 	    $width += 7;
 	    $width += $_->{key}->width * 0.7;
 	}
@@ -695,7 +699,7 @@ sub width {
 
     if ( $self->{bass} ) {
 	foreach ( @{$self->{bass}} ) {
-	    $pr->text( $x + $md + 2, $y, "/", $f_chord );
+	    $pr->strwidth( "/", $f_chord );
 	    $width += 7;
 	    $width += $_->{key}->width * 0.7;
 	}
@@ -774,8 +778,12 @@ sub _text {
 
     $font ||= $self->{font};
     $size ||= $font->{size};
+    $self->setfont($font, $size);
+
 #    $text = encode( "cp1250", $text ) unless $font->{file}; # #### TODO ???
     $text =~ s/'/’/g;		# '/;
+
+    $text =~ s/\x{2007}/  /g;	# Figure space.
 
     if ( 0 ) {
 	warn( "TEXT: ",
@@ -786,8 +794,6 @@ sub _text {
 	      $size ? "size=$size " : "",
 	      "]\n" );
     }
-
-    $self->setfont($font, $size);
 
     $self->{pdftext}->translate( $x, $y );
     if ( $align > 0 ) {
