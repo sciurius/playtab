@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Jan 15 15:59:16 2008
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr  5 22:44:08 2014
-# Update Count    : 11
+# Last Modified On: Mon Mar  9 10:59:50 2015
+# Update Count    : 24
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::LyChord;
@@ -144,7 +144,7 @@ sub parse {
 #	    $chmods[7] = 0;
 #	    next;
 #	}
-	if ( $mod =~ /^(2|5|6|7|9|10|11|13)([-+])?(?:\.(.*))?/ ) { # addition
+	if ( $mod =~ /^(2|5|6|7|9|10|11|13)([-+])?\.?(.*)?/ ) { # addition
 	    $mod = $3;
 	    # 13th implies 11th implies 9th implies 7th...
 	    if ( $1 > 7 && !(vec($chflags,7,1)) ) {
@@ -199,7 +199,11 @@ sub parse {
     $self->{vec} = [@vec];
 
     warn("=> Chord ", $self->{_unparsed}, ": ", $self->{key}->key,
-	 " (", $self->{key}->name, ") [ @vec ]\n")
+	 " (", $self->{key}->name, ") [ @vec ]",
+	 $self->{bass}
+	 ? (" {" . join("/", map { $_->{key}->key } @{$self->{bass}}) . "}")
+	 : "",
+	 "\n")
       if $self->{_debug};
 
     $self;
