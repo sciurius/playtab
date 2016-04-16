@@ -5,8 +5,8 @@ package App::Music::PlayTab::Output::iRealPro::Song;
 # Author          : Johan Vromans
 # Created On      : Mon Jan 19 13:05:01 2015
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Jan 19 15:40:44 2015
-# Update Count    : 28
+# Last Modified On: Fri Apr 24 08:24:39 2015
+# Update Count    : 39
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -44,8 +44,7 @@ sub setup {			# API
 use strict;
 use warnings;
 
-#use Music::iRealPro::Song;
-use Music::iRealBook::Song;
+use Music::iRealPro::Song;
 
 EOD
 }
@@ -54,9 +53,16 @@ EOD
 sub setuppage {			# API
     my ( $self, $title, $stitles ) = @_;
 
+    my $composer = "# composer \"...\";";
+
+    if ( $title =~ /^(.*)\s+\((.*)\)$/ ) {
+	$title = $1;
+	$composer = "composer \"$2\";";
+    }
+
     $self->{fh}->print( <<EOD );
 song "$title";
-# composer "...";
+$composer
 tempo $tempo;
 EOD
 
@@ -143,6 +149,11 @@ sub _render {
 			    "\"$name\", \"$type\", $dur; ");
     }
     $pdur = $dur;
+}
+
+sub render__again {
+    my ( $self, $dup ) = @_;
+    $self->_render( $self->{_prev_chord}, $dup );
 }
 
 sub render__rest { }
