@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 15 11:02:34 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun Feb  8 20:17:23 2015
-# Update Count    : 657
+# Last Modified On: Sat Apr 16 22:17:49 2016
+# Update Count    : 658
 # Status          : Unknown, Use with caution!
 
 use utf8;
@@ -818,8 +818,15 @@ sub _getfont {
     my ( $self, $font ) = @_;
     $self->{font} = $font;
     if ( $font->{file} ) {
-	return $fonts{$font->{file}} ||=
-	  $self->{pdf}->ttfont( $font->{file}, -dokern => 1 );
+	return $fonts{$font->{file}} if $fonts{$font->{file}};
+	return $fonts{$font->{file}} =
+	  $self->{pdf}->ttfont( $font->{file}, -dokern => 1 )
+	    unless $Cava::Packager::PACKAGED;
+	my $fn = $font->{file};
+	$fn =~ s;^.*/([^/]+)$;$1;;
+	return $fonts{$font->{file}} =
+	  $self->{pdf}->ttfont( Cava::Packager::GetResourcePath() . "/fonts/$fn",
+				-dokern => 1 );
     }
     else {
 	return $fonts{$font->{name}} ||=
