@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr 16 22:41:56 2016
-# Update Count    : 560
+# Last Modified On: Sun May 15 22:58:41 2016
+# Update Count    : 562
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -238,10 +238,13 @@ sub bar {
     $entry->{margin} = $indent if $indent;
     $entry->{bpm}    = $bpm;
 
+    # Autosensing...
+    # Uppercase chords -> not lilypond mode.
     if ( $line =~ /^\s*\|\s*[A-G]/ ) {
 	$lilypond = 0;
     }
-    elsif ( $line =~ /^\s*\|\s*[a-g]/ ) {
+    # Lowcase chords and : modifiers -> lilypond mode.
+    elsif ( $line =~ /^\s*\|\s*[a-g].*?:(m|\d|sus|aug|dim)/ ) {
 	$lilypond = 1;
     };
 
