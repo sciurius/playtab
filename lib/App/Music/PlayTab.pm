@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr 16 22:30:28 2016
-# Update Count    : 559
+# Last Modified On: Sat Apr 16 22:41:56 2016
+# Update Count    : 560
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -311,7 +311,7 @@ sub bar {
 		}
 		if ( my $d = $chord->duration ) {
 		    $d = int($d / ($chord->duration_base / $bpm));
-		    unshift(@c, ('.') x ($d-1));
+		    unshift(@c, ('.') x ($d-1)) if $d > 1;
 		}
 	    }
 	};
