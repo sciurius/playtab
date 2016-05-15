@@ -1,66 +1,63 @@
 $opus = {
-  'subtitle' => [
-    'Silvia Millecam (Bruce Springsteen)',
-    't = 120 CAPO 1'
-  ],
   'lines' => [
     {
-      'width' => 25,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'g2.',
             'duration' => '12',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 2,
               'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space'
         ],
         [
           bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'g',
             'duration' => '12',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 2,
               'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space'
         ],
         [
           bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'g1',
             'duration' => '16',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 2,
               'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -68,49 +65,50 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
       'pfx_vsp' => 2,
-      'height' => -12,
-      'prefix' => 'Intro'
+      'prefix' => 'Intro',
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 2,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -118,19 +116,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -138,19 +136,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -163,209 +161,29 @@ $opus = {
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 2
+      'width' => 25
     },
     {
-      'width' => 25,
-      'pfx_vsp' => 1,
-      'height' => -12,
       'barno' => 6,
       'bpm' => 4,
-      'measures' => [
-        [
-          bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
-          }, 'App::Music::PlayTab::LyChord' ),
-          'space',
-          'space',
-          'space'
-        ],
-        [
-          bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
-            '_unparsed' => 'g',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
-          }, 'App::Music::PlayTab::LyChord' ),
-          'space',
-          'space',
-          'space'
-        ],
-        [
-          bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
-            '_unparsed' => 'g',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
-          }, 'App::Music::PlayTab::LyChord' ),
-          'space',
-          'space',
-          'space'
-        ],
-        [
-          bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
-            '_unparsed' => 'g',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
-          }, 'App::Music::PlayTab::LyChord' ),
-          'space',
-          'space',
-          'space'
-        ]
-      ],
-      'margin' => 40,
-      'prefix' => 'V1'
-    },
-    {
-      'width' => 25,
-      'bpm' => 4,
-      'measures' => [
-        [
-          bless( {
-            'vec' => [
-              0,
-              3,
-              7
-            ],
-            '_unparsed' => 'a1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
-          }, 'App::Music::PlayTab::LyChord' ),
-          'space',
-          'space',
-          'space'
-        ],
-        [
-          bless( {
-            'vec' => [
-              0,
-              3,
-              7
-            ],
-            '_unparsed' => 'a1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
-          }, 'App::Music::PlayTab::LyChord' ),
-          'space',
-          'space',
-          'space'
-        ],
-        [
-          bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
-          }, 'App::Music::PlayTab::LyChord' ),
-          'space',
-          'space',
-          'space'
-        ],
-        [
-          bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
-          }, 'App::Music::PlayTab::LyChord' ),
-          'space',
-          'space',
-          'space'
-        ]
-      ],
-      'margin' => 40,
       'height' => -12,
-      'barno' => 10
-    },
-    {
-      'width' => 25,
-      'bpm' => 4,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
-              3,
+              4,
               7
-            ],
-            '_unparsed' => 'a1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -373,19 +191,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
-              3,
+              4,
               7
-            ],
-            '_unparsed' => 'a1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -393,19 +211,199 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
+          }, 'App::Music::PlayTab::LyChord' ),
+          'space',
+          'space',
+          'space'
+        ],
+        [
+          bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
+          }, 'App::Music::PlayTab::LyChord' ),
+          'space',
+          'space',
+          'space'
+        ]
+      ],
+      'pfx_vsp' => 1,
+      'prefix' => 'V1',
+      'width' => 25
+    },
+    {
+      'barno' => 10,
+      'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
+      'measures' => [
+        [
+          bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               3,
               7
-            ],
+            ]
+          }, 'App::Music::PlayTab::LyChord' ),
+          'space',
+          'space',
+          'space'
+        ],
+        [
+          bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              3,
+              7
+            ]
+          }, 'App::Music::PlayTab::LyChord' ),
+          'space',
+          'space',
+          'space'
+        ],
+        [
+          bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
+          }, 'App::Music::PlayTab::LyChord' ),
+          'space',
+          'space',
+          'space'
+        ],
+        [
+          bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
+          }, 'App::Music::PlayTab::LyChord' ),
+          'space',
+          'space',
+          'space'
+        ]
+      ],
+      'width' => 25
+    },
+    {
+      'barno' => 14,
+      'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
+      'measures' => [
+        [
+          bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              3,
+              7
+            ]
+          }, 'App::Music::PlayTab::LyChord' ),
+          'space',
+          'space',
+          'space'
+        ],
+        [
+          bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              3,
+              7
+            ]
+          }, 'App::Music::PlayTab::LyChord' ),
+          'space',
+          'space',
+          'space'
+        ],
+        [
+          bless( {
+            '_isrest' => 0,
             '_unparsed' => 'e1:m',
             'duration' => '16',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 11,
               'unparsed' => 'e',
-              'useflat' => 1,
-              'key' => 11
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              3,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -413,48 +411,48 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'e1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 11,
+              'unparsed' => 'e',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               3,
               7
-            ],
-            '_unparsed' => 'e1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'e',
-              'useflat' => 1,
-              'key' => 11
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 14
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 18,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'c1',
             'duration' => '16',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 7,
               'unparsed' => 'c',
-              'useflat' => 1,
-              'key' => 7
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -462,51 +460,48 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'd2.',
+            'duration' => '12',
+            'key' => bless( {
+              'key' => 9,
+              'unparsed' => 'd',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'd2.',
-            'duration' => '12',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'd',
-              'useflat' => 1,
-              'key' => 9
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'rest'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 18
+      'width' => 25
     },
     {
-      'width' => 25,
-      'pfx_vsp' => 1,
-      'height' => -12,
       'barno' => 20,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -514,19 +509,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -534,19 +529,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -559,28 +554,31 @@ $opus = {
           'space'
         ]
       ],
-      'margin' => 40,
-      'prefix' => 'Fire'
+      'pfx_vsp' => 1,
+      'prefix' => 'Fire',
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 24,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -588,19 +586,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -608,19 +606,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -628,48 +626,48 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 24
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 28,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               3,
               7
-            ],
-            '_unparsed' => 'a1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -677,19 +675,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               3,
               7
-            ],
-            '_unparsed' => 'a1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -697,19 +695,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -717,48 +715,48 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 28
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 32,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               3,
               7
-            ],
-            '_unparsed' => 'a1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -766,19 +764,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               3,
               7
-            ],
-            '_unparsed' => 'a1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -786,19 +784,19 @@ $opus = {
         ],
         [
           bless( {
-            'vec' => [
-              0,
-              3,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'e1:m',
             'duration' => '16',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 11,
               'unparsed' => 'e',
-              'useflat' => 1,
-              'key' => 11
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              3,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -806,48 +804,48 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'e1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 11,
+              'unparsed' => 'e',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               3,
               7
-            ],
-            '_unparsed' => 'e1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'e',
-              'useflat' => 1,
-              'key' => 11
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 32
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 36,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'c1',
             'duration' => '16',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 7,
               'unparsed' => 'c',
-              'useflat' => 1,
-              'key' => 7
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -855,48 +853,48 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'd2.',
+            'duration' => '12',
+            'key' => bless( {
+              'key' => 9,
+              'unparsed' => 'd',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'd2.',
-            'duration' => '12',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'd',
-              'useflat' => 1,
-              'key' => 9
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'rest'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 36
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 38,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_debug' => '',
+            '_unparsed' => 'G',
+            'duration' => 0,
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'G',
-            'duration' => 0,
-            '_debug' => '',
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::Chord' ),
           'space',
           'space',
@@ -904,19 +902,19 @@ $opus = {
         ],
         [
           bless( {
+            '_debug' => '',
+            '_unparsed' => 'G',
+            'duration' => 0,
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'G',
-            'duration' => 0,
-            '_debug' => '',
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::Chord' ),
           'space',
           'space',
@@ -924,48 +922,48 @@ $opus = {
         ],
         [
           bless( {
+            '_debug' => '',
+            '_unparsed' => 'G',
+            'duration' => 0,
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'G',
-            'duration' => 0,
-            '_debug' => '',
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::Chord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 38
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 41,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -973,19 +971,19 @@ $opus = {
         ],
         [
           bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'c1',
             'duration' => '16',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 7,
               'unparsed' => 'c',
-              'useflat' => 1,
-              'key' => 7
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -993,19 +991,19 @@ $opus = {
         ],
         [
           bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'g1',
             'duration' => '16',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 2,
               'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1013,48 +1011,48 @@ $opus = {
         ],
         [
           bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'd1',
             'duration' => '16',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 9,
               'unparsed' => 'd',
-              'useflat' => 1,
-              'key' => 9
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 41
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 45,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1062,39 +1060,19 @@ $opus = {
         ],
         [
           bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'c1',
             'duration' => '16',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 7,
               'unparsed' => 'c',
-              'useflat' => 1,
-              'key' => 7
-            }, 'App::Music::PlayTab::Note' )
-          }, 'App::Music::PlayTab::LyChord' ),
-          'space',
-          'space',
-          'space'
-        ],
-        [
-          bless( {
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1102,99 +1080,119 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
+          }, 'App::Music::PlayTab::LyChord' ),
+          'space',
+          'space',
+          'space'
+        ],
+        [
+          bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:7',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7,
               10
-            ],
-            '_unparsed' => 'a1:7',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 45
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 49,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'd4',
+            'duration' => '4',
+            'key' => bless( {
+              'key' => 9,
+              'unparsed' => 'd',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'd4',
-            'duration' => '4',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'd',
-              'useflat' => 1,
-              'key' => 9
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'd4:maj7',
+            'duration' => '4',
+            'key' => bless( {
+              'key' => 9,
+              'unparsed' => 'd',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7,
               11
-            ],
-            '_unparsed' => 'd4:maj7',
-            'duration' => '4',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'd',
-              'useflat' => 1,
-              'key' => 9
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'd2:7',
+            'duration' => '8',
+            'key' => bless( {
+              'key' => 9,
+              'unparsed' => 'd',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7,
               10
-            ],
-            '_unparsed' => 'd2:7',
-            'duration' => '8',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'd',
-              'useflat' => 1,
-              'key' => 9
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space'
         ],
         [
           bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'd1',
             'duration' => '16',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 9,
               'unparsed' => 'd',
-              'useflat' => 1,
-              'key' => 9
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1213,29 +1211,29 @@ $opus = {
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 49
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 53,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1243,19 +1241,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1263,19 +1261,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1283,48 +1281,48 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 53
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 57,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               3,
               7
-            ],
-            '_unparsed' => 'a1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1332,19 +1330,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               3,
               7
-            ],
-            '_unparsed' => 'a1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1352,19 +1350,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1372,48 +1370,48 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 57
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 61,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               3,
               7
-            ],
-            '_unparsed' => 'a1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1421,19 +1419,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'a1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 4,
+              'unparsed' => 'a',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               3,
               7
-            ],
-            '_unparsed' => 'a1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'a',
-              'useflat' => 1,
-              'key' => 4
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1441,19 +1439,19 @@ $opus = {
         ],
         [
           bless( {
-            'vec' => [
-              0,
-              3,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'e1:m',
             'duration' => '16',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 11,
               'unparsed' => 'e',
-              'useflat' => 1,
-              'key' => 11
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              3,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1461,48 +1459,48 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'e1:m',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 11,
+              'unparsed' => 'e',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               3,
               7
-            ],
-            '_unparsed' => 'e1:m',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'e',
-              'useflat' => 1,
-              'key' => 11
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 61
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 65,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
-            'vec' => [
-              0,
-              4,
-              7
-            ],
+            '_isrest' => 0,
             '_unparsed' => 'c1',
             'duration' => '16',
-            '_isrest' => 0,
             'key' => bless( {
+              'key' => 7,
               'unparsed' => 'c',
-              'useflat' => 1,
-              'key' => 7
-            }, 'App::Music::PlayTab::Note' )
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
+            'vec' => [
+              0,
+              4,
+              7
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1510,48 +1508,48 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'd2.',
+            'duration' => '12',
+            'key' => bless( {
+              'key' => 9,
+              'unparsed' => 'd',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'd2.',
-            'duration' => '12',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'd',
-              'useflat' => 1,
-              'key' => 9
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'rest'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 65
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 67,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1559,19 +1557,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1579,19 +1577,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1599,48 +1597,48 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 67
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 71,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1648,19 +1646,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1668,19 +1666,19 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1688,48 +1686,48 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 71
+      'width' => 25
     },
     {
-      'width' => 25,
+      'barno' => 75,
       'bpm' => 4,
+      'height' => -12,
+      'margin' => 40,
       'measures' => [
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
@@ -1737,29 +1735,32 @@ $opus = {
         ],
         [
           bless( {
+            '_isrest' => 0,
+            '_unparsed' => 'g1',
+            'duration' => '16',
+            'key' => bless( {
+              'key' => 2,
+              'unparsed' => 'g',
+              'useflat' => 1
+            }, 'App::Music::PlayTab::Note' ),
             'vec' => [
               0,
               4,
               7
-            ],
-            '_unparsed' => 'g1',
-            'duration' => '16',
-            '_isrest' => 0,
-            'key' => bless( {
-              'unparsed' => 'g',
-              'useflat' => 1,
-              'key' => 2
-            }, 'App::Music::PlayTab::Note' )
+            ]
           }, 'App::Music::PlayTab::LyChord' ),
           'space',
           'space',
           'space'
         ]
       ],
-      'margin' => 40,
-      'height' => -12,
-      'barno' => 75
+      'width' => 25
     }
+  ],
+  'subtitle' => [
+    'Silvia Millecam (Bruce Springsteen)',
+    't = 120 CAPO 1'
   ],
   'title' => 'Brand (Fire)'
 };
+

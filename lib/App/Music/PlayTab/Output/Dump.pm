@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Mar 28 19:42:24 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr 19 22:29:51 2014
-# Update Count    : 26
+# Last Modified On: Sat Apr 16 22:45:34 2016
+# Update Count    : 27
 # Status          : Unknown, Use with caution!
 
 package App::Music::PlayTab::Output::Dump;
@@ -32,6 +32,7 @@ sub generate {
     my $opus = $args->{opus};
 
     $Data::Dumper::Indent = 1;
+    $Data::Dumper::Sortkeys = 1;
     $self->{fh}->print( Data::Dumper->Dump([$opus], ["opus"]) );
 
 }
