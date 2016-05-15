@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 15 11:02:34 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr 16 22:17:49 2016
-# Update Count    : 658
+# Last Modified On: Thu Apr 21 10:32:22 2016
+# Update Count    : 662
 # Status          : Unknown, Use with caution!
 
 use utf8;
@@ -13,8 +13,9 @@ package App::Music::PlayTab::Output::PDF;
 
 use strict;
 use warnings;
+use App::Packager;
 
-our $VERSION = "0.001";
+our $VERSION = "0.002";
 
 # Globals.
 
@@ -27,21 +28,21 @@ my $ps =
     lineheight    => 15,
     fonts         => {
 		      title   => { name => 'Helvetica',
-				   file => $ENV{HOME}.'/.fonts/ArialMT.ttf',
+				   file => 'ArialMT.ttf',
 				   size => 16 },
 		      subtitle=> { name => 'Helvetica',
-				   file => $ENV{HOME}.'/.fonts/ArialMT.ttf',
+				   file => 'ArialMT.ttf',
 				   size => 12 },
 		      chord_n  => { name => 'Helvetica',
-				   file => $ENV{HOME}.'/.fonts/ArialMT.ttf',
+				   file => 'ArialMT.ttf',
 				   size => 17 },
 		      chord_cn => { name => 'Myriad-CnSemibold',
-				   file => $ENV{HOME}.'/.fonts/Myriad-CnSemibold.ttf',
+				   file => 'Myriad-CnSemibold.ttf',
 				   size => 20 },
 		      barno   => { file => 'Helvetica',
-				   file => $ENV{HOME}.'/.fonts/ArialMT.ttf',
+				   file => 'ArialMT.ttf',
 				   size => 8 },
-		      msyms   => { file => $ENV{HOME}.'/.fonts/MSyms.ttf',
+		      msyms   => { file => 'MSyms.ttf',
 				   size => 15 },
 		     },
   };
@@ -819,13 +820,10 @@ sub _getfont {
     $self->{font} = $font;
     if ( $font->{file} ) {
 	return $fonts{$font->{file}} if $fonts{$font->{file}};
-	return $fonts{$font->{file}} =
-	  $self->{pdf}->ttfont( $font->{file}, -dokern => 1 )
-	    unless $Cava::Packager::PACKAGED;
 	my $fn = $font->{file};
 	$fn =~ s;^.*/([^/]+)$;$1;;
 	return $fonts{$font->{file}} =
-	  $self->{pdf}->ttfont( Cava::Packager::GetResourcePath() . "/fonts/$fn",
+	  $self->{pdf}->ttfont( App::Packager::GetResourcePath() . "/fonts/$fn",
 				-dokern => 1 );
     }
     else {
