@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 15 11:02:34 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Apr 21 10:32:22 2016
-# Update Count    : 662
+# Last Modified On: Wed May 18 17:24:34 2016
+# Update Count    : 681
 # Status          : Unknown, Use with caution!
 
 use utf8;
@@ -24,26 +24,26 @@ my $ps =
     marginleft    => 50,
     margintop     => 40,
     marginbottom  => 50,
-    marginright   => 45,
+    marginright   => 45,	# only used for page number!
     lineheight    => 15,
     fonts         => {
-		      title   => { name => 'Helvetica',
-				   file => 'ArialMT.ttf',
-				   size => 16 },
-		      subtitle=> { name => 'Helvetica',
-				   file => 'ArialMT.ttf',
-				   size => 12 },
+		      title    => { name => 'Helvetica',
+				    file => 'ArialMT.ttf',
+				    size => 16 },
+		      subtitle => { name => 'Helvetica',
+				    file => 'ArialMT.ttf',
+				    size => 12 },
 		      chord_n  => { name => 'Helvetica',
-				   file => 'ArialMT.ttf',
-				   size => 17 },
+				    file => 'ArialMT.ttf',
+				    size => 17 },
 		      chord_cn => { name => 'Myriad-CnSemibold',
-				   file => 'Myriad-CnSemibold.ttf',
-				   size => 20 },
-		      barno   => { file => 'Helvetica',
-				   file => 'ArialMT.ttf',
-				   size => 8 },
-		      msyms   => { file => 'MSyms.ttf',
-				   size => 15 },
+				    file => 'Myriad-CnSemibold.ttf',
+				    size => 20 },
+		      barno    => { file => 'Helvetica',
+				    file => 'ArialMT.ttf',
+				    size => 8 },
+		      msyms    => { file => 'MSyms.ttf',
+				    size => 15 },
 		     },
   };
 
@@ -90,6 +90,21 @@ sub setup {
     if ( $args->{opus}->{globalsettings} ) {
 	$self->globalsettings( $args->{opus}->{globalsettings} );
     }
+
+    my $options = { pagedefs_default => { pdf => $ps } };
+    $self->pagesettings($options);
+    $ps = $self->{ps};
+
+    if ( App::Packager::IsPackaged() ) {
+	$self->{fontdir} ||= App::Packager::GetResourcePath() . "/fonts";
+    }
+    else {
+	$self->{fontdir} = $ENV{FONTDIR} || ".";
+    }
+    $self->{fontdir} .= "/";
+    $self->{fontdir} =~ s;/+$;/;;
+
+    $self->initfonts($options);
 
     unless ( $pr ) {
 	$pr = PDFWriter->new;
@@ -167,6 +182,7 @@ sub globalsettings {
 	}
     }
 }
+
 
 # New page.
 sub setuppage {
@@ -377,6 +393,69 @@ sub checkvspace {
 
     # Otherwise, new page.
     $self->pdf_page( 0, $self->{title}, [] );
+}
+
+################ Page settings ################
+#
+# Copied from GImager.
+
+use JSON::PP ();
+
+# Setup fonts.
+sub initfonts {
+    my ( $self ) = @_;
+}
+
+# API: pagesettings (inheritable)
+sub pagesettings {
+    my ( $self, $options ) = @_;
+
+    my $ret = delete( $options->{pagedefs_default} ) || {};
+    if ( open( my $fd, "<:utf8", $options->{pagedefs} || "pagedefs.json" ) ) {
+	local $/;
+	$ret = JSON::PP->new->utf8->relaxed->decode( scalar( <$fd> ) );
+	$fd->close;
+    }
+    elsif ( $options->{pagedefs} ) {
+	die("Cannot open ", $options->{pagedefs}, " [$!]\n");
+    }
+
+    my $def =
+      { papersize     => 'a4',
+	marginleft    => 130,
+	margintop     =>  66,
+	marginbottom  =>  40,
+	marginright   =>  40,
+	offsets => [  50, 300 ],
+      };
+
+    # Use fallback values, if necessary.
+    $ret->{pdf}->{$_} ||= $def->{$_} foreach keys(%$def);
+
+    my $stdfonts =
+      { text    => {
+		    name => 'Times-Roman',
+		    size => 12,
+		    fallback => "/home/jv/.fonts/TimesNewRomanPSMT.ttf",
+		   },
+      };
+
+    # Use fallback fonts, if necessary.
+    $ret->{pdf}->{fonts}->{$_} ||= $stdfonts->{$_} foreach keys(%$stdfonts);
+
+    unless ( eval { $ret->{pdf}->{papersize}->[0] } ) {
+	require PDF::API2::Resource::PaperSizes;
+	my %ps = PDF::API2::Resource::PaperSizes->get_paper_sizes;
+	$ret->{pdf}->{papersize} = $ps{lc $ret->{pdf}->{papersize}}
+    }
+
+    if ( 0 ) {
+	open( my $fd, '>:utf8', 'pagedefs.new' );
+	$fd->print(JSON::PP->new->utf8->canonical->indent(4)->pretty->encode($ret));
+	$fd->close;
+    }
+
+    $self->{ps} = $ret->{pdf};
 }
 
 ################  App::Music::PlayTab::Note ################

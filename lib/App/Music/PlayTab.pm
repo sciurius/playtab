@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun May 15 22:58:41 2016
-# Update Count    : 562
+# Last Modified On: Thu May 26 20:33:14 2016
+# Update Count    : 563
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -14,7 +14,7 @@ package App::Music::PlayTab;
 use strict;
 use warnings;
 
-our $VERSION = "2.900";
+our $VERSION = "2.902";
 
 # Package name.
 my $my_package = 'Sciurix';
