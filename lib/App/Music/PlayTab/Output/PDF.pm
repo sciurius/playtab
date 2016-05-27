@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 15 11:02:34 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed May 18 17:24:34 2016
-# Update Count    : 681
+# Last Modified On: Fri May 27 11:47:04 2016
+# Update Count    : 686
 # Status          : Unknown, Use with caution!
 
 use utf8;
@@ -194,6 +194,7 @@ sub setuppage {
 sub finish {
     my $self = shift;
     return unless $pr;
+    $self->{fh}->binmode;
     $self->{fh}->print( $pr->finish );
     undef $pr;
 }
@@ -808,6 +809,7 @@ sub new {
     my ( $pkg ) = @_;
     my $self = bless { }, $pkg;
     $self->{pdf} = PDF::API2->new;
+    # $self->{pdf}->{forcecompress} = 0; # development
     $self->newpage;
     $self;
 }
@@ -897,13 +899,27 @@ sub setfont {
 sub _getfont {
     my ( $self, $font ) = @_;
     $self->{font} = $font;
+
     if ( $font->{file} ) {
 	return $fonts{$font->{file}} if $fonts{$font->{file}};
+
 	my $fn = $font->{file};
 	$fn =~ s;^.*/([^/]+)$;$1;;
-	return $fonts{$font->{file}} =
-	  $self->{pdf}->ttfont( App::Packager::GetResourcePath() . "/fonts/$fn",
-				-dokern => 1 );
+	my $fp = App::Packager::GetResourcePath() . "/fonts";
+
+	if ( $font->{file} =~ /\.ttf$/ ) {
+	    return $fonts{$font->{file}} =
+	      $self->{pdf}->ttfont( "$fp/$fn",
+				    -dokern => 1 );
+	}
+
+	if ( $font->{file} =~ /(^.*)\.pf[ab]$/ ) {
+	    my $metrics = "$1.afm";
+	    return $fonts{$font->{file}} =
+	      $self->{pdf}->psfont( "$fp/$fn",
+				    -afmfile => "$fp/$metrics",
+				    -dokern => $font->{file} !~ /msyms/i );
+	}
     }
     else {
 	return $fonts{$font->{name}} ||=
