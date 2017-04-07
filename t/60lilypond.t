@@ -5,6 +5,7 @@ use warnings;
 
 our $base = "60lilypond";
 
+use lib qw(.);			# for perl 2.26+
 use File::Basename;
 use File::Spec;
 
