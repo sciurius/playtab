@@ -14,7 +14,7 @@ package App::Music::PlayTab;
 use strict;
 use warnings;
 
-our $VERSION = "2.025";
+our $VERSION = "2.026";
 
 # Package or program libraries, if appropriate.
 # $LIBDIR = $ENV{'LIBDIR'} || '/usr/local/lib/sample';
