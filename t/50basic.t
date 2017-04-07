@@ -5,7 +5,7 @@ use warnings;
 
 our $base = "50basic";
 
-use lib qw(.);			# for perl 2.26+
+use lib qw(.);			# for perl 5.26+
 use File::Basename;
 use File::Spec;
 
