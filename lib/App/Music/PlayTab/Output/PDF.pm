@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Apr 15 11:02:34 2014
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri May 27 11:47:04 2016
-# Update Count    : 686
+# Last Modified On: Fri Apr  7 17:28:35 2017
+# Update Count    : 698
 # Status          : Unknown, Use with caution!
 
 use utf8;
@@ -95,14 +95,18 @@ sub setup {
     $self->pagesettings($options);
     $ps = $self->{ps};
 
-    if ( App::Packager::IsPackaged() ) {
-	$self->{fontdir} ||= App::Packager::GetResourcePath() . "/fonts";
+    # Add font dirs.
+    for my $fontdir ( $self->{fontdir}, ::findlib("fonts"), $ENV{FONTDIR} ) {
+	next unless $fontdir;
+	if ( -d $fontdir ) {
+	    warn("PDF: Adding fontdir $fontdir\n");
+	    PDF::API2::addFontDirs($fontdir);
+	}
+	else {
+	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
+	    undef $fontdir;
+	}
     }
-    else {
-	$self->{fontdir} = $ENV{FONTDIR} || ".";
-    }
-    $self->{fontdir} .= "/";
-    $self->{fontdir} =~ s;/+$;/;;
 
     $self->initfonts($options);
 
@@ -221,7 +225,7 @@ sub bar {
 }
 
 sub chord {
-    my ( $self, $chord, $dup ) = @_;
+    my ( $self, $chord, $dup ) = ( @_, 0 );
     if ( ref($chord) =~ /::/ ) {
 	my $save_x = $x;
 	my $save_y = $y;
@@ -904,20 +908,19 @@ sub _getfont {
 	return $fonts{$font->{file}} if $fonts{$font->{file}};
 
 	my $fn = $font->{file};
+	warn("PDF: Adding font $fn\n");
 	$fn =~ s;^.*/([^/]+)$;$1;;
-	my $fp = App::Packager::GetResourcePath() . "/fonts";
-
 	if ( $font->{file} =~ /\.ttf$/ ) {
 	    return $fonts{$font->{file}} =
-	      $self->{pdf}->ttfont( "$fp/$fn",
+	      $self->{pdf}->ttfont( $fn,
 				    -dokern => 1 );
 	}
 
 	if ( $font->{file} =~ /(^.*)\.pf[ab]$/ ) {
 	    my $metrics = "$1.afm";
 	    return $fonts{$font->{file}} =
-	      $self->{pdf}->psfont( "$fp/$fn",
-				    -afmfile => "$fp/$metrics",
+	      $self->{pdf}->psfont( $fn,
+				    -afmfile => "$metrics",
 				    -dokern => $font->{file} !~ /msyms/i );
 	}
     }

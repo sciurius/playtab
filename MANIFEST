@@ -11,8 +11,9 @@ lib/App/Music/PlayTab/Note.pm
 lib/App/Music/PlayTab/NoteMap.pm
 lib/App/Music/PlayTab/Output.pm
 lib/App/Music/PlayTab/Output/Dump.pm
+lib/App/Music/PlayTab/Output/PDF.pm
 lib/App/Music/PlayTab/Output/PostScript.pm
-lib/App/Music/PlayTab/Output/PostScript/Preamble.pm
+lib/App/Music/PlayTab/res/fonts/MusicSymbols.ttf
 zzexamples/TOC
 zzexamples/allblues.ptb
 zzexamples/anighttunisia.ptb

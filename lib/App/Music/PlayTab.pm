@@ -5,8 +5,8 @@ package App::Music::PlayTab;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri May 27 11:49:17 2016
-# Update Count    : 565
+# Last Modified On: Fri Apr  7 11:33:38 2017
+# Update Count    : 566
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -650,6 +650,30 @@ sub pr_syntax {
     print STDERR <<EOD;
 EOD
 }
+
+################ Resources ################
+
+sub ::findlib {
+    my ( $file ) = @_;
+
+    # Packaged.
+    if ( $App::Packager::PACKAGED ) {
+	my $found = App::Packager::GetUserFile($file);
+	return $found if -e $found;
+	$found = App::Packager::GetResource($file);
+	return $found if -e $found;
+    }
+
+    ( my $me = __PACKAGE__ ) =~ s;::;/;g;
+    foreach ( @INC ) {
+	return "$_/$me/user/$file" if -e "$_/$me/user/$file";
+	return "$_/$me/res/$file"  if -e "$_/$me/res/$file";
+	return "$_/$me/$file"      if -e "$_/$me/$file";
+    }
+    undef;
+}
+
+use lib ( grep { defined } ::findlib("CPAN") );
 
 ################ Documentation ################
 
