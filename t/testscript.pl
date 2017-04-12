@@ -19,9 +19,8 @@ if ( -d "t" ) {
 
 { package PlayTab;
   use App::Music::PlayTab;
-  run( "-test",
-       "-output", "${prefix}test.$ext",
-       "-preamble", "${prefix}dummy.pre",
+  run( "--test",
+       "--output", "${prefix}test.$ext",
        "${prefix}${base}.ptb",
      );
 }
@@ -46,3 +45,5 @@ sub differ {
     return 0 if $str1 eq $str2;
     1;
 }
+
+1;
