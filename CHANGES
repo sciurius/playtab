@@ -1,3 +1,11 @@
+2.027	Apr 26 2017
+
+	Fix problems with parallel tests.
+
+2.026	Apr 07 2017
+
+	Fix failing tests with 5.26+ (no dot in @INC).
+
 2.025	Mar 26 2014
 
 	Add --syntax and --lilypond options.
