@@ -1,8 +1,12 @@
-'playtab' is a perl program that generates PDF documents to print the
+PlayTab - Print chords of songs in a tabular fashion.
+
+PlayTab is a perl program that generates PDF documents to print the
 chords of songs. The output resembles (is influenced by) jazz grilles.
 
 The input for playtab is plain ASCII. It contains the chords, the
 division in bars, with optional annotations.
+
+This is a rewrite of PlayTab 2.x, that focused on PostScript output.
 
 An example:
 
@@ -56,6 +60,9 @@ You can modify the width of the bars with a '!w' control. Standard
 width of a beat is 30. '!w +5' increases the width to 35. '!w 25' sets
 it to 25. You get the idea. You can also change the height with '!h'
 (default is 15) and margin with '!m' (default width is 40).
+
+"playtab --syntax" will show a concise overview of the syntax for the
+chords.
 
 Look at the examples, that is (currently) the best way to get grip on
 what the program does.
